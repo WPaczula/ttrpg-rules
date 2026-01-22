@@ -1,0 +1,7 @@
+# MCP config (contains API keys)
+.mcp.json
+
+# Claude Code
+.claude/
+
+node_modules

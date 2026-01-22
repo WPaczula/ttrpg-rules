@@ -6,8 +6,11 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { VectorStore } from './vector-store.js';
 import { generateEmbedding } from './embeddings.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const DB_PATH = 'data/embeddings.db';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DB_PATH = join(__dirname, '..', 'data', 'embeddings.db');
 
 const server = new Server(
   { name: 'daggerheart-mcp', version: '0.1.0' },
@@ -117,7 +120,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         filtered = adversaries.filter(a => a.content.includes(tier));
       }
       const names = filtered.map(a => {
-        const match = a.content.match(/^#\s*(.+)/m);
+        // Strip BOM and match first H1 header
+        const content = a.content.replace(/^\uFEFF/, '');
+        const match = content.match(/^#\s+(.+)/m);
         return match ? match[1] : a.id;
       });
       return { content: [{ type: 'text', text: names.join('\n') }] };
@@ -131,7 +136,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         filtered = abilities.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()));
       }
       const names = filtered.map(a => {
-        const match = a.content.match(/^#\s*(.+)/m);
+        // Strip BOM and match first H1 header
+        const content = a.content.replace(/^\uFEFF/, '');
+        const match = content.match(/^#\s+(.+)/m);
         return match ? match[1] : a.id;
       });
       return { content: [{ type: 'text', text: names.join('\n') }] };
