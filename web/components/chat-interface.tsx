@@ -1,7 +1,8 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useMemo } from "react"
 import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChatMessage } from "@/components/chat-message"
@@ -21,17 +22,28 @@ I'm here to help you create your character. Together, we'll craft a hero with a 
 export function ChatInterface({ password }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const { messages, input, setInput, handleSubmit, isLoading } = useChat({
-    api: "/api/chat",
-    body: { password },
-    initialMessages: [
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: { password },
+      }),
+    [password]
+  )
+
+  const { messages, sendMessage, status } = useChat({
+    transport,
+    messages: [
       {
         id: "welcome",
         role: "assistant",
         content: INITIAL_MESSAGE,
+        parts: [{ type: "text", text: INITIAL_MESSAGE }],
       },
     ],
   })
+
+  const isLoading = status === "streaming" || status === "submitted"
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -39,6 +51,16 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, isLoading])
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    const input = form.elements.namedItem("message") as HTMLInputElement
+    if (input.value.trim() && !isLoading) {
+      sendMessage({ text: input.value.trim() })
+      input.value = ""
+    }
+  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -74,15 +96,14 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
         <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
             <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              name="message"
               placeholder={isLoading ? "Thinking..." : "Type your message..."}
               disabled={isLoading}
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
             />
             <Button
               type="submit"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading}
               className="bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />

@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,35 +7,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Swords, Lock } from "lucide-react"
 
 interface AccessGateProps {
-  onValidToken: () => void
-  dmName?: string
+  onValidPassword: (password: string) => void
 }
 
-export function AccessGate({ onValidToken, dmName = "the GM at wojciech.paczul@gmail.com" }: AccessGateProps) {
+export function AccessGate({ onValidPassword }: AccessGateProps) {
   const [code, setCode] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  
-  console.log("[v0] AccessGate rendering")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    // Simulate validation - in production this would check against a backend
-    setTimeout(() => {
-      if (code.length >= 4) {
-        // Store token in URL or localStorage
-        const url = new URL(window.location.href)
-        url.searchParams.set("token", code)
-        window.history.replaceState({}, "", url.toString())
-        onValidToken()
+    try {
+      // Validate against backend
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [], password: code }),
+      })
+
+      if (res.ok) {
+        onValidPassword(code)
       } else {
         setError("Invalid access code. Please try again.")
       }
-      setIsLoading(false)
-    }, 500)
+    } catch {
+      setError("Connection error. Please try again.")
+    }
+
+    setIsLoading(false)
   }
 
   return (
@@ -47,7 +47,7 @@ export function AccessGate({ onValidToken, dmName = "the GM at wojciech.paczul@g
           <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
             <Swords className="w-8 h-8 text-gold" />
           </div>
-          <CardTitle className="text-2xl font-sans text-gold">Daggerheart Character Creator</CardTitle>
+          <CardTitle className="text-2xl font-sans text-gold">Character Creator</CardTitle>
           <CardDescription className="text-muted-foreground">
             This tool is invite-only
           </CardDescription>
@@ -61,7 +61,7 @@ export function AccessGate({ onValidToken, dmName = "the GM at wojciech.paczul@g
               </label>
               <Input
                 id="code"
-                type="text"
+                type="password"
                 placeholder="Enter code..."
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
@@ -77,9 +77,6 @@ export function AccessGate({ onValidToken, dmName = "the GM at wojciech.paczul@g
               {isLoading ? "Verifying..." : "Enter"}
             </Button>
           </form>
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Need access? Contact {dmName}
-          </p>
         </CardContent>
       </Card>
     </div>

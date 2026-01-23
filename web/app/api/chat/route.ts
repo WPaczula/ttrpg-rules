@@ -18,10 +18,9 @@ export async function POST(req: Request) {
       system: CHARACTER_CREATION_PROMPT,
       messages,
       tools: rulesTools,
-      maxSteps: 10, // Allow multiple tool calls
     });
 
-    return result.toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     return Response.json(

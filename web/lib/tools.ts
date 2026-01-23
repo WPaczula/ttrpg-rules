@@ -17,7 +17,7 @@ const categories = [
 function createListTool(plural: string) {
   return tool({
     description: `List all ${plural}`,
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       const res = await fetch(`${serverUrl}/api/${plural}`);
       const data = await res.json();
@@ -30,14 +30,14 @@ function createListTool(plural: string) {
 function createGetTool(plural: string, singular: string) {
   return tool({
     description: `Get details for a specific ${singular}`,
-    parameters: z.object({
+    inputSchema: z.object({
       name: z.string().describe(`Name of the ${singular}`),
     }),
-    execute: async ({ name }) => {
+    execute: async ({ name }: { name: string }) => {
       const res = await fetch(`${serverUrl}/api/${plural}/${name}`);
       if (!res.ok) return `${singular} not found`;
       const data = await res.json();
-      return data.content;
+      return data.content as string;
     },
   });
 }
@@ -55,12 +55,12 @@ export const rulesTools = {
   // Search tool
   search_rules: tool({
     description: 'Search rules by semantic meaning. Use for open-ended questions.',
-    parameters: z.object({
+    inputSchema: z.object({
       query: z.string().describe('What to search for'),
       limit: z.number().optional().describe('Max results (default 5)'),
       category: z.string().optional().describe('Filter by category'),
     }),
-    execute: async ({ query, limit, category }) => {
+    execute: async ({ query, limit, category }: { query: string; limit?: number; category?: string }) => {
       const res = await fetch(`${serverUrl}/api/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
