@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo } from "react"
+import { useRef, useEffect, useMemo, useState } from "react"
 import { useChat, UIMessage } from "@ai-sdk/react"
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,7 @@ I'm here to help you create your character. Together, we'll craft a hero with a 
 export function ChatInterface({ password }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isInputFocused, setIsInputFocused] = useState(false)
 
   const transport = useMemo(
     () =>
@@ -75,6 +76,18 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     }
   }, [isLoading])
 
+  // Scroll input into view when focused (for mobile keyboard)
+  const handleInputFocus = () => {
+    setIsInputFocused(true)
+    setTimeout(() => {
+      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    }, 300) // Delay to allow keyboard to appear
+  }
+
+  const handleInputBlur = () => {
+    setIsInputFocused(false)
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
@@ -86,7 +99,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-dvh bg-background">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         {/* Header */}
         <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
@@ -124,6 +137,8 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
               placeholder={isLoading ? "Thinking..." : "Type your message..."}
               disabled={isLoading}
               autoComplete="off"
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
             />
             <Button
@@ -136,16 +151,18 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
           </form>
         </div>
 
-        {/* Attribution Footer */}
-        <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
-          <p>
-            Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
-            <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
-              DPCGL
-            </a>
-            . Not affiliated with Critical Role or Darrington Press.
-          </p>
-        </footer>
+        {/* Attribution Footer - hidden when input focused on mobile */}
+        {!isInputFocused && (
+          <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
+            <p>
+              Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
+              <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
+                DPCGL
+              </a>
+              . Not affiliated with Critical Role or Darrington Press.
+            </p>
+          </footer>
+        )}
       </div>
     </div>
   )
