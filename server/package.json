@@ -1,5 +1,5 @@
 {
-  "name": "daggerheart-mcp",
+  "name": "ttrpg-rules-server",
   "version": "0.1.0",
   "description": "MCP server for Daggerheart rules lookup and campaign management",
   "type": "module",
