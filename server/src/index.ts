@@ -43,46 +43,42 @@ categories.forEach(category => {
       : category.slice(0, -1);
 
   // List tool
-  mcpServer.tool(
-    `list_${category}`,
-    `List all ${category}`,
-    {},
-    async () => {
-      const docs = listDocuments(category);
-      return { content: [{ type: 'text', text: docs.join('\n') }] };
-    }
-  );
+  mcpServer.registerTool(`list_${category}`, {
+    description: `List all ${category}`,
+    inputSchema: {}
+  }, async () => {
+    const docs = listDocuments(category);
+    return { content: [{ type: 'text', text: docs.join('\n') }] };
+  });
 
   // Get tool
-  mcpServer.tool(
-    `get_${singular}`,
-    `Get details for a specific ${singular}`,
-    { name: z.string().describe(`Name of the ${singular}`) },
-    async ({ name }) => {
-      const content = getDocument(category, name);
-      if (!content) {
-        return { content: [{ type: 'text', text: `${singular} "${name}" not found` }] };
-      }
-      return { content: [{ type: 'text', text: content }] };
+  mcpServer.registerTool(`get_${singular}`, {
+    description: `Get details for a specific ${singular}`,
+    inputSchema: {
+      name: z.string().describe(`Name of the ${singular}`)
     }
-  );
+  }, async ({ name }) => {
+    const content = getDocument(category, name);
+    if (!content) {
+      return { content: [{ type: 'text', text: `${singular} "${name}" not found` }] };
+    }
+    return { content: [{ type: 'text', text: content }] };
+  });
 });
 
 // Search tool
-mcpServer.tool(
-  'search_rules',
-  'Search rules by semantic meaning',
-  {
+mcpServer.registerTool('search_rules', {
+  description: 'Search rules by semantic meaning',
+  inputSchema: {
     query: z.string().describe('What to search for'),
     limit: z.number().optional().describe('Max results (default 5)'),
     category: z.string().optional().describe('Filter by category'),
-  },
-  async ({ query, limit = 5, category }) => {
-    const results = await searchService.search(query, limit, category);
-    const text = results.map(r => `## ${r.id}\n\n${r.content}`).join('\n\n---\n\n');
-    return { content: [{ type: 'text', text }] };
   }
-);
+}, async ({ query, limit = 5, category }) => {
+  const results = await searchService.search(query, limit, category);
+  const text = results.map(r => `## ${r.id}\n\n${r.content}`).join('\n\n---\n\n');
+  return { content: [{ type: 'text', text }] };
+});
 
 // MCP endpoint (Streamable HTTP) - placeholder until SDK supports it
 // For now, keep stdio support for local development
