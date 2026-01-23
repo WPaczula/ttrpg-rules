@@ -1,3 +1,4 @@
+import { config } from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -9,6 +10,15 @@ import { dirname, join } from 'path';
 import { z } from 'zod';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Load .env from project root (one level up from dist/)
+const envPath = join(__dirname, '..', '.env');
+console.log(`Loading .env from: ${envPath}`);
+console.log(`Before dotenv - OPENAI_API_KEY: ${process.env.OPENAI_API_KEY?.slice(0, 7)}...`);
+
+const result = config({ path: envPath, override: true });
+console.log(`Dotenv result:`, result.error ? result.error.message : 'OK');
+console.log(`After dotenv - OPENAI_API_KEY: ${process.env.OPENAI_API_KEY?.slice(0, 7)}...`);
 const DB_PATH = join(__dirname, '..', 'data', 'embeddings.db');
 const PORT = process.env.PORT || 3001;
 

@@ -22,10 +22,10 @@ export function AccessGate({ onValidPassword }: AccessGateProps) {
 
     try {
       // Validate against backend
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [], password: code }),
+        body: JSON.stringify({ password: code }),
       })
 
       if (res.ok) {

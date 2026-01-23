@@ -15,7 +15,7 @@ function parseMarkdown(content: string) {
   const elements: React.ReactNode[] = []
   let inList = false
   let listItems: string[] = []
-  
+
   const flushList = () => {
     if (listItems.length > 0) {
       elements.push(
@@ -31,16 +31,16 @@ function parseMarkdown(content: string) {
       inList = false
     }
   }
-  
+
   const formatInline = (text: string): string => {
     return text
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-gold font-semibold">$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
   }
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
-    
+
     // Headings
     if (line.startsWith("# ")) {
       flushList()
@@ -51,7 +51,7 @@ function parseMarkdown(content: string) {
       )
       continue
     }
-    
+
     // Numbered list items
     const listMatch = line.match(/^\d+\.\s*(.+)/)
     if (listMatch) {
@@ -59,13 +59,13 @@ function parseMarkdown(content: string) {
       listItems.push(listMatch[1])
       continue
     }
-    
+
     // Empty line or new paragraph
     if (line.trim() === "") {
       flushList()
       continue
     }
-    
+
     // Regular paragraph
     flushList()
     elements.push(
@@ -74,7 +74,7 @@ function parseMarkdown(content: string) {
       </p>
     )
   }
-  
+
   flushList()
   return elements
 }
@@ -97,7 +97,7 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
             : "bg-gold/20 border border-gold/30 text-foreground"
         )}
       >
-        {isBot ? (
+        {isBot && content ? (
           <div className="max-w-none">
             {parseMarkdown(content)}
           </div>

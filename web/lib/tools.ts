@@ -67,6 +67,11 @@ export const rulesTools = {
         body: JSON.stringify({ query, limit, category }),
       });
       const data = await res.json();
+
+      if (!res.ok || !Array.isArray(data)) {
+        return data.error || 'Search failed';
+      }
+
       return data.map((r: { id: string; content: string }) =>
         `## ${r.id}\n\n${r.content}`
       ).join('\n\n---\n\n');

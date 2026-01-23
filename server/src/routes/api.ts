@@ -39,7 +39,9 @@ export function createApiRouter(dbPath: string): Router {
       const results = await searchService.search(query, limit, category);
       res.json(results);
     } catch (error) {
-      res.status(500).json({ error: 'Search failed' });
+      console.error('Search error:', error);
+      const message = error instanceof Error ? error.message : 'Search failed';
+      res.status(500).json({ error: message });
     }
   });
 

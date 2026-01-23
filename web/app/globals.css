@@ -133,4 +133,31 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--purple-deep);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--purple-glow);
+    border-radius: 4px;
+    border: 2px solid var(--purple-deep);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-muted);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple-glow) var(--purple-deep);
+  }
 }

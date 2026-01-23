@@ -1,9 +1,16 @@
 import OpenAI from 'openai/index.mjs';
 
-const openai = new OpenAI();
+let openai: OpenAI | null = null;
+
+function getClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI();
+  }
+  return openai;
+}
 
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
+  const response = await getClient().embeddings.create({
     model: 'text-embedding-3-small',
     input: text,
     

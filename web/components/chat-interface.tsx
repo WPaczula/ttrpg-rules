@@ -1,13 +1,27 @@
 "use client"
 
 import { useRef, useEffect, useMemo } from "react"
-import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+import { useChat, UIMessage } from "@ai-sdk/react"
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChatMessage } from "@/components/chat-message"
 import { TypingIndicator } from "@/components/typing-indicator"
 import { Send, Swords } from "lucide-react"
+
+// Extract text content from AI SDK v6 message parts
+function getMessageContent(message: UIMessage): string {
+  // If content exists (e.g., our initial message), use it
+  if (message.content) return message.content
+
+  // Otherwise extract from parts
+  if (!message.parts) return ""
+
+  return message.parts
+    .filter((part): part is { type: "text"; text: string } => part.type === "text")
+    .map((part) => part.text)
+    .join("\n")
+}
 
 interface ChatInterfaceProps {
   password: string
@@ -21,6 +35,7 @@ I'm here to help you create your character. Together, we'll craft a hero with a 
 
 export function ChatInterface({ password }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const transport = useMemo(
     () =>
@@ -33,6 +48,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
 
   const { messages, sendMessage, status } = useChat({
     transport,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     messages: [
       {
         id: "welcome",
@@ -51,6 +67,13 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, isLoading])
+
+  // Refocus input when loading completes
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isLoading])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -85,7 +108,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
               <ChatMessage
                 key={message.id}
                 role={message.role === "assistant" ? "bot" : "user"}
-                content={message.content}
+                content={getMessageContent(message)}
               />
             ))}
             {isLoading && <TypingIndicator />}
@@ -96,9 +119,11 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
         <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
             <Input
+              ref={inputRef}
               name="message"
               placeholder={isLoading ? "Thinking..." : "Type your message..."}
               disabled={isLoading}
+              autoComplete="off"
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
             />
             <Button

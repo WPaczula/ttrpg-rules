@@ -1,4 +1,4 @@
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages, stepCountIs } from 'ai';
 import { anthropic } from '@/lib/anthropic';
 import { validatePassword } from '@/lib/auth';
 import { CHARACTER_CREATION_PROMPT } from '@/lib/prompts';
@@ -16,8 +16,9 @@ export async function POST(req: Request) {
     const result = streamText({
       model: anthropic('claude-3-5-haiku-latest'),
       system: CHARACTER_CREATION_PROMPT,
-      messages,
+      messages: await convertToModelMessages(messages),
       tools: rulesTools,
+      stopWhen: stepCountIs(5),
     });
 
     return result.toUIMessageStreamResponse();
