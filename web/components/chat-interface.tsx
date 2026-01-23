@@ -63,20 +63,6 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
 
   const isLoading = status === "streaming" || status === "submitted"
 
-  // Auto-scroll on new messages
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages, isLoading])
-
-  // Refocus input when loading completes
-  useEffect(() => {
-    if (!isLoading && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isLoading])
-
   // Scroll input area into view when focused (for mobile keyboard)
   const handleInputFocus = () => {
     setIsInputFocused(true)
