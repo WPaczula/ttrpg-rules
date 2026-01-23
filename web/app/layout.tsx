@@ -16,8 +16,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Daggerheart Character Creator',
-  description: 'Create your Daggerheart character with an AI-powered assistant',
+  title: 'TTRPG Character Creator',
+  description: 'Create your character with an AI-powered assistant',
   generator: 'v0.app',
   icons: {
     icon: [
