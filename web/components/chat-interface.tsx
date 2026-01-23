@@ -36,6 +36,7 @@ I'm here to help you create your character. Together, we'll craft a hero with a 
 export function ChatInterface({ password }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const inputAreaRef = useRef<HTMLDivElement>(null)
   const [isInputFocused, setIsInputFocused] = useState(false)
 
   const transport = useMemo(
@@ -76,11 +77,11 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     }
   }, [isLoading])
 
-  // Scroll input into view when focused (for mobile keyboard)
+  // Scroll input area into view when focused (for mobile keyboard)
   const handleInputFocus = () => {
     setIsInputFocused(true)
     setTimeout(() => {
-      inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      inputAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
     }, 300) // Delay to allow keyboard to appear
   }
 
@@ -129,7 +130,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
+        <div ref={inputAreaRef} className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
             <Input
               ref={inputRef}
