@@ -1,6 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { tool } from 'ai';
+import { z } from 'zod';
 
-type Tool = Anthropic.Messages.Tool;
+const serverUrl = process.env.SERVER_URL || 'http://localhost:3001';
 
 const categories = [
   { plural: 'classes', singular: 'class' },
@@ -12,84 +13,63 @@ const categories = [
   { plural: 'weapons', singular: 'weapon' },
 ];
 
-export const RULES_TOOLS: Tool[] = [
-  // List tools
-  ...categories.map(({ plural }) => ({
-    name: `list_${plural}`,
+// Helper to create list tools
+function createListTool(plural: string) {
+  return tool({
     description: `List all ${plural}`,
-    input_schema: {
-      type: 'object' as const,
-      properties: {},
-      required: [],
+    parameters: z.object({}),
+    execute: async () => {
+      const res = await fetch(`${serverUrl}/api/${plural}`);
+      const data = await res.json();
+      return Array.isArray(data) ? data.join('\n') : JSON.stringify(data);
     },
-  })),
-  // Get tools
-  ...categories.map(({ plural, singular }) => ({
-    name: `get_${singular}`,
-    description: `Get details for a specific ${singular}`,
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        name: { type: 'string', description: `Name of the ${singular}` },
-      },
-      required: ['name'],
-    },
-  })),
-  // Search tool
-  {
-    name: 'search_rules',
-    description: 'Search rules by semantic meaning. Use for open-ended questions.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        query: { type: 'string', description: 'What to search for' },
-        limit: { type: 'number', description: 'Max results (default 5)' },
-        category: { type: 'string', description: 'Filter by category' },
-      },
-      required: ['query'],
-    },
-  },
-];
-
-export async function executeTool(
-  name: string,
-  input: Record<string, unknown>
-): Promise<string> {
-  const serverUrl = process.env.SERVER_URL || 'http://localhost:3001';
-
-  // Handle list tools
-  if (name.startsWith('list_')) {
-    const category = name.replace('list_', '');
-    const res = await fetch(`${serverUrl}/api/${category}`);
-    const data = await res.json();
-    return Array.isArray(data) ? data.join('\n') : JSON.stringify(data);
-  }
-
-  // Handle get tools
-  if (name.startsWith('get_')) {
-    const singular = name.replace('get_', '');
-    const plural = singular === 'class' ? 'classes'
-      : singular === 'ancestry' ? 'ancestries'
-      : singular === 'community' ? 'communities'
-      : `${singular}s`;
-    const res = await fetch(`${serverUrl}/api/${plural}/${input.name}`);
-    if (!res.ok) return `${singular} not found`;
-    const data = await res.json();
-    return data.content;
-  }
-
-  // Handle search
-  if (name === 'search_rules') {
-    const res = await fetch(`${serverUrl}/api/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-    });
-    const data = await res.json();
-    return data.map((r: { id: string; content: string }) =>
-      `## ${r.id}\n\n${r.content}`
-    ).join('\n\n---\n\n');
-  }
-
-  return `Unknown tool: ${name}`;
+  });
 }
+
+// Helper to create get tools
+function createGetTool(plural: string, singular: string) {
+  return tool({
+    description: `Get details for a specific ${singular}`,
+    parameters: z.object({
+      name: z.string().describe(`Name of the ${singular}`),
+    }),
+    execute: async ({ name }) => {
+      const res = await fetch(`${serverUrl}/api/${plural}/${name}`);
+      if (!res.ok) return `${singular} not found`;
+      const data = await res.json();
+      return data.content;
+    },
+  });
+}
+
+// Build tools object
+export const rulesTools = {
+  // List tools
+  ...Object.fromEntries(
+    categories.map(({ plural }) => [`list_${plural}`, createListTool(plural)])
+  ),
+  // Get tools
+  ...Object.fromEntries(
+    categories.map(({ plural, singular }) => [`get_${singular}`, createGetTool(plural, singular)])
+  ),
+  // Search tool
+  search_rules: tool({
+    description: 'Search rules by semantic meaning. Use for open-ended questions.',
+    parameters: z.object({
+      query: z.string().describe('What to search for'),
+      limit: z.number().optional().describe('Max results (default 5)'),
+      category: z.string().optional().describe('Filter by category'),
+    }),
+    execute: async ({ query, limit, category }) => {
+      const res = await fetch(`${serverUrl}/api/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, limit, category }),
+      });
+      const data = await res.json();
+      return data.map((r: { id: string; content: string }) =>
+        `## ${r.id}\n\n${r.content}`
+      ).join('\n\n---\n\n');
+    },
+  }),
+};
