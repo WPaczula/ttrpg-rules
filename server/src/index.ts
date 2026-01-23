@@ -1,159 +1,109 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import { VectorStore } from './vector-store.js';
-import { generateEmbedding } from './embeddings.js';
+import express from 'express';
+import cors from 'cors';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { createApiRouter } from './routes/api.js';
+import { listDocuments, getDocument } from './services/documents.js';
+import { SearchService } from './services/search.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { z } from 'zod';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'data', 'embeddings.db');
+const PORT = process.env.PORT || 3001;
 
-const server = new Server(
-  { name: 'daggerheart-mcp', version: '0.1.0' },
-  { capabilities: { tools: {} } }
-);
+// Initialize services
+const searchService = new SearchService(DB_PATH);
 
-let store: VectorStore;
+// Create Express app
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: 'search_rules',
-      description: 'Search Daggerheart rules by semantic meaning. Use this to find rules about combat, abilities, character creation, etc.',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          query: { type: 'string', description: 'What to search for' },
-          limit: { type: 'number', description: 'Max results (default 5)' },
-          category: { type: 'string', description: 'Filter by category: abilities, adversaries, ancestries, armor, classes, communities, consumables, contents, domains, environments, frames, items, subclasses, weapons' },
-        },
-        required: ['query'],
-      },
-    },
-    {
-      name: 'get_adversary',
-      description: 'Get a specific adversary/monster by name',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'Adversary name' },
-        },
-        required: ['name'],
-      },
-    },
-    {
-      name: 'get_ability',
-      description: 'Get a specific ability by name',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'Ability name' },
-        },
-        required: ['name'],
-      },
-    },
-    {
-      name: 'list_adversaries',
-      description: 'List all adversaries, optionally filtered by tier',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          tier: { type: 'string', description: 'Filter by tier (e.g., "Tier 1", "Tier 2")' },
-        },
-      },
-    },
-    {
-      name: 'list_abilities',
-      description: 'List all abilities, optionally filtered by class or domain',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          filter: { type: 'string', description: 'Filter text to match in ability content' },
-        },
-      },
-    },
-  ],
-}));
+// REST API routes
+app.use('/api', createApiRouter(DB_PATH));
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  switch (name) {
-    case 'search_rules': {
-      const { query, limit = 5, category } = args as { query: string; limit?: number; category?: string };
-      const embedding = await generateEmbedding(query);
-      const results = store.search(embedding, limit, category);
-      return {
-        content: [{ type: 'text', text: results.map(r => `## ${r.id}\n\n${r.content}`).join('\n\n---\n\n') }],
-      };
-    }
-
-    case 'get_adversary': {
-      const { name: advName } = args as { name: string };
-      const fileName = `adversaries/${advName}.md`;
-      const doc = store.getById(fileName);
-      if (!doc) {
-        return { content: [{ type: 'text', text: `Adversary "${advName}" not found. Try search_rules to find it.` }] };
-      }
-      return { content: [{ type: 'text', text: doc.content }] };
-    }
-
-    case 'get_ability': {
-      const { name: abilityName } = args as { name: string };
-      const fileName = `abilities/${abilityName}.md`;
-      const doc = store.getById(fileName);
-      if (!doc) {
-        return { content: [{ type: 'text', text: `Ability "${abilityName}" not found. Try search_rules to find it.` }] };
-      }
-      return { content: [{ type: 'text', text: doc.content }] };
-    }
-
-    case 'list_adversaries': {
-      const { tier } = args as { tier?: string };
-      const adversaries = store.listByCategory('adversaries');
-      let filtered = adversaries;
-      if (tier) {
-        filtered = adversaries.filter(a => a.content.includes(tier));
-      }
-      const names = filtered.map(a => {
-        // Strip BOM and match first H1 header
-        const content = a.content.replace(/^\uFEFF/, '');
-        const match = content.match(/^#\s+(.+)/m);
-        return match ? match[1] : a.id;
-      });
-      return { content: [{ type: 'text', text: names.join('\n') }] };
-    }
-
-    case 'list_abilities': {
-      const { filter } = args as { filter?: string };
-      const abilities = store.listByCategory('abilities');
-      let filtered = abilities;
-      if (filter) {
-        filtered = abilities.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()));
-      }
-      const names = filtered.map(a => {
-        // Strip BOM and match first H1 header
-        const content = a.content.replace(/^\uFEFF/, '');
-        const match = content.match(/^#\s+(.+)/m);
-        return match ? match[1] : a.id;
-      });
-      return { content: [{ type: 'text', text: names.join('\n') }] };
-    }
-
-    default:
-      throw new Error(`Unknown tool: ${name}`);
-  }
+// MCP Server setup
+const mcpServer = new McpServer({
+  name: 'ttrpg-rules',
+  version: '1.0.0',
 });
 
-async function main() {
-  store = new VectorStore(DB_PATH);
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('Daggerheart MCP server running');
-}
+// Register MCP tools
+const categories = [
+  'classes', 'subclasses', 'ancestries', 'communities',
+  'domains', 'armor', 'weapons'
+];
 
-main().catch(console.error);
+categories.forEach(category => {
+  const singular = category.endsWith('ies')
+    ? category.slice(0, -3) + 'y'
+    : category.endsWith('es')
+      ? category.slice(0, -2)
+      : category.slice(0, -1);
+
+  // List tool
+  mcpServer.tool(
+    `list_${category}`,
+    `List all ${category}`,
+    {},
+    async () => {
+      const docs = listDocuments(category);
+      return { content: [{ type: 'text', text: docs.join('\n') }] };
+    }
+  );
+
+  // Get tool
+  mcpServer.tool(
+    `get_${singular}`,
+    `Get details for a specific ${singular}`,
+    { name: z.string().describe(`Name of the ${singular}`) },
+    async ({ name }) => {
+      const content = getDocument(category, name);
+      if (!content) {
+        return { content: [{ type: 'text', text: `${singular} "${name}" not found` }] };
+      }
+      return { content: [{ type: 'text', text: content }] };
+    }
+  );
+});
+
+// Search tool
+mcpServer.tool(
+  'search_rules',
+  'Search rules by semantic meaning',
+  {
+    query: z.string().describe('What to search for'),
+    limit: z.number().optional().describe('Max results (default 5)'),
+    category: z.string().optional().describe('Filter by category'),
+  },
+  async ({ query, limit = 5, category }) => {
+    const results = await searchService.search(query, limit, category);
+    const text = results.map(r => `## ${r.id}\n\n${r.content}`).join('\n\n---\n\n');
+    return { content: [{ type: 'text', text }] };
+  }
+);
+
+// MCP endpoint (Streamable HTTP) - placeholder until SDK supports it
+// For now, keep stdio support for local development
+app.get('/mcp', (req, res) => {
+  res.json({
+    message: 'MCP endpoint - use Claude Desktop with stdio transport for now',
+    tools: categories.flatMap(c => [`list_${c}`, `get_${c.slice(0, -1)}`]).concat(['search_rules'])
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`REST API: http://localhost:${PORT}/api`);
+});
+
+// Also support stdio for local MCP
+if (process.argv.includes('--stdio')) {
+  import('@modelcontextprotocol/sdk/server/stdio.js').then(({ StdioServerTransport }) => {
+    const transport = new StdioServerTransport();
+    mcpServer.connect(transport);
+    console.error('MCP server running on stdio');
+  });
+}
