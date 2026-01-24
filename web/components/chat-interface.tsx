@@ -63,6 +63,17 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
 
   const isLoading = status === "streaming" || status === "submitted"
 
+  // Auto-scroll to bottom when user sends a message (so they see the assistant response)
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage?.role === "user") {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      })
+    }
+  }, [messages.length])
+
   // Scroll input area into view when focused (for mobile keyboard)
   const handleInputFocus = () => {
     setIsInputFocused(true)
@@ -102,7 +113,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto p-4 pb-24" ref={scrollRef}>
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => (
               <ChatMessage
@@ -131,6 +142,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
             <Button
               type="submit"
               disabled={isLoading}
+              onMouseDown={(e) => e.preventDefault()}
               className="bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
