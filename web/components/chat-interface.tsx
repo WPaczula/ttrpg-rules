@@ -27,11 +27,54 @@ interface ChatInterfaceProps {
   password: string
 }
 
+const STORAGE_KEY = "daggerheart-chat-messages"
+
 const INITIAL_MESSAGE = `# Welcome, Adventurer!
 
 I'm here to help you create your character. Together, we'll craft a hero with a compelling story and abilities that match your vision.
 
-**What kind of character would you like to play?** Tell me about the concept you have in mind, or I can show you the available classes to help you decide!`
+**What kind of character would you like to play?** Tell me about the concept you have in mind, or I can show you the available classes to help you decide!
+
+*Your conversation is saved automatically. Type /clear to start fresh.*`
+
+const WELCOME_MESSAGE = {
+  id: "welcome",
+  role: "assistant" as const,
+  content: INITIAL_MESSAGE,
+  parts: [{ type: "text" as const, text: INITIAL_MESSAGE }],
+}
+
+function loadMessages(): UIMessage[] {
+  if (typeof window === "undefined") return [WELCOME_MESSAGE]
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+      }
+    }
+  } catch {
+    // Invalid data, ignore
+  }
+  return [WELCOME_MESSAGE]
+}
+
+function saveMessages(messages: UIMessage[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+  } catch {
+    // Storage full or unavailable, ignore
+  }
+}
+
+function clearMessages() {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Ignore errors
+  }
+}
 
 export function ChatInterface({ password }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -48,18 +91,18 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     [password]
   )
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, setMessages, status } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    messages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        content: INITIAL_MESSAGE,
-        parts: [{ type: "text", text: INITIAL_MESSAGE }],
-      },
-    ],
+    messages: loadMessages(),
   })
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveMessages(messages)
+    }
+  }, [messages])
 
   const isLoading = status === "streaming" || status === "submitted"
 
@@ -90,8 +133,18 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     e.preventDefault()
     const form = e.currentTarget
     const input = form.elements.namedItem("message") as HTMLInputElement
-    if (input.value.trim() && !isLoading) {
-      sendMessage({ text: input.value.trim() })
+    const value = input.value.trim()
+
+    if (value && !isLoading) {
+      // Handle /clear command
+      if (value.toLowerCase() === "/clear") {
+        clearMessages()
+        setMessages([WELCOME_MESSAGE])
+        input.value = ""
+        return
+      }
+
+      sendMessage({ text: value })
       input.value = ""
     }
   }
