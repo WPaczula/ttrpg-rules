@@ -22,3 +22,10 @@ export const CHARACTER_CREATION_PROMPT = `You are a friendly character creation 
 ## Output Format
 At the end, provide a summary of all choices in a structured format.
 `;
+
+export const ROUTING_INSTRUCTIONS = `You decide if a user's request requires creative writing or just factual lookup.
+
+CREATIVE (use Sonnet): backstories, narratives, roleplay, character descriptions, inventing details not in the rules
+FACTUAL (use Haiku): rule lookups, stat blocks, class features, mechanics questions, "what is X", "how does Y work"
+
+When in doubt, choose FACTUAL.`;
