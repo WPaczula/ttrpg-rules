@@ -186,24 +186,22 @@ export function ChatInterface({ password, game, onGameChange }: ChatInterfacePro
         {/* Game Tabs */}
         <div className="flex border-b border-border">
           <button
-            onClick={() => onGameChange("daggerheart")}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              game === "daggerheart"
-                ? "text-gold border-b-2 border-gold"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Daggerheart
-          </button>
-          <button
             onClick={() => onGameChange("dnd")}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              game === "dnd"
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${game === "dnd"
                 ? "text-gold border-b-2 border-gold"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             D&D
+          </button>
+          <button
+            onClick={() => onGameChange("daggerheart")}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${game === "daggerheart"
+                ? "text-gold border-b-2 border-gold"
+                : "text-muted-foreground hover:text-foreground"
+              }`}
+          >
+            Daggerheart
           </button>
         </div>
 

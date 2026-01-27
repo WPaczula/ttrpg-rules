@@ -8,7 +8,7 @@ export type Game = "daggerheart" | "dnd"
 
 export default function Home() {
   const [password, setPassword] = useState<string | null>(null)
-  const [game, setGame] = useState<Game>("daggerheart")
+  const [game, setGame] = useState<Game>("dnd")
 
   if (!password) {
     return <AccessGate onValidPassword={setPassword} />
