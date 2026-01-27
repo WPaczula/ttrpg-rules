@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+config({ path: '.env' });
+
 import { readdir, readFile } from 'fs/promises';
 import { join, relative } from 'path';
 import { VectorStore } from '../src/vector-store.js';
@@ -5,7 +8,7 @@ import { generateEmbedding } from '../src/embeddings.js';
 
 const GAMES: Record<string, { srdPath: string; dbPath: string }> = {
   daggerheart: {
-    srdPath: 'D:/AI/daggerheart/srd',
+    srdPath: 'daggerheart-srd',
     dbPath: 'data/daggerheart-embeddings.db',
   },
   dnd: {
