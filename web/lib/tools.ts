@@ -19,7 +19,7 @@ function createListTool(plural: string) {
     description: `List all ${plural}`,
     inputSchema: z.object({}),
     execute: async () => {
-      const res = await fetch(`${serverUrl}/api/${plural}`);
+      const res = await fetch(`${serverUrl}/api/daggerheart/${plural}`);
       const data = await res.json();
       return Array.isArray(data) ? data.join('\n') : JSON.stringify(data);
     },
@@ -34,7 +34,7 @@ function createGetTool(plural: string, singular: string) {
       name: z.string().describe(`Name of the ${singular}`),
     }),
     execute: async ({ name }: { name: string }) => {
-      const res = await fetch(`${serverUrl}/api/${plural}/${name}`);
+      const res = await fetch(`${serverUrl}/api/daggerheart/${plural}/${name}`);
       if (!res.ok) return `${singular} not found`;
       const data = await res.json();
       return data.content as string;
@@ -61,10 +61,36 @@ export const rulesTools = {
       category: z.string().optional().describe('Filter by category'),
     }),
     execute: async ({ query, limit, category }: { query: string; limit?: number; category?: string }) => {
-      const res = await fetch(`${serverUrl}/api/search`, {
+      const res = await fetch(`${serverUrl}/api/daggerheart/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, limit, category }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !Array.isArray(data)) {
+        return data.error || 'Search failed';
+      }
+
+      return data.map((r: { id: string; content: string }) =>
+        `## ${r.id}\n\n${r.content}`
+      ).join('\n\n---\n\n');
+    },
+  }),
+};
+
+export const dndTools = {
+  search_dnd_rules: tool({
+    description: 'Search D&D Starter Set rules by semantic meaning.',
+    inputSchema: z.object({
+      query: z.string().describe('What to search for'),
+      limit: z.number().optional().describe('Max results (default 5)'),
+    }),
+    execute: async ({ query, limit }: { query: string; limit?: number }) => {
+      const res = await fetch(`${serverUrl}/api/dnd/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, limit }),
       });
       const data = await res.json();
 
