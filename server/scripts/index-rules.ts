@@ -1,6 +1,3 @@
-import { config } from 'dotenv';
-config({ path: '.env' });
-
 import { readdir, readFile } from 'fs/promises';
 import { join, relative } from 'path';
 import { VectorStore } from '../src/vector-store.js';
@@ -46,7 +43,7 @@ function chunkByHeading(content: string): Array<{ id: string; text: string }> {
   let currentLines: string[] = [];
 
   for (const line of lines) {
-    const match = line.match(/^##\s+(.+)/);
+    const match = line.match(/^#{2,3}\s+(.+)/);
     if (match) {
       if (currentLines.length > 0) {
         const text = currentLines.join('\n').trim();
