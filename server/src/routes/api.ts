@@ -2,25 +2,29 @@ import { Router } from 'express';
 import { listDocuments, getDocument } from '../services/documents.js';
 import { SearchService } from '../services/search.js';
 
-export function createApiRouter(dbPath: string): Router {
-  const router = Router();
-  const searchService = new SearchService(dbPath);
+interface GameDbPaths {
+  daggerheart: string;
+  dnd: string;
+}
 
-  // Generic document routes for each category
+export function createApiRouter(dbPaths: GameDbPaths): Router {
+  const router = Router();
+  const daggerheartSearch = new SearchService(dbPaths.daggerheart);
+  const dndSearch = new SearchService(dbPaths.dnd);
+
+  // --- Daggerheart routes ---
   const categories = [
     'classes', 'subclasses', 'ancestries', 'communities',
     'domains', 'armor', 'weapons', 'abilities', 'adversaries'
   ];
 
   categories.forEach(category => {
-    // List all in category
-    router.get(`/${category}`, (req, res) => {
+    router.get(`/daggerheart/${category}`, (req, res) => {
       const docs = listDocuments(category);
       res.json(docs);
     });
 
-    // Get specific document
-    router.get(`/${category}/:name`, (req, res) => {
+    router.get(`/daggerheart/${category}/:name`, (req, res) => {
       const content = getDocument(category, req.params.name);
       if (!content) {
         return res.status(404).json({ error: `${category.slice(0, -1)} not found` });
@@ -29,14 +33,29 @@ export function createApiRouter(dbPath: string): Router {
     });
   });
 
-  // Search endpoint
-  router.post('/search', async (req, res) => {
+  router.post('/daggerheart/search', async (req, res) => {
     try {
       const { query, limit = 5, category } = req.body;
       if (!query) {
         return res.status(400).json({ error: 'query is required' });
       }
-      const results = await searchService.search(query, limit, category);
+      const results = await daggerheartSearch.search(query, limit, category);
+      res.json(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      const message = error instanceof Error ? error.message : 'Search failed';
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- D&D routes ---
+  router.post('/dnd/search', async (req, res) => {
+    try {
+      const { query, limit = 5 } = req.body;
+      if (!query) {
+        return res.status(400).json({ error: 'query is required' });
+      }
+      const results = await dndSearch.search(query, limit);
       res.json(results);
     } catch (error) {
       console.error('Search error:', error);
