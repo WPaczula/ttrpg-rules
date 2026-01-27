@@ -3,7 +3,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SRD_PATH = join(__dirname, '..', '..', 'srd');
+const SRD_PATH = join(__dirname, '..', '..', 'daggerheart-srd');
 
 export function listDocuments(category: string): string[] {
   const categoryPath = join(SRD_PATH, category);
