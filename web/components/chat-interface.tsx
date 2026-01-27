@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ChatMessage } from "@/components/chat-message"
 import { TypingIndicator } from "@/components/typing-indicator"
 import { Send, Swords } from "lucide-react"
+import { Game } from "@/app/page"
 
 // Extract text content from AI SDK v6 message parts
 function getMessageContent(message: UIMessage): string {
@@ -25,29 +26,46 @@ function getMessageContent(message: UIMessage): string {
 
 interface ChatInterfaceProps {
   password: string
+  game: Game
+  onGameChange: (game: Game) => void
 }
 
-const STORAGE_KEY = "daggerheart-chat-messages"
+const STORAGE_KEYS: Record<Game, string> = {
+  daggerheart: "daggerheart-chat-messages",
+  dnd: "dnd-chat-messages",
+}
 
-const INITIAL_MESSAGE = `# Welcome, Adventurer!
+const WELCOME_TEXTS: Record<Game, string> = {
+  daggerheart: `# Welcome, Adventurer!
 
 I'm here to help you create your character. Together, we'll craft a hero with a compelling story and abilities that match your vision.
 
 **What kind of character would you like to play?** Tell me about the concept you have in mind, or I can show you the available classes to help you decide!
 
-*Your conversation is saved automatically. Type /clear to start fresh.*`
+*Your conversation is saved automatically. Type /clear to start fresh.*`,
+  dnd: `# Welcome to D&D!
 
-const WELCOME_MESSAGE = {
-  id: "welcome",
-  role: "assistant" as const,
-  content: INITIAL_MESSAGE,
-  parts: [{ type: "text" as const, text: INITIAL_MESSAGE }],
+I'm your D&D Starter Set rules assistant. Ask me anything about the rules, character creation, combat, spells, or any other aspect of the game.
+
+**What would you like to know?**
+
+*Your conversation is saved automatically. Type /clear to start fresh.*`,
 }
 
-function loadMessages(): UIMessage[] {
-  if (typeof window === "undefined") return [WELCOME_MESSAGE]
+function makeWelcomeMessage(game: Game) {
+  const text = WELCOME_TEXTS[game]
+  return {
+    id: "welcome",
+    role: "assistant" as const,
+    content: text,
+    parts: [{ type: "text" as const, text }],
+  }
+}
+
+function loadMessages(game: Game): UIMessage[] {
+  if (typeof window === "undefined") return [makeWelcomeMessage(game)]
   try {
-    const saved = localStorage.getItem(STORAGE_KEY)
+    const saved = localStorage.getItem(STORAGE_KEYS[game])
     if (saved) {
       const parsed = JSON.parse(saved)
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -57,26 +75,26 @@ function loadMessages(): UIMessage[] {
   } catch {
     // Invalid data, ignore
   }
-  return [WELCOME_MESSAGE]
+  return [makeWelcomeMessage(game)]
 }
 
-function saveMessages(messages: UIMessage[]) {
+function saveMessages(game: Game, messages: UIMessage[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+    localStorage.setItem(STORAGE_KEYS[game], JSON.stringify(messages))
   } catch {
     // Storage full or unavailable, ignore
   }
 }
 
-function clearMessages() {
+function clearMessages(game: Game) {
   try {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(STORAGE_KEYS[game])
   } catch {
     // Ignore errors
   }
 }
 
-export function ChatInterface({ password }: ChatInterfaceProps) {
+export function ChatInterface({ password, game, onGameChange }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
@@ -86,23 +104,23 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { password },
+        body: { password, game },
       }),
-    [password]
+    [password, game]
   )
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    messages: loadMessages(),
+    messages: loadMessages(game),
   })
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     if (messages.length > 0) {
-      saveMessages(messages)
+      saveMessages(game, messages)
     }
-  }, [messages])
+  }, [messages, game])
 
   const isLoading = status === "streaming" || status === "submitted"
 
@@ -138,8 +156,8 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
     if (value && !isLoading) {
       // Handle /clear command
       if (value.toLowerCase() === "/clear") {
-        clearMessages()
-        setMessages([WELCOME_MESSAGE])
+        clearMessages(game)
+        setMessages([makeWelcomeMessage(game)])
         input.value = ""
         return
       }
@@ -164,6 +182,30 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
             </div>
           </div>
         </header>
+
+        {/* Game Tabs */}
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => onGameChange("daggerheart")}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              game === "daggerheart"
+                ? "text-gold border-b-2 border-gold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Daggerheart
+          </button>
+          <button
+            onClick={() => onGameChange("dnd")}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              game === "dnd"
+                ? "text-gold border-b-2 border-gold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            D&D
+          </button>
+        </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 pb-24" ref={scrollRef}>
@@ -206,13 +248,19 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
         {/* Attribution Footer - hidden when input focused on mobile */}
         {!isInputFocused && (
           <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
-            <p>
-              Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
-              <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
-                DPCGL
-              </a>
-              . Not affiliated with Critical Role or Darrington Press.
-            </p>
+            {game === "daggerheart" ? (
+              <p>
+                Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
+                <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
+                  DPCGL
+                </a>
+                . Not affiliated with Critical Role or Darrington Press.
+              </p>
+            ) : (
+              <p>
+                Uses material from the D&D Starter Set. D&D is a trademark of Wizards of the Coast.
+              </p>
+            )}
           </footer>
         )}
       </div>
