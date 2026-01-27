@@ -19,11 +19,11 @@ console.log(`Before dotenv - OPENAI_API_KEY: ${process.env.OPENAI_API_KEY?.slice
 const result = config({ path: envPath, override: true });
 console.log(`Dotenv result:`, result.error ? result.error.message : 'OK');
 console.log(`After dotenv - OPENAI_API_KEY: ${process.env.OPENAI_API_KEY?.slice(0, 7)}...`);
-const DB_PATH = join(__dirname, '..', 'data', 'embeddings.db');
+const DAGGERHEART_DB = join(__dirname, '..', 'data', 'daggerheart-embeddings.db');
 const PORT = process.env.PORT || 3001;
 
 // Initialize services
-const searchService = new SearchService(DB_PATH);
+const searchService = new SearchService(DAGGERHEART_DB);
 
 // Create Express app
 const app = express();
@@ -31,7 +31,7 @@ app.use(cors());
 app.use(express.json());
 
 // REST API routes
-app.use('/api', createApiRouter(DB_PATH));
+app.use('/api', createApiRouter(DAGGERHEART_DB));
 
 // MCP Server setup
 const mcpServer = new McpServer({
