@@ -1,10 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Copy, X, Scroll, Check } from "lucide-react"
+import { Copy, X, Scroll } from "lucide-react"
 import { toast } from "react-toastify"
 
 export interface CharacterData {
