@@ -1,48 +1,39 @@
 # Daggerheart AI
 
-DM assistant for Daggerheart TTRPG, built as a Claude Code MCP server with skills.
+TTRPG assistant for Daggerheart and D&D, with a rules server, web chat UI, and Claude Code skills.
 
 ## Setup
 
-### 1. Install dependencies
+### Server
 
 ```bash
-cd mcp-server
+cd server
+cp .env.example .env   # add your OPENAI_API_KEY
 npm install
-```
-
-### 2. Set OpenAI API key
-
-```bash
-export OPENAI_API_KEY=your-key-here
-```
-
-### 3. Index the rules
-
-Point the indexer at your Daggerheart SRD files:
-
-```bash
-npm run index-rules
-```
-
-This creates `data/embeddings.db` with searchable rules content.
-
-### 4. Build the server
-
-```bash
+npm run index-rules               # index Daggerheart SRD
+npm run index-rules -- --game=dnd # index D&D SRD
 npm run build
 ```
 
-### 5. Configure Claude Code
+### Web App
 
-Add to your Claude Code MCP settings:
+```bash
+cd web
+cp .env.example .env   # add your ANTHROPIC_API_KEY
+npm install
+npm run dev
+```
+
+### Claude Code MCP
+
+Add to your `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "daggerheart": {
       "command": "node",
-      "args": ["D:/AI/daggerheart-ai/mcp-server/dist/index.js"],
+      "args": ["<path-to>/daggerheart-ai/server/dist/index.js"],
       "env": {
         "OPENAI_API_KEY": "your-key-here"
       }
@@ -51,25 +42,48 @@ Add to your Claude Code MCP settings:
 }
 ```
 
-### 6. Install skills
+### Skills
 
-Copy the skills to your Claude Code skills directory:
+Copy skills to your Claude Code skills directory:
 
 ```bash
 cp -r skills/* ~/.claude/skills/
 ```
 
-## Usage
+## MCP Tools
 
-### MCP Tools
+Category tools (Daggerheart) -- dynamically registered for each category:
 
-- `search_rules` - Semantic search across all Daggerheart content
-- `get_adversary` - Get a specific monster
-- `get_ability` - Get a specific ability
-- `list_adversaries` - List monsters by tier
-- `list_abilities` - List abilities by class/domain
+- `list_classes`, `get_class`
+- `list_subclasses`, `get_subclass`
+- `list_ancestries`, `get_ancestry`
+- `list_communities`, `get_community`
+- `list_domains`, `get_domain`
+- `list_armor`, `get_armor_item`
+- `list_weapons`, `get_weapon`
 
-### Skills
+Search:
+
+- `search_rules` - Semantic search across Daggerheart rules
+
+## REST API
+
+The server also exposes REST endpoints on port 3001:
+
+- `/api/daggerheart/search` - Daggerheart semantic search
+- `/api/daggerheart/documents/:category` - List/get documents by category
+- `/api/dnd/search` - D&D semantic search
+
+## Web App
+
+Next.js chat interface with:
+
+- Game tab bar (Daggerheart / D&D) with per-game chat history
+- Game-specific system prompts and tool selection
+- Streaming responses via Vercel AI SDK + Anthropic
+- Smart model routing (Haiku for factual, Sonnet for creative)
+
+## Skills
 
 - `/daggerheart-campaign` - Create campaign concept
 - `/daggerheart-session-zero` - Run session zero
@@ -83,11 +97,14 @@ cp -r skills/* ~/.claude/skills/
 
 ```
 daggerheart-ai/
-  mcp-server/         # MCP server code
-    src/              # TypeScript source
-    data/             # SQLite databases
-    scripts/          # Indexing scripts
-  skills/             # Claude Code skills
-  campaign/           # Your campaign data (created by skills)
-  docs/               # Documentation
+  server/               # Express + MCP server
+    src/                # TypeScript source
+    data/               # SQLite embedding databases
+    scripts/            # Indexing scripts
+    daggerheart-srd/    # Daggerheart SRD markdown files
+    dnd-srd/            # D&D SRD markdown
+  web/                  # Next.js chat UI
+  skills/               # Claude Code skills
+  campaign/             # Your campaign data (created by skills)
+  docs/plans/           # Design documents
 ```
