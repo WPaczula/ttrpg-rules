@@ -5,12 +5,18 @@ import { generateEmbedding } from '../src/embeddings.js';
 
 const SRD_PATH = 'daggerheart-srd';
 const DB_PATH = 'data/daggerheart-embeddings.db';
+const SKIP_DIRS = ['.build', '.github'];
 
 async function getAllMdFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
   const files: string[] = [];
 
   for (const entry of entries) {
+    // Skip excluded directories
+    if (entry.isDirectory() && SKIP_DIRS.includes(entry.name)) {
+      continue;
+    }
+
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...await getAllMdFiles(fullPath));
