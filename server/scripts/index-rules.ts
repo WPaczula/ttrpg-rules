@@ -8,10 +8,6 @@ const GAMES: Record<string, { srdPath: string; dbPath: string }> = {
     srdPath: 'daggerheart-srd',
     dbPath: 'data/daggerheart-embeddings.db',
   },
-  dnd: {
-    srdPath: 'dnd-srd',
-    dbPath: 'data/dnd-embeddings.db',
-  },
 };
 
 async function getAllMdFiles(dir: string): Promise<string[]> {
@@ -97,46 +93,18 @@ async function indexDaggerheart(config: { srdPath: string; dbPath: string }) {
   store.close();
 }
 
-async function indexDnd(config: { srdPath: string; dbPath: string }) {
-  const store = new VectorStore(config.dbPath);
-  const rulesPath = join(config.srdPath, 'rules.md');
-  const content = await readFile(rulesPath, 'utf-8');
-  const chunks = chunkByHeading(content);
-
-  console.log(`Split rules.md into ${chunks.length} chunks`);
-
-  let indexed = 0;
-  for (const chunk of chunks) {
-    try {
-      const embedding = await generateEmbedding(chunk.text);
-      store.upsert(chunk.id, chunk.text, 'rules', embedding);
-      indexed++;
-    } catch (error) {
-      console.error(`Failed to index chunk ${chunk.id}:`, error);
-    }
-  }
-
-  console.log(`Done! Indexed ${indexed} chunks.`);
-  store.close();
-}
-
 async function main() {
   const gameArg = process.argv.find(a => a.startsWith('--game='));
   const game = gameArg?.split('=')[1];
 
   if (!game || !GAMES[game]) {
-    console.error('Usage: --game=daggerheart|dnd');
+    console.error('Usage: --game=daggerheart');
     process.exit(1);
   }
 
   console.log(`Indexing ${game} rules...`);
   const config = GAMES[game];
-
-  if (game === 'dnd') {
-    await indexDnd(config);
-  } else {
-    await indexDaggerheart(config);
-  }
+  await indexDaggerheart(config);
 }
 
 main().catch(console.error);

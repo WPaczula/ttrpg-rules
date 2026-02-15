@@ -11,7 +11,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: join(__dirname, '..', '.env'), override: true });
 
 const DAGGERHEART_DB = join(__dirname, '..', 'data', 'daggerheart-embeddings.db');
-const DND_DB = join(__dirname, '..', 'data', 'dnd-embeddings.db');
 const PORT = process.env.PORT || 3001;
 
 // Create Express app
@@ -20,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // REST API routes
-app.use('/api', createApiRouter({ daggerheart: DAGGERHEART_DB, dnd: DND_DB }));
+app.use('/api', createApiRouter({ daggerheart: DAGGERHEART_DB }));
 
 // Start server
 app.listen(PORT, () => {

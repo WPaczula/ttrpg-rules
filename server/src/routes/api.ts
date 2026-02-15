@@ -4,13 +4,11 @@ import { SearchService } from '../services/search.js';
 
 interface GameDbPaths {
   daggerheart: string;
-  dnd: string;
 }
 
 export function createApiRouter(dbPaths: GameDbPaths): Router {
   const router = Router();
   const daggerheartSearch = new SearchService(dbPaths.daggerheart);
-  const dndSearch = new SearchService(dbPaths.dnd);
 
   // --- Daggerheart routes ---
   const categories = [
@@ -40,22 +38,6 @@ export function createApiRouter(dbPaths: GameDbPaths): Router {
         return res.status(400).json({ error: 'query is required' });
       }
       const results = await daggerheartSearch.search(query, limit, category);
-      res.json(results);
-    } catch (error) {
-      console.error('Search error:', error);
-      const message = error instanceof Error ? error.message : 'Search failed';
-      res.status(500).json({ error: message });
-    }
-  });
-
-  // --- D&D routes ---
-  router.post('/dnd/search', async (req, res) => {
-    try {
-      const { query, limit = 5 } = req.body;
-      if (!query) {
-        return res.status(400).json({ error: 'query is required' });
-      }
-      const results = await dndSearch.search(query, limit);
       res.json(results);
     } catch (error) {
       console.error('Search error:', error);

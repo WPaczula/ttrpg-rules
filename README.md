@@ -1,6 +1,6 @@
 # Daggerheart AI
 
-TTRPG assistant for Daggerheart and D&D, with a rules server, web chat UI, and Claude Code skills.
+TTRPG assistant for Daggerheart, with a rules server, web chat UI, and Claude Code skills.
 
 ## Setup
 
@@ -10,8 +10,7 @@ TTRPG assistant for Daggerheart and D&D, with a rules server, web chat UI, and C
 cd server
 cp .env.example .env   # add your OPENAI_API_KEY
 npm install
-npm run index-rules               # index Daggerheart SRD
-npm run index-rules -- --game=dnd # index D&D SRD
+npm run index-rules   # index Daggerheart SRD
 npm run build
 ```
 
@@ -72,14 +71,12 @@ The server also exposes REST endpoints on port 3001:
 
 - `/api/daggerheart/search` - Daggerheart semantic search
 - `/api/daggerheart/documents/:category` - List/get documents by category
-- `/api/dnd/search` - D&D semantic search
 
 ## Web App
 
 Next.js chat interface with:
 
-- Game tab bar (Daggerheart / D&D) with per-game chat history
-- Game-specific system prompts and tool selection
+- Daggerheart-focused chat UI with history
 - Streaming responses via Vercel AI SDK + Anthropic
 - Smart model routing (Haiku for factual, Sonnet for creative)
 
@@ -101,8 +98,7 @@ daggerheart-ai/
     src/                # TypeScript source
     data/               # SQLite embedding databases
     scripts/            # Indexing scripts
-    daggerheart-srd/    # Daggerheart SRD markdown files
-    dnd-srd/            # D&D SRD markdown
+    daggerheart-srd/    # Daggerheart SRD markdown files (git submodule)
   web/                  # Next.js chat UI
   skills/               # Claude Code skills
   campaign/             # Your campaign data (created by skills)
