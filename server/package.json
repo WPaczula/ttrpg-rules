@@ -13,7 +13,7 @@
     "index-rules": "tsx scripts/index-rules.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "better-sqlite3": "^11.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
