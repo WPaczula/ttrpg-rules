@@ -78,29 +78,3 @@ export const rulesTools = {
     },
   }),
 };
-
-export const dndTools = {
-  search_dnd_rules: tool({
-    description: 'Search D&D Starter Set rules by semantic meaning.',
-    inputSchema: z.object({
-      query: z.string().describe('What to search for'),
-      limit: z.number().optional().describe('Max results (default 5)'),
-    }),
-    execute: async ({ query, limit }: { query: string; limit?: number }) => {
-      const res = await fetch(`${serverUrl}/api/dnd/search`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, limit }),
-      });
-      const data = await res.json();
-
-      if (!res.ok || !Array.isArray(data)) {
-        return data.error || 'Search failed';
-      }
-
-      return data.map((r: { id: string; content: string }) =>
-        `## ${r.id}\n\n${r.content}`
-      ).join('\n\n---\n\n');
-    },
-  }),
-};

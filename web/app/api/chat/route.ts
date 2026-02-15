@@ -1,8 +1,8 @@
 import { streamText, convertToModelMessages, stepCountIs, ToolLoopAgent, Output } from 'ai';
 import { anthropic } from '@/lib/anthropic';
 import { validatePassword } from '@/lib/auth';
-import { CHARACTER_CREATION_PROMPT, ROUTING_INSTRUCTIONS, DND_PROMPT } from '@/lib/prompts';
-import { rulesTools, dndTools } from '@/lib/tools';
+import { CHARACTER_CREATION_PROMPT, ROUTING_INSTRUCTIONS } from '@/lib/prompts';
+import { rulesTools } from '@/lib/tools';
 import z from 'zod';
 
 const routingSchema = z.object({
@@ -39,7 +39,7 @@ function selectModel(isCreative: boolean) {
 
 export async function POST(req: Request) {
   try {
-    const { messages, password, game = 'daggerheart' } = await req.json();
+    const { messages, password } = await req.json();
 
     if (!validatePassword(password)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -50,14 +50,11 @@ export async function POST(req: Request) {
       determineIfCreative(messages)
     ]);
 
-    const tools = game === 'dnd' ? dndTools : rulesTools;
-    const systemPrompt = game === 'dnd' ? DND_PROMPT : CHARACTER_CREATION_PROMPT;
-
     const result = streamText({
       model: selectModel(isCreative),
-      system: systemPrompt,
+      system: CHARACTER_CREATION_PROMPT,
       messages: modelMessages,
-      tools,
+      tools: rulesTools,
       stopWhen: stepCountIs(5),
     });
 
