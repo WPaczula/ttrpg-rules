@@ -12,8 +12,14 @@ import { z } from 'zod';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Load .env from project root (one level up from dist/)
-config({ path: join(__dirname, '..', '.env'), override: true });
+// Load .env only if not already set (Claude Desktop provides env vars)
+// Suppress stderr to avoid dotenv banner interfering with JSON-RPC
+if (!process.env.OPENAI_API_KEY) {
+  const originalStderr = process.stderr.write;
+  process.stderr.write = () => true;
+  config({ path: join(__dirname, '..', '.env'), override: true });
+  process.stderr.write = originalStderr;
+}
 
 const DAGGERHEART_DB = join(__dirname, '..', 'data', 'daggerheart-embeddings.db');
 
@@ -85,8 +91,9 @@ async function initCampaign() {
     registerCampaignTools(mcpServer, driver);
     console.error('Campaign engine initialized (Neo4j connected)');
   } catch (err) {
-    console.error('Warning: Campaign engine failed to initialize (Neo4j may not be running):', err);
-    console.error('Rules tools are still available. Start Neo4j to enable campaign tools.');
+    // Silently skip campaign tools if Neo4j is not available
+    // This is expected for most users who don't have Neo4j running
+    console.error('Info: Campaign tools not available (Neo4j not running). Rules tools are still available.');
   }
 }
 
