@@ -8,9 +8,9 @@ TTRPG assistant for Daggerheart, with a rules server, web chat UI, and Claude Co
 
 ```bash
 cd server
-cp .env.example .env   # add your OPENAI_API_KEY
+cp .env.example .env    # add your OPENAI_API_KEY
 npm install
-npm run index-rules   # index Daggerheart SRD
+npm run index-rules     # index Daggerheart SRD
 npm run build
 ```
 
