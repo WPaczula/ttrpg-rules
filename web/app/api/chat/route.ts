@@ -19,7 +19,7 @@ function serializeMessages(messages: any[]) {
 
 async function determineIfCreative(messages: any[]): Promise<boolean> {
   const agent = new ToolLoopAgent({
-    model: anthropic('claude-3-5-haiku-latest'),
+    model: anthropic('claude-haiku-4-5'),
     instructions: ROUTING_INSTRUCTIONS,
     stopWhen: stepCountIs(1),
     output: Output.object({ schema: routingSchema }),
@@ -34,7 +34,7 @@ async function determineIfCreative(messages: any[]): Promise<boolean> {
 }
 
 function selectModel(isCreative: boolean) {
-  return anthropic(isCreative ? 'claude-3-7-sonnet-latest' : 'claude-3-5-haiku-latest');
+  return anthropic(isCreative ? 'claude-sonnet-4-6' : 'claude-haiku-4-5');
 }
 
 export async function POST(req: Request) {
