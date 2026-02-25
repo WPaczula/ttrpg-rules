@@ -153,7 +153,7 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex h-dvh bg-background">
+    <div className="flex h-full bg-background">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         {/* Header */}
         <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
