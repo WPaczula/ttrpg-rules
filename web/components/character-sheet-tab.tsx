@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
 import {
   Collapsible,
   CollapsibleContent,
@@ -13,11 +14,10 @@ import {
 } from "@/components/ui/collapsible"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { getTier, formatModifier, type Experience, type DomainCard } from "@/lib/character-types"
+import { SRD_WEAPONS, SRD_ARMOR, SRD_DOMAIN_CARDS } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
 import {
   Heart,
-  Brain,
-  Shield,
   Dumbbell,
   Star,
   BookOpen,
@@ -255,6 +255,51 @@ export function CharacterSheetTab() {
   }
 
   const tier = getTier(c.level)
+
+  // ── SRD combobox items (memoized) ────────────────────────────
+  const domainCardItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_DOMAIN_CARDS.map((dc) => ({
+        value: dc.name,
+        label: dc.name,
+        detail: `Lvl ${dc.level} · Recall ${dc.recallCost}`,
+        group: dc.domain,
+      })),
+    []
+  )
+
+  const primaryWeaponItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_WEAPONS.filter((w) => w.type === "Primary").map((w) => ({
+        value: w.name,
+        label: w.name,
+        detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
+        group: `Tier ${w.tier} — ${w.damageType}`,
+      })),
+    []
+  )
+
+  const secondaryWeaponItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_WEAPONS.filter((w) => w.type === "Secondary").map((w) => ({
+        value: w.name,
+        label: w.name,
+        detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
+        group: `Tier ${w.tier} — ${w.damageType}`,
+      })),
+    []
+  )
+
+  const armorItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_ARMOR.map((a) => ({
+        value: a.name,
+        label: a.name,
+        detail: `Score ${a.baseScore} · Thresholds ${a.baseThresholds}${a.feature ? ` · ${a.feature}` : ""}`,
+        group: `Tier ${a.tier}`,
+      })),
+    []
+  )
 
   const handleReset = () => {
     if (confirmReset) {
@@ -617,46 +662,76 @@ export function CharacterSheetTab() {
           {c.domainCards.length === 0 && (
             <p className="text-xs text-muted-foreground italic">No domain cards yet.</p>
           )}
-          {c.domainCards.map((card) => (
-            <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
-              <div className="flex items-center gap-2">
-                <Input
-                  value={card.name}
-                  onChange={(e) => updateDomainCard(card.id, { name: e.target.value })}
-                  placeholder="Card name…"
-                  className="flex-1 h-8 bg-input border-border text-sm font-medium"
-                />
-                <button
-                  onClick={() => removeDomainCard(card.id)}
-                  className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95 shrink-0"
-                  aria-label="Remove card"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  value={card.domain}
-                  onChange={(e) => updateDomainCard(card.id, { domain: e.target.value })}
-                  placeholder="Domain"
-                  className="flex-1 h-7 bg-input border-border text-xs"
-                />
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">Lvl</span>
-                  <select
-                    value={card.level}
-                    onChange={(e) => updateDomainCard(card.id, { level: Number(e.target.value) })}
-                    className="bg-input border border-border rounded px-1.5 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-gold h-7"
-                    aria-label="Card level"
+          {c.domainCards.map((card) => {
+            const srdCard = SRD_DOMAIN_CARDS.find((dc) => dc.name === card.name)
+            return (
+              <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <Combobox
+                      items={domainCardItems}
+                      value={card.name}
+                      onSelect={(name) => {
+                        const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === name)
+                        if (match) {
+                          updateDomainCard(card.id, { name, level: match.level, domain: match.domain })
+                        } else {
+                          updateDomainCard(card.id, { name })
+                        }
+                      }}
+                      placeholder="Search domain cards…"
+                      searchPlaceholder="Type to search cards…"
+                      className="h-8 text-sm font-medium"
+                    />
+                  </div>
+                  <button
+                    onClick={() => removeDomainCard(card.id)}
+                    className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95 shrink-0"
+                    aria-label="Remove card"
                   >
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map((l) => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
+                {srdCard && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
+                        {srdCard.domain}
+                      </Badge>
+                      <span>Lvl {srdCard.level}</span>
+                      <span>· Recall {srdCard.recallCost}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3">
+                      {srdCard.description}
+                    </p>
+                  </div>
+                )}
+                {!srdCard && card.name && (
+                  <div className="flex gap-2">
+                    <Input
+                      value={card.domain}
+                      onChange={(e) => updateDomainCard(card.id, { domain: e.target.value })}
+                      placeholder="Domain"
+                      className="flex-1 h-7 bg-input border-border text-xs"
+                    />
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-muted-foreground">Lvl</span>
+                      <select
+                        value={card.level}
+                        onChange={(e) => updateDomainCard(card.id, { level: Number(e.target.value) })}
+                        className="bg-input border border-border rounded px-1.5 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-gold h-7"
+                        aria-label="Card level"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((l) => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
           {c.domainCards.length < 5 ? (
             <Button
               variant="outline"
@@ -682,30 +757,70 @@ export function CharacterSheetTab() {
         <div className="space-y-3">
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Primary Weapon</label>
-            <Input
+            <Combobox
+              items={primaryWeaponItems}
               value={c.primaryWeapon}
-              onChange={(e) => update({ primaryWeapon: e.target.value })}
-              placeholder="e.g. Longsword (d8+STR)"
-              className="bg-input border-border text-sm"
+              onSelect={(v) => update({ primaryWeapon: v })}
+              placeholder="Search weapons…"
+              searchPlaceholder="Type to search weapons…"
+              className="text-sm"
             />
+            {(() => {
+              const w = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
+              return w ? (
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>{w.damage}</span>
+                  <span>· {w.trait}</span>
+                  <span>· {w.range}</span>
+                  <span>· {w.burden}</span>
+                  {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
+                </div>
+              ) : null
+            })()}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Secondary Weapon</label>
-            <Input
+            <Combobox
+              items={secondaryWeaponItems}
               value={c.secondaryWeapon}
-              onChange={(e) => update({ secondaryWeapon: e.target.value })}
-              placeholder="e.g. Dagger (d6+FIN)"
-              className="bg-input border-border text-sm"
+              onSelect={(v) => update({ secondaryWeapon: v })}
+              placeholder="Search weapons…"
+              searchPlaceholder="Type to search weapons…"
+              className="text-sm"
             />
+            {(() => {
+              const w = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
+              return w ? (
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>{w.damage}</span>
+                  <span>· {w.trait}</span>
+                  <span>· {w.range}</span>
+                  <span>· {w.burden}</span>
+                  {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
+                </div>
+              ) : null
+            })()}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Armor</label>
-            <Input
+            <Combobox
+              items={armorItems}
               value={c.armorName}
-              onChange={(e) => update({ armorName: e.target.value })}
-              placeholder="e.g. Chain Mail"
-              className="bg-input border-border text-sm"
+              onSelect={(v) => update({ armorName: v })}
+              placeholder="Search armor…"
+              searchPlaceholder="Type to search armor…"
+              className="text-sm"
             />
+            {(() => {
+              const a = SRD_ARMOR.find((a) => a.name === c.armorName)
+              return a ? (
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>Score {a.baseScore}</span>
+                  <span>· Thresholds {a.baseThresholds}</span>
+                  {a.feature && <span className="text-gold-muted">· {a.feature}</span>}
+                </div>
+              ) : null
+            })()}
           </div>
           <div className="space-y-2">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Other Items</label>
