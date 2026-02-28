@@ -244,19 +244,8 @@ export function CharacterSheetTab() {
 
   const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
 
-  if (!isLoaded) {
-    return (
-      <div className="p-4 space-y-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 rounded-lg bg-card animate-pulse" />
-        ))}
-      </div>
-    )
-  }
-
-  const tier = getTier(c.level)
-
   // ── SRD combobox items (memoized) ────────────────────────────
+  // Must be before any early returns to satisfy Rules of Hooks
   const domainCardItems = useMemo<ComboboxItem[]>(
     () =>
       SRD_DOMAIN_CARDS.map((dc) => ({
@@ -300,6 +289,18 @@ export function CharacterSheetTab() {
       })),
     []
   )
+
+  if (!isLoaded) {
+    return (
+      <div className="p-4 space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 rounded-lg bg-card animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  const tier = getTier(c.level)
 
   const handleReset = () => {
     if (confirmReset) {
