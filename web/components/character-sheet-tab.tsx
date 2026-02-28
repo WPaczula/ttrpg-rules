@@ -12,6 +12,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { getTier, formatModifier, type Experience, type DomainCard } from "@/lib/character-types"
 import {
@@ -27,7 +34,7 @@ import {
 import { cn } from "@/lib/utils"
 import {
   Heart,
-  Dumbbell,
+  Shield,
   Star,
   BookOpen,
   Sword,
@@ -38,6 +45,7 @@ import {
   Plus,
   Trash2,
   RotateCcw,
+  Pencil,
 } from "lucide-react"
 
 // ─── Slot Toggle ──────────────────────────────────────────────────────────────
@@ -269,6 +277,7 @@ function FeatureList({ label, features }: { label: string; features: SrdFeature[
 export function CharacterSheetTab() {
   const { character: c, setCharacter, resetCharacter, isLoaded } = useCharacterSheet()
   const [confirmReset, setConfirmReset] = useState(false)
+  const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
 
   const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
 
@@ -461,93 +470,254 @@ export function CharacterSheetTab() {
   return (
     <div className="max-w-2xl mx-auto px-4 pb-8">
 
-      {/* ── Identity Header ──────────────────────────────────────── */}
-      <div className="py-4 space-y-3">
-        <Input
-          value={c.name}
-          onChange={(e) => update({ name: e.target.value })}
-          placeholder="Character name…"
-          className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50"
-        />
-        <div className="flex flex-wrap gap-2 items-center">
-          {/* Level selector */}
+      {/* ── Identity Header (static display) ────────────────────── */}
+      <div className="py-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <Input
+            value={c.name}
+            onChange={(e) => update({ name: e.target.value })}
+            placeholder="Character name…"
+            className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50 flex-1"
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIdentityDialogOpen(true)}
+            className="text-muted-foreground hover:text-gold shrink-0"
+            aria-label="Edit character identity"
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-sm">
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground">Lvl</span>
-            <select
-              value={c.level}
-              onChange={(e) => update({ level: Number(e.target.value) })}
-              className="bg-input border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold"
-              aria-label="Level"
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((l) => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
+            <span className="font-medium text-foreground">{c.level}</span>
           </div>
           <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
             Tier {tier}
           </Badge>
-          <div className="flex-1 min-w-[100px]">
-            <Combobox
-              items={classItems}
-              value={c.class}
-              onSelect={(name) => {
-                const cls = SRD_CLASSES.find((cl) => cl.name === name)
-                const patch: Partial<typeof c> = { class: name }
-                if (cls) {
-                  patch.evasion = cls.evasion
-                  patch.hpTotal = cls.hp
-                  // Clear subclass if it doesn't belong to the new class
-                  if (!cls.subclasses.includes(c.subclass)) {
-                    patch.subclass = ""
-                  }
-                }
-                update(patch)
-              }}
-              placeholder="Class"
-              searchPlaceholder="Search classes…"
-              className="h-8 text-sm"
-            />
-          </div>
-          <div className="flex-1 min-w-[100px]">
-            <Combobox
-              items={subclassItems}
-              value={c.subclass}
-              onSelect={(name) => update({ subclass: name })}
-              placeholder="Subclass"
-              searchPlaceholder="Search subclasses…"
-              className="h-8 text-sm"
-            />
-          </div>
+          {c.class && (
+            <span className="text-foreground font-medium">{c.class}</span>
+          )}
+          {c.subclass && (
+            <span className="text-muted-foreground">({c.subclass})</span>
+          )}
         </div>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Combobox
-              items={ancestryItems}
-              value={c.ancestry}
-              onSelect={(name) => update({ ancestry: name })}
-              placeholder="Ancestry"
-              searchPlaceholder="Search ancestries…"
-              className="h-8 text-sm"
-            />
+        {(c.ancestry || c.community) && (
+          <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
+            {c.ancestry && <span>{c.ancestry}</span>}
+            {c.ancestry && c.community && <span>·</span>}
+            {c.community && <span>{c.community}</span>}
           </div>
-          <div className="flex-1">
-            <Combobox
-              items={communityItems}
-              value={c.community}
-              onSelect={(name) => update({ community: name })}
-              placeholder="Community"
-              searchPlaceholder="Search communities…"
-              className="h-8 text-sm"
-            />
-          </div>
-        </div>
+        )}
+        {!c.class && !c.ancestry && !c.community && (
+          <button
+            onClick={() => setIdentityDialogOpen(true)}
+            className="text-xs text-muted-foreground/70 italic hover:text-gold transition-colors"
+          >
+            Tap the pencil icon to set your class, ancestry, and community
+          </button>
+        )}
       </div>
 
       <Separator className="bg-border mb-1" />
 
-      {/* ── Vitals ───────────────────────────────────────────────── */}
-      <Section icon={<Heart className="w-4 h-4" />} title="Vitals" defaultOpen>
+      {/* ── Edit Identity Dialog ─────────────────────────────────── */}
+      <Dialog open={identityDialogOpen} onOpenChange={setIdentityDialogOpen} modal={false}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-gold">Edit Character Identity</DialogTitle>
+            <DialogDescription>
+              Change your class, subclass, ancestry, community, and other build options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Level</label>
+              <select
+                value={c.level}
+                onChange={(e) => update({ level: Number(e.target.value) })}
+                className="w-full bg-input border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-gold"
+                aria-label="Level"
+              >
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Class</label>
+              <Combobox
+                items={classItems}
+                value={c.class}
+                onSelect={(name) => {
+                  const cls = SRD_CLASSES.find((cl) => cl.name === name)
+                  const patch: Partial<typeof c> = { class: name }
+                  if (cls) {
+                    patch.evasion = cls.evasion
+                    patch.hpTotal = cls.hp
+                    if (!cls.subclasses.includes(c.subclass)) {
+                      patch.subclass = ""
+                    }
+                  }
+                  update(patch)
+                }}
+                placeholder="Select class…"
+                searchPlaceholder="Search classes…"
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Subclass</label>
+              <Combobox
+                items={subclassItems}
+                value={c.subclass}
+                onSelect={(name) => update({ subclass: name })}
+                placeholder="Select subclass…"
+                searchPlaceholder="Search subclasses…"
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Ancestry</label>
+              <Combobox
+                items={ancestryItems}
+                value={c.ancestry}
+                onSelect={(name) => update({ ancestry: name })}
+                placeholder="Select ancestry…"
+                searchPlaceholder="Search ancestries…"
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Community</label>
+              <Combobox
+                items={communityItems}
+                value={c.community}
+                onSelect={(name) => update({ community: name })}
+                placeholder="Select community…"
+                searchPlaceholder="Search communities…"
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground uppercase tracking-wider">Evasion</label>
+              <NumberStepper
+                label="Evasion"
+                value={c.evasion}
+                onChange={(v) => update({ evasion: v })}
+                min={0}
+                max={30}
+              />
+              <p className="text-xs text-muted-foreground">
+                Auto-set when choosing a class. Override here if needed.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Traits & Defense ─────────────────────────────────────── */}
+      <Section icon={<Shield className="w-4 h-4" />} title="Traits & Defense" defaultOpen>
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-2">
+            <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
+            <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
+            <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
+            <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
+            <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
+            <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Distribute: +2, +1, +1, +0, +0, −1
+          </p>
+
+          <div className="grid grid-cols-3 gap-3">
+            <StatBox label="Evasion" value={c.evasion} />
+            <StatBox label="Armor" value={`${c.armorMarked}/${c.armorScore}`} />
+            <StatBox label="Tier" value={tier} />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground">
+                Armor Slots
+                <span className="text-xs text-muted-foreground ml-2">
+                  {c.armorMarked}/{c.armorScore} marked
+                </span>
+              </span>
+              <NumberStepper
+                label="Slots"
+                value={c.armorScore}
+                onChange={(v) => update({ armorScore: v, armorMarked: Math.min(c.armorMarked, v) })}
+                min={0}
+                max={5}
+              />
+            </div>
+            {c.armorScore > 0 ? (
+              <SlotTracker
+                total={c.armorScore}
+                marked={c.armorMarked}
+                onToggle={(n) => update({ armorMarked: n })}
+                filledClass="bg-gold/30 border-gold"
+                emptyClass="bg-transparent border-border hover:border-gold/50"
+                label="Armor"
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground italic">No armor slots</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+              Damage Thresholds
+            </span>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground block text-center">Minor</span>
+                <Input
+                  type="number"
+                  value={c.minorThreshold}
+                  onChange={(e) => update({ minorThreshold: Number(e.target.value) })}
+                  className="text-center text-gold font-bold bg-input border-border h-9"
+                  min={0}
+                  aria-label="Minor threshold"
+                />
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground block text-center">Major</span>
+                <Input
+                  type="number"
+                  value={c.majorThreshold}
+                  onChange={(e) => update({ majorThreshold: Number(e.target.value) })}
+                  className="text-center text-gold font-bold bg-input border-border h-9"
+                  min={0}
+                  aria-label="Major threshold"
+                />
+              </div>
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground block text-center">Severe</span>
+                <Input
+                  type="number"
+                  value={c.severeThreshold}
+                  onChange={(e) => update({ severeThreshold: Number(e.target.value) })}
+                  className="text-center text-gold font-bold bg-input border-border h-9"
+                  min={0}
+                  aria-label="Severe threshold"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Base (from armor) + level {c.level}. Adjust after leveling up.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      {/* ── HP, Stress & Hope ────────────────────────────────────── */}
+      <Section icon={<Heart className="w-4 h-4" />} title="HP, Stress & Hope" defaultOpen>
         <div className="space-y-5">
           {/* HP */}
           <div className="space-y-2">
@@ -603,131 +773,18 @@ export function CharacterSheetTab() {
             />
           </div>
 
-          {/* Armor */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                Armor
-                <span className="text-xs text-muted-foreground ml-2">
-                  {c.armorMarked}/{c.armorScore} marked
-                </span>
-              </span>
-              <NumberStepper
-                label="Slots"
-                value={c.armorScore}
-                onChange={(v) => update({ armorScore: v, armorMarked: Math.min(c.armorMarked, v) })}
-                min={0}
-                max={5}
-              />
-            </div>
-            {c.armorScore > 0 ? (
-              <SlotTracker
-                total={c.armorScore}
-                marked={c.armorMarked}
-                onToggle={(n) => update({ armorMarked: n })}
-                filledClass="bg-gold/30 border-gold"
-                emptyClass="bg-transparent border-border hover:border-gold/50"
-                label="Armor"
-              />
-            ) : (
-              <p className="text-xs text-muted-foreground italic">No armor slots</p>
-            )}
-          </div>
-
-          {/* Hope + Evasion + Damage Thresholds */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col items-center gap-1 bg-purple-deep/50 border border-border rounded-lg p-3">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">Hope</span>
-              <Counter
-                value={c.hope}
-                onChange={(v) => update({ hope: v })}
-                min={0}
-                max={12}
-                label="Hope"
-              />
-            </div>
-            <StatBox label="Evasion" value={c.evasion} />
-          </div>
-
-          <div className="space-y-2">
-            <span className="text-xs text-muted-foreground uppercase tracking-wider">
-              Damage Thresholds
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground block text-center">Minor</span>
-                <Input
-                  type="number"
-                  value={c.minorThreshold}
-                  onChange={(e) => update({ minorThreshold: Number(e.target.value) })}
-                  className="text-center text-gold font-bold bg-input border-border h-9"
-                  min={0}
-                  aria-label="Minor threshold"
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground block text-center">Major</span>
-                <Input
-                  type="number"
-                  value={c.majorThreshold}
-                  onChange={(e) => update({ majorThreshold: Number(e.target.value) })}
-                  className="text-center text-gold font-bold bg-input border-border h-9"
-                  min={0}
-                  aria-label="Major threshold"
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground block text-center">Severe</span>
-                <Input
-                  type="number"
-                  value={c.severeThreshold}
-                  onChange={(e) => update({ severeThreshold: Number(e.target.value) })}
-                  className="text-center text-gold font-bold bg-input border-border h-9"
-                  min={0}
-                  aria-label="Severe threshold"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Base (from armor) + level {c.level}. Adjust after leveling up.
-            </p>
-          </div>
-
-          {/* Evasion stepper */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground flex-1">Evasion</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => update({ evasion: Math.max(0, c.evasion - 1) })}
-                className="w-7 h-7 flex items-center justify-center rounded border border-border bg-input text-foreground hover:bg-secondary active:scale-95 text-sm"
-              >
-                −
-              </button>
-              <span className="w-8 text-center font-bold text-gold">{c.evasion}</span>
-              <button
-                onClick={() => update({ evasion: c.evasion + 1 })}
-                className="w-7 h-7 flex items-center justify-center rounded border border-border bg-input text-foreground hover:bg-secondary active:scale-95 text-sm"
-              >
-                +
-              </button>
-            </div>
+          {/* Hope */}
+          <div className="flex flex-col items-center gap-1 bg-purple-deep/50 border border-border rounded-lg p-3">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Hope</span>
+            <Counter
+              value={c.hope}
+              onChange={(v) => update({ hope: v })}
+              min={0}
+              max={12}
+              label="Hope"
+            />
           </div>
         </div>
-      </Section>
-
-      {/* ── Traits ───────────────────────────────────────────────── */}
-      <Section icon={<Dumbbell className="w-4 h-4" />} title="Traits">
-        <div className="grid grid-cols-2 gap-2">
-          <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
-          <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
-          <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
-          <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
-          <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
-          <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
-        </div>
-        <p className="text-xs text-muted-foreground mt-3">
-          Distribute: +2, +1, +1, +0, +0, −1
-        </p>
       </Section>
 
       {/* ── Experiences ──────────────────────────────────────────── */}
@@ -882,6 +939,48 @@ export function CharacterSheetTab() {
         </div>
       </Section>
 
+      {/* ── Features & Abilities ─────────────────────────────────── */}
+      <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
+        <div className="space-y-4">
+          {selectedClass && (
+            <div className="space-y-2">
+              <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
+              <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
+            </div>
+          )}
+          {selectedSubclass && (
+            <div className="space-y-2">
+              <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
+              <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
+              <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
+              {selectedSubclass.spellcastTrait && (
+                <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
+                  <span className="text-xs text-muted-foreground">Spellcast Trait: </span>
+                  <span className="text-xs font-medium text-gold">{selectedSubclass.spellcastTrait}</span>
+                </div>
+              )}
+            </div>
+          )}
+          {selectedAncestry && (
+            <FeatureList label={`${selectedAncestry.name} — Ancestry Features`} features={selectedAncestry.features} />
+          )}
+          {selectedCommunity && (
+            <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
+          )}
+          {!selectedClass && !selectedSubclass && !selectedAncestry && !selectedCommunity && (
+            <p className="text-xs text-muted-foreground italic">
+              Select a class, subclass, ancestry, or community to see their features here.
+            </p>
+          )}
+          <Textarea
+            value={c.features}
+            onChange={(e) => update({ features: e.target.value })}
+            placeholder="Additional custom features or notes…"
+            className="min-h-[80px] bg-input border-border text-sm resize-none"
+          />
+        </div>
+      </Section>
+
       {/* ── Equipment ────────────────────────────────────────────── */}
       <Section icon={<Sword className="w-4 h-4" />} title="Equipment">
         <div className="space-y-3">
@@ -1006,50 +1105,6 @@ export function CharacterSheetTab() {
           <p className="text-xs text-muted-foreground">
             10 handfuls = 1 bag · 10 bags = 1 chest
           </p>
-        </div>
-      </Section>
-
-      {/* ── Features & Abilities ─────────────────────────────────── */}
-      <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
-        <div className="space-y-4">
-          {/* Auto-populated features from selections */}
-          {selectedClass && (
-            <div className="space-y-2">
-              <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
-              <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
-            </div>
-          )}
-          {selectedSubclass && (
-            <div className="space-y-2">
-              <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
-              <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
-              <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
-              {selectedSubclass.spellcastTrait && (
-                <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
-                  <span className="text-xs text-muted-foreground">Spellcast Trait: </span>
-                  <span className="text-xs font-medium text-gold">{selectedSubclass.spellcastTrait}</span>
-                </div>
-              )}
-            </div>
-          )}
-          {selectedAncestry && (
-            <FeatureList label={`${selectedAncestry.name} — Ancestry Features`} features={selectedAncestry.features} />
-          )}
-          {selectedCommunity && (
-            <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
-          )}
-          {!selectedClass && !selectedSubclass && !selectedAncestry && !selectedCommunity && (
-            <p className="text-xs text-muted-foreground italic">
-              Select a class, subclass, ancestry, or community above to see their features here.
-            </p>
-          )}
-          {/* Free-text area for custom notes */}
-          <Textarea
-            value={c.features}
-            onChange={(e) => update({ features: e.target.value })}
-            placeholder="Additional custom features or notes…"
-            className="min-h-[80px] bg-input border-border text-sm resize-none"
-          />
         </div>
       </Section>
 
