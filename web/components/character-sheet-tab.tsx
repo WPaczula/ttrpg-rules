@@ -14,7 +14,16 @@ import {
 } from "@/components/ui/collapsible"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { getTier, formatModifier, type Experience, type DomainCard } from "@/lib/character-types"
-import { SRD_WEAPONS, SRD_ARMOR, SRD_DOMAIN_CARDS } from "@/lib/srd-data"
+import {
+  SRD_WEAPONS,
+  SRD_ARMOR,
+  SRD_DOMAIN_CARDS,
+  SRD_CLASSES,
+  SRD_ANCESTRIES,
+  SRD_COMMUNITIES,
+  SRD_SUBCLASSES,
+  type SrdFeature,
+} from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
 import {
   Heart,
@@ -236,6 +245,25 @@ function NumberStepper({ label, value, onChange, min = 0, max = 20 }: NumberStep
   )
 }
 
+// ─── Feature Display ──────────────────────────────────────────────────────
+
+function FeatureList({ label, features }: { label: string; features: SrdFeature[] }) {
+  if (features.length === 0) return null
+  return (
+    <div className="space-y-1.5">
+      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+        {label}
+      </span>
+      {features.map((f) => (
+        <div key={f.name} className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
+          <span className="text-xs font-medium text-gold">{f.name}</span>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{f.text}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function CharacterSheetTab() {
@@ -246,16 +274,89 @@ export function CharacterSheetTab() {
 
   // ── SRD combobox items (memoized) ────────────────────────────
   // Must be before any early returns to satisfy Rules of Hooks
-  const domainCardItems = useMemo<ComboboxItem[]>(
+  // ── Class / Ancestry / Community / Subclass items ────────
+  const classItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_DOMAIN_CARDS.map((dc) => ({
-        value: dc.name,
-        label: dc.name,
-        detail: `Lvl ${dc.level} · Recall ${dc.recallCost}`,
-        group: dc.domain,
+      SRD_CLASSES.map((cls) => ({
+        value: cls.name,
+        label: cls.name,
+        detail: `${cls.domains[0]} & ${cls.domains[1]} · HP ${cls.hp} · Evasion ${cls.evasion}`,
       })),
     []
   )
+
+  const ancestryItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_ANCESTRIES.map((a) => ({
+        value: a.name,
+        label: a.name,
+        detail: a.features.map((f) => f.name).join(", "),
+      })),
+    []
+  )
+
+  const communityItems = useMemo<ComboboxItem[]>(
+    () =>
+      SRD_COMMUNITIES.map((cm) => ({
+        value: cm.name,
+        label: cm.name,
+        detail: cm.features.map((f) => f.name).join(", "),
+      })),
+    []
+  )
+
+  const selectedClass = useMemo(
+    () => SRD_CLASSES.find((cls) => cls.name === c.class),
+    [c.class]
+  )
+
+  const subclassItems = useMemo<ComboboxItem[]>(() => {
+    if (selectedClass) {
+      // Only show subclasses that belong to the selected class
+      return SRD_SUBCLASSES.filter((sc) =>
+        selectedClass.subclasses.includes(sc.name)
+      ).map((sc) => ({
+        value: sc.name,
+        label: sc.name,
+        detail: sc.description,
+      }))
+    }
+    // No class selected — show all subclasses
+    return SRD_SUBCLASSES.map((sc) => ({
+      value: sc.name,
+      label: sc.name,
+      detail: sc.description,
+    }))
+  }, [selectedClass])
+
+  // ── Lookups for selected ancestry / community / subclass ──
+  const selectedAncestry = useMemo(
+    () => SRD_ANCESTRIES.find((a) => a.name === c.ancestry),
+    [c.ancestry]
+  )
+  const selectedCommunity = useMemo(
+    () => SRD_COMMUNITIES.find((cm) => cm.name === c.community),
+    [c.community]
+  )
+  const selectedSubclass = useMemo(
+    () => SRD_SUBCLASSES.find((sc) => sc.name === c.subclass),
+    [c.subclass]
+  )
+
+  // ── Domain cards filtered by class ────────────────────────
+  const domainCardItems = useMemo<ComboboxItem[]>(() => {
+    let cards = SRD_DOMAIN_CARDS
+    if (selectedClass) {
+      const classDomains = selectedClass.domains
+      cards = SRD_DOMAIN_CARDS.filter((dc) => classDomains.includes(dc.domain))
+    }
+    return cards.map((dc) => ({
+      value: dc.name,
+      label: dc.name,
+      detail: `Lvl ${dc.level} · Recall ${dc.recallCost}`,
+      group: dc.domain,
+    }))
+  }, [selectedClass])
 
   const primaryWeaponItems = useMemo<ComboboxItem[]>(
     () =>
@@ -386,32 +487,60 @@ export function CharacterSheetTab() {
           <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
             Tier {tier}
           </Badge>
-          <Input
-            value={c.class}
-            onChange={(e) => update({ class: e.target.value })}
-            placeholder="Class"
-            className="flex-1 min-w-[100px] h-8 text-sm bg-input border-border"
-          />
-          <Input
-            value={c.subclass}
-            onChange={(e) => update({ subclass: e.target.value })}
-            placeholder="Subclass"
-            className="flex-1 min-w-[100px] h-8 text-sm bg-input border-border"
-          />
+          <div className="flex-1 min-w-[100px]">
+            <Combobox
+              items={classItems}
+              value={c.class}
+              onSelect={(name) => {
+                const cls = SRD_CLASSES.find((cl) => cl.name === name)
+                const patch: Partial<typeof c> = { class: name }
+                if (cls) {
+                  patch.evasion = cls.evasion
+                  patch.hpTotal = cls.hp
+                  // Clear subclass if it doesn't belong to the new class
+                  if (!cls.subclasses.includes(c.subclass)) {
+                    patch.subclass = ""
+                  }
+                }
+                update(patch)
+              }}
+              placeholder="Class"
+              searchPlaceholder="Search classes…"
+              className="h-8 text-sm"
+            />
+          </div>
+          <div className="flex-1 min-w-[100px]">
+            <Combobox
+              items={subclassItems}
+              value={c.subclass}
+              onSelect={(name) => update({ subclass: name })}
+              placeholder="Subclass"
+              searchPlaceholder="Search subclasses…"
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
         <div className="flex gap-2">
-          <Input
-            value={c.ancestry}
-            onChange={(e) => update({ ancestry: e.target.value })}
-            placeholder="Ancestry"
-            className="flex-1 h-8 text-sm bg-input border-border"
-          />
-          <Input
-            value={c.community}
-            onChange={(e) => update({ community: e.target.value })}
-            placeholder="Community"
-            className="flex-1 h-8 text-sm bg-input border-border"
-          />
+          <div className="flex-1">
+            <Combobox
+              items={ancestryItems}
+              value={c.ancestry}
+              onSelect={(name) => update({ ancestry: name })}
+              placeholder="Ancestry"
+              searchPlaceholder="Search ancestries…"
+              className="h-8 text-sm"
+            />
+          </div>
+          <div className="flex-1">
+            <Combobox
+              items={communityItems}
+              value={c.community}
+              onSelect={(name) => update({ community: name })}
+              placeholder="Community"
+              searchPlaceholder="Search communities…"
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -882,12 +1011,46 @@ export function CharacterSheetTab() {
 
       {/* ── Features & Abilities ─────────────────────────────────── */}
       <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
-        <Textarea
-          value={c.features}
-          onChange={(e) => update({ features: e.target.value })}
-          placeholder="Class features, ancestry features, community feature, subclass features…"
-          className="min-h-[120px] bg-input border-border text-sm resize-none"
-        />
+        <div className="space-y-4">
+          {/* Auto-populated features from selections */}
+          {selectedClass && (
+            <div className="space-y-2">
+              <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
+              <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
+            </div>
+          )}
+          {selectedSubclass && (
+            <div className="space-y-2">
+              <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
+              <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
+              <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
+              {selectedSubclass.spellcastTrait && (
+                <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
+                  <span className="text-xs text-muted-foreground">Spellcast Trait: </span>
+                  <span className="text-xs font-medium text-gold">{selectedSubclass.spellcastTrait}</span>
+                </div>
+              )}
+            </div>
+          )}
+          {selectedAncestry && (
+            <FeatureList label={`${selectedAncestry.name} — Ancestry Features`} features={selectedAncestry.features} />
+          )}
+          {selectedCommunity && (
+            <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
+          )}
+          {!selectedClass && !selectedSubclass && !selectedAncestry && !selectedCommunity && (
+            <p className="text-xs text-muted-foreground italic">
+              Select a class, subclass, ancestry, or community above to see their features here.
+            </p>
+          )}
+          {/* Free-text area for custom notes */}
+          <Textarea
+            value={c.features}
+            onChange={(e) => update({ features: e.target.value })}
+            placeholder="Additional custom features or notes…"
+            className="min-h-[80px] bg-input border-border text-sm resize-none"
+          />
+        </div>
       </Section>
 
       {/* ── Notes ────────────────────────────────────────────────── */}

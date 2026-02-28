@@ -1,6 +1,11 @@
 // Auto-generated from Daggerheart SRD. Do not edit by hand.
 // Run: node web/scripts/generate-srd-data.mjs
 
+export interface SrdFeature {
+  name: string
+  text: string
+}
+
 export interface SrdWeapon {
   name: string
   tier: number
@@ -34,6 +39,44 @@ export interface SrdDomain {
   description: string
   classes: string[]
   cardsByLevel: Record<number, string[]>
+}
+
+export interface SrdClass {
+  name: string
+  description: string
+  domains: [string, string]
+  subclasses: [string, string]
+  evasion: number
+  hp: number
+  items: string
+  suggestedTraits: string
+  suggestedPrimary: string
+  suggestedSecondary: string
+  suggestedArmor: string
+  hopeFeature: SrdFeature
+  features: SrdFeature[]
+}
+
+export interface SrdAncestry {
+  name: string
+  description: string
+  features: SrdFeature[]
+}
+
+export interface SrdCommunity {
+  name: string
+  description: string
+  note: string
+  features: SrdFeature[]
+}
+
+export interface SrdSubclass {
+  name: string
+  description: string
+  spellcastTrait: string
+  foundation: SrdFeature[]
+  specialization: SrdFeature[]
+  mastery: SrdFeature[]
 }
 
 export const SRD_WEAPONS: SrdWeapon[] = [
@@ -3951,5 +3994,1151 @@ export const SRD_DOMAINS: SrdDomain[] = [
         "Unyielding Armor"
       ]
     }
+  }
+] as const
+
+export const SRD_CLASSES: SrdClass[] = [
+  {
+    "name": "Bard",
+    "description": "Bards are the most charismatic people in all the realms. Members of this class are masters of captivation and specialize in a variety of performance types, including singing, playing musical instruments, weaving tales, or telling jokes. Whether performing for an audience or speaking to an individual, bards thrive in social situations. Members of this profession bond and train at schools or guilds, but a current of egotism runs through those of the bardic persuasion. While they may be the most likely class to bring people together, a bard of ill temper can just as easily tear a party apart.",
+    "domains": [
+      "Grace",
+      "Codex"
+    ],
+    "subclasses": [
+      "Troubadour",
+      "Wordsmith"
+    ],
+    "evasion": 10,
+    "hp": 5,
+    "items": "A romance novel or a letter never opened",
+    "suggestedTraits": "0, -1, +1, 0, +2, +1",
+    "suggestedPrimary": "Rapier",
+    "suggestedSecondary": "Small Dagger",
+    "suggestedArmor": "Gambeson Armor",
+    "hopeFeature": {
+      "name": "Make a Scene",
+      "text": "**Spend 3 Hope** to temporarily _Distract_ a target within Close range, giving them a -2 penalty to their Difficulty."
+    },
+    "features": [
+      {
+        "name": "Rally",
+        "text": "Once per session, describe how you rally the party and give yourself and each of your allies a Rally Die. At level 1, your Rally Die is a **d6**. A PC can spend their Rally Die to roll it, adding the result to their action roll, reaction roll, damage roll, or to clear a number of Stress equal to the result. At the end of each session, clear all unspent Rally Dice. At level 5, your Rally Die increases to a **d8**."
+      }
+    ]
+  },
+  {
+    "name": "Druid",
+    "description": "Becoming a druid is more than an occupation; it’s a calling for those who wish to learn from and protect the magic of the wilderness. While one might underestimate a gentle druid who practices the often-quiet work of cultivating flora, druids who channel the untamed forces of nature are terrifying to behold. Druids cultivate their abilities in small groups, often connected by a specific ethos or locale, but some choose to work alone. Through years of study and dedication, druids can learn to transform into beasts and shape nature itself.",
+    "domains": [
+      "Sage",
+      "Arcana"
+    ],
+    "subclasses": [
+      "Warden of the Elements",
+      "Warden of Renewal"
+    ],
+    "evasion": 10,
+    "hp": 6,
+    "items": "A small bag of rocks and bones or a strange pendant found in the dirt",
+    "suggestedTraits": "+1, 0, +1, +2, -1, 0",
+    "suggestedPrimary": "Shortstaff",
+    "suggestedSecondary": "Round Shield",
+    "suggestedArmor": "Leather Armor",
+    "hopeFeature": {
+      "name": "Evolution",
+      "text": "**Spend 3 Hope** to transform into a Beastform without marking a Stress. When you do, choose one trait to raise by +1 until you drop out of that Beastform."
+    },
+    "features": [
+      {
+        "name": "Beastform",
+        "text": "Mark a Stress to magically transform into a creature of your tier or lower from the Beastform list. You can drop out of this form at any time. While transformed, you can't use weapons or cast spells from domain cards, but you can still use other features or abilities you have access to. Spells you cast before you transform stay active and last for their normal duration, and you can talk and communicate as normal. Additionally, you gain the Beastform's features, add their Evasion bonus to your Evasion, and use the trait specified in their statistics for your attack. While you're in a Beastform, your armor becomes part of your body and you mark Armor Slots as usual; when you drop out of a Beastform, those marked Armor Slots remain marked. If you mark your last Hit Point, you automatically drop out of this form."
+      },
+      {
+        "name": "Wildtouch",
+        "text": "You can perform harmless, subtle effects that involve nature—such as causing a flower to rapidly grow, summoning a slight gust of wind, or starting a campfire at will."
+      }
+    ]
+  },
+  {
+    "name": "Guardian",
+    "description": "The title of guardian represents an array of martial professions, speaking more to their moral compass and unshakeable fortitude than the means by which they fight. While many guardians join groups of militants for either a country or cause, they’re more likely to follow those few they truly care for, majority be damned. Guardians are known for fighting with remarkable ferocity even against overwhelming odds, defending their cohort above all else. Woe betide those who harm the ally of a guardian, as the guardian will answer this injury in kind.",
+    "domains": [
+      "Valor",
+      "Blade"
+    ],
+    "subclasses": [
+      "Stalwart",
+      "Vengeance"
+    ],
+    "evasion": 9,
+    "hp": 7,
+    "items": "A totem from your mentor or a secret key",
+    "suggestedTraits": "+1, +2, -1, 0, +1, 0",
+    "suggestedPrimary": "Battleaxe",
+    "suggestedSecondary": "",
+    "suggestedArmor": "Chainmail Armor",
+    "hopeFeature": {
+      "name": "Frontline Tank",
+      "text": "**Spend 3 Hope** to clear 2 Armor Slots."
+    },
+    "features": [
+      {
+        "name": "Unstoppable",
+        "text": "Once per long rest, you can become _Unstoppable._ You gain an Unstoppable Die. At level 1, your Unstoppable Die is a **d4.** Place it on your character sheet in the space provided, starting with the 1 value facing up. After you make a damage roll that deals 1 or more Hit Points to a target, increase the Unstoppable Die value by one. When the die's value would exceed its maximum value or when the scene ends, remove the die and drop out of _Unstoppable_. At level 5, your Unstoppable Die increases to a **d6.**\n\nWhile _Unstoppable_, you gain the following benefits:\n\n- You reduce the severity of physical damage by one threshold (Severe to Major, Major to Minor, Minor to None).\n- You add the current value of the Unstoppable Die to your damage roll.\n- You can't be _Restrained_ or _Vulnerable_.\n\n> _**Tip:** If your Unstoppable Die is a d4 and the 4 is currently facing up, you remove the die the next time you would increase it. However, if your Unstoppable Die has increased to a d6 and the 4 is currently facing up, you'll turn it to 5 the next time you would increase it. In this case, you'll remove the die after you would need to increase it higher than 6._"
+      }
+    ]
+  },
+  {
+    "name": "Ranger",
+    "description": "Rangers are highly skilled hunters who, despite their martial abilities, rarely lend their skills to an army. Through mastery of the body and a deep understanding of the wilderness, rangers become sly tacticians, pursuing their quarry with cunning and patience. Many rangers track and fight alongside an animal companion with whom they’ve forged a powerful spiritual bond. By honing their skills in the wild, rangers become expert trackers, as likely to ensnare their foes in a trap as they are to assail them head-on.",
+    "domains": [
+      "Bone",
+      "Sage"
+    ],
+    "subclasses": [
+      "Beastbound",
+      "Wayfinder"
+    ],
+    "evasion": 12,
+    "hp": 6,
+    "items": "A trophy from your first kill or a seemingly broken compass",
+    "suggestedTraits": "+2, 0, +1, +1, -1, 0",
+    "suggestedPrimary": "Shortbow",
+    "suggestedSecondary": "",
+    "suggestedArmor": "Leather Armor",
+    "hopeFeature": {
+      "name": "Hold Them Off",
+      "text": "**Spend 3 Hope** when you succeed on an attack with a weapon to use that same roll against two additional adversaries within range of the attack."
+    },
+    "features": [
+      {
+        "name": "Ranger's Focus",
+        "text": "**Spend a Hope** and make an attack against a target. On a success, deal your attack's normal damage and temporarily make the attack's target your _Focus_. Until this feature ends or you make a different creature your _Focus_, you gain the following benefits against your _Focus:_\n\n- You know precisely what direction they are in.\n- When you deal damage to them, they must mark a Stress.\n- When you fail an attack against them, you can end your Ranger's Focus feature to reroll your Duality Dice."
+      }
+    ]
+  },
+  {
+    "name": "Rogue",
+    "description": "Rogues are scoundrels, often in both attitude and practice. Broadly known as liars and thieves, the best among this class move through the world anonymously. Utilizing their sharp wits and blades, rogues trick their foes through social manipulation as easily as breaking locks, climbing through windows, or dealing underhanded blows. These masters of magical craft manipulate shadow and movement, adding an array of useful and deadly tools to their repertoire. Rogues frequently establish guilds to meet future accomplices, hire out jobs, and hone secret skills, proving that there’s honor among thieves for those who know where to look.",
+    "domains": [
+      "Midnight",
+      "Grace"
+    ],
+    "subclasses": [
+      "Nightwalker",
+      "Syndicate"
+    ],
+    "evasion": 12,
+    "hp": 6,
+    "items": "A set of forgery tools or a grappling hook",
+    "suggestedTraits": "+1, -1, +2, 0, +1, 0",
+    "suggestedPrimary": "Dagger",
+    "suggestedSecondary": "Small Dagger",
+    "suggestedArmor": "Gambeson Armor",
+    "hopeFeature": {
+      "name": "Rogue's Dodge",
+      "text": "**Spend 3 Hope** to gain a +2 bonus to your Evasion until the next time an attack succeeds against you. Otherwise, this bonus lasts until your next rest."
+    },
+    "features": [
+      {
+        "name": "Cloaked",
+        "text": "Any time you would be _Hidden,_ you are instead _Cloaked._ In addition to the benefits of the _Hidden_ condition, while _Cloaked_ you remain unseen if you are stationary when an adversary moves to where they would normally see you. After you make an attack or end a move within line of sight of an adversary, you are no longer _Cloaked_."
+      },
+      {
+        "name": "Sneak Attack",
+        "text": "When you succeed on an attack while _Cloaked_ or while an ally is within Melee range of your target, add a number of **d6s** equal to your tier to your damage roll.\n\n- Level 1 → Tier 1\n- Levels 2-4 → Tier 2\n- Levels 5-7 → Tier 3\n- Levels 8-10 → Tier 4"
+      }
+    ]
+  },
+  {
+    "name": "Seraph",
+    "description": "Seraphs are divine fighters and healers imbued with sacred purpose. A wide array of deities exist within the realms, and thus numerous kinds of seraphs are appointed by these gods. Their ethos traditionally aligns with the domain or goals of their god, such as defending the weak, exacting vengeance, protecting a land or artifact, or upholding a particular faith. Some seraphs ally themselves with an army or locale, much to the satisfaction of their rulers, but other crusaders fight in opposition to the follies of the Mortal Realm. It is better to be a seraph’s ally than their enemy, as they are terrifying foes to those who defy their purpose.",
+    "domains": [
+      "Splendor",
+      "Valor"
+    ],
+    "subclasses": [
+      "Divine Wielder",
+      "Winged Sentinel"
+    ],
+    "evasion": 9,
+    "hp": 7,
+    "items": "A bundle of offerings or a sigil of your god",
+    "suggestedTraits": "0, +2, 0, +1, +1, -1",
+    "suggestedPrimary": "Hallowed Axe",
+    "suggestedSecondary": "Round Shield",
+    "suggestedArmor": "Chainmail Armor",
+    "hopeFeature": {
+      "name": "Life Support",
+      "text": "**Spend 3 Hope** to clear a Hit Point on an ally within Close range."
+    },
+    "features": [
+      {
+        "name": "Prayer Dice",
+        "text": "At the beginning of each session, roll a number of **d4s** equal to your subclass's Spellcast trait and place them on your character sheet in the space provided. These are your Prayer Dice. You can spend any number of Prayer Dice to aid yourself or an ally within Far range. You can use a spent die's value to reduce incoming damage, add to a roll's result after the roll is made, or gain Hope equal to the result. At the end of each session, clear all unspent Prayer Dice."
+      }
+    ]
+  },
+  {
+    "name": "Sorcerer",
+    "description": "Not all innate magic users choose to hone their craft, but those who do can become powerful sorcerers. The gifts of these wielders are passed down through families, even if the family is unaware of or reluctant to practice them. A sorcerer’s abilities can range from the elemental to the illusionary and beyond, and many practitioners band together into collectives based on their talents. The act of becoming a formidable sorcerer is not the practice of acquiring power, but learning to cultivate and control the power one already possesses. The magic of a misguided or undisciplined sorcerer is a dangerous force indeed.",
+    "domains": [
+      "Arcana",
+      "Midnight"
+    ],
+    "subclasses": [
+      "Elemental Origin",
+      "Primal Origin"
+    ],
+    "evasion": 10,
+    "hp": 6,
+    "items": "A whispering orb or a family heirloom",
+    "suggestedTraits": "0, -1, +1, +2, +1, 0",
+    "suggestedPrimary": "Dualstaff",
+    "suggestedSecondary": "",
+    "suggestedArmor": "Gambeson Armor",
+    "hopeFeature": {
+      "name": "Volatile Magic",
+      "text": "**Spend 3 Hope** to reroll any number of your damage dice on an attack that deals magic damage."
+    },
+    "features": [
+      {
+        "name": "Arcane Sense",
+        "text": "You can sense the presence of magical people and objects within Close range."
+      },
+      {
+        "name": "Minor Illusion",
+        "text": "Make a **Spellcast Roll (10).** On a success, you create a minor visual illusion no larger than yourself within Close range. This illusion is convincing to anyone at Close range or farther."
+      },
+      {
+        "name": "Channel Raw Power",
+        "text": "Once per long rest, you can place a domain card from your loadout into your vault and choose to either:\n\n- Gain Hope equal to the level of the card.\n- Enhance a spell that deals damage, gaining a bonus to your damage roll equal to twice the level of the card."
+      }
+    ]
+  },
+  {
+    "name": "Warrior",
+    "description": "Becoming a warrior requires years, often a lifetime, of training and dedication to the mastery of weapons and violence. While many who seek to fight hone only their strength, warriors understand the importance of an agile body and mind, making them some of the most sought-after fighters across the realms. Frequently, warriors find employment within an army, a band of mercenaries, or even a royal guard, but their potential is wasted in any position where they cannot continue to improve and expand their skills. Warriors are known to have a favored weapon; to come between them and their blade would be a grievous mistake.",
+    "domains": [
+      "Blade",
+      "Bone"
+    ],
+    "subclasses": [
+      "Call of the Brave",
+      "Call of the Slayer"
+    ],
+    "evasion": 11,
+    "hp": 6,
+    "items": "The drawing of a lover or a sharpening stone",
+    "suggestedTraits": "+2, +1, 0, +1, -1, 0",
+    "suggestedPrimary": "Longsword",
+    "suggestedSecondary": "",
+    "suggestedArmor": "Chainmail Armor",
+    "hopeFeature": {
+      "name": "No Mercy",
+      "text": "**Spend 3 Hope** to gain a +1 bonus to your attack rolls until your next rest."
+    },
+    "features": [
+      {
+        "name": "Attack of Opportunity",
+        "text": "If an adversary within Melee range attempts to leave that range, make a reaction roll using a trait of your choice against their Difficulty. Choose one effect on a success, or two if you critically succeed:\n\n- They can't move from where they are.\n- You deal damage to them equal to your primary weapon's damage.\n- You move with them."
+      },
+      {
+        "name": "Combat Training",
+        "text": "You ignore burden when equipping weapons. When you deal physical damage, you gain a bonus to your damage roll equal to your level."
+      }
+    ]
+  },
+  {
+    "name": "Wizard",
+    "description": "Whether through an institution or individual study, those known as wizards acquire and hone immense magical power over years of learning using a variety of tools, including books, stones, potions, and herbs. Some wizards dedicate their lives to mastering a particular school of magic, while others learn from a wide variety of disciplines. Many wizards become wise and powerful figures in their communities, advising rulers, providing medicines and healing, and even leading war councils. While these mages all work toward the common goal of collecting magical knowledge, wizards often have the most conflict within their own ranks, as the acquisition, keeping, and sharing of powerful secrets is a topic of intense debate that has resulted in innumerable deaths.",
+    "domains": [
+      "Codex",
+      "Splendor"
+    ],
+    "subclasses": [
+      "School of Knowledge",
+      "School of War"
+    ],
+    "evasion": 11,
+    "hp": 5,
+    "items": "A book you’re trying to translate or a tiny, harmless elemental pet",
+    "suggestedTraits": "-1, 0, 0, +1, +1, +2",
+    "suggestedPrimary": "Greatstaff",
+    "suggestedSecondary": "",
+    "suggestedArmor": "Leather Armor",
+    "hopeFeature": {
+      "name": "Not This Time",
+      "text": "**Spend 3 Hope** to force an adversary within Far range to reroll an attack or damage roll."
+    },
+    "features": [
+      {
+        "name": "Prestidigitation",
+        "text": "You can perform harmless, subtle magical effects at will. For example, you can change an object's color, create a smell, light a candle, cause a tiny object to float, illuminate a room, or repair a small object."
+      },
+      {
+        "name": "Strange Patterns",
+        "text": "Choose a number between 1 and 12. When you roll that number on a Duality Die, gain a Hope or clear a Stress.\n\nYou can change this number when you take a long rest."
+      }
+    ]
+  }
+] as const
+
+export const SRD_ANCESTRIES: SrdAncestry[] = [
+  {
+    "name": "Clank",
+    "description": "Clanks are sentient mechanical beings built from a variety of materials, including metal, wood, and stone. They can resemble humanoids, animals, or even inanimate objects. Like organic beings, their bodies come in a wide array of sizes. Because of their bespoke construction, many clanks have highly specialized physical configurations. Examples include clawed hands for grasping, wheels for movement, or built-in weaponry.\n\nMany clanks embrace body modifications for style as well as function, and members of other ancestries often turn to clank artisans to construct customized mobility aids and physical adornments. Other ancestries can create clanks, even using their own physical characteristics as inspiration, but it's also common for clanks to build one another. A clank's lifespan extends as long as they're able to acquire or craft new parts, making their physical form effectively immortal. That said, their minds are subject to the effects of time, and deteriorate as the magic that powers them loses potency.",
+    "features": [
+      {
+        "name": "Purposeful Design",
+        "text": "Decide who made you and for what purpose. At character creation, choose one of your Experiences that best aligns with this purpose and gain a permanent +1 bonus to it."
+      },
+      {
+        "name": "Efficient",
+        "text": "When you take a short rest, you can choose a long rest move instead of a short rest move."
+      }
+    ]
+  },
+  {
+    "name": "Drakona",
+    "description": "Drakona resemble wingless dragons in humanoid form and possess a powerful elemental breath. All drakona have thick scales that provide excellent natural armor against both attacks and the forces of nature. They are large in size, ranging from 5 feet to 7 feet on average, with long sharp teeth. New teeth grow throughout a Drakona's approximately 350-year lifespan, so they are never in danger of permanently losing an incisor. Unlike their dragon ancestors, drakona don't have wings and can't fly without magical aid. Members of this ancestry pass down the element of their breath through generations, though in rare cases, a drakona's elemental power will differ from the rest of their family's.",
+    "features": [
+      {
+        "name": "Scales",
+        "text": "Your scales act as natural protection. When you would take Severe damage, you can **mark a Stress** to mark 1 fewer Hit Points."
+      },
+      {
+        "name": "Elemental Breath",
+        "text": "Choose an element for your breath (such as electricity, fire, or ice). You can use this breath against a target or group of targets within Very Close range, treating it as an Instinct weapon that deals **d8** magic damage using your Proficiency."
+      }
+    ]
+  },
+  {
+    "name": "Dwarf",
+    "description": "Dwarves are most easily recognized as short humanoids with square frames, dense musculature, and thick hair. Their average height ranges from 4 to 5 ½ feet, and they are often broad in proportion to their stature. Their skin and nails contain a high amount of keratin, making them naturally resilient. This allows dwarves to embed gemstones into their bodies and decorate themselves with tattoos or piercings. Their hair grows thickly—usually on their heads, but some dwarves have thick hair across their bodies as well. Dwarves of all genders can grow facial hair, which they often style in elaborate arrangements. Typically, dwarves live up to 250 years of age, maintaining their muscle mass well into later life.",
+    "features": [
+      {
+        "name": "Thick Skin",
+        "text": "When you take Minor damage, you can **mark 2 Stress** instead of marking a Hit Point."
+      },
+      {
+        "name": "Increased Fortitude",
+        "text": "**Spend 3 Hope** to halve incoming physical damage."
+      }
+    ]
+  },
+  {
+    "name": "Elf",
+    "description": "Elves are typically tall humanoids with pointed ears and acutely attuned senses. Their ears vary in size and pointed shape, and as they age, the tips begin to droop. While elves come in a wide range of body types, they are all fairly tall, with heights ranging from about 6 to 6 ½ feet. All elves have the ability to drop into a celestial trance, rather than sleep. This allows them to rest effectively in a short amount of time.\n\nSome elves possess what is known as a \"mystic form,\" which occurs when an elf has dedicated themself to the study or protection of the natural world so deeply that their physical form changes. These characteristics can include celestial freckles, the presence of leaves, vines, or flowers in their hair, eyes that flicker like fire, and more. Sometimes these traits are inherited from parents, but if an elf changes their environment or magical focus, their appearance changes over time. Because elves live for about 350 years, these traits can shift more than once throughout their lifespan.",
+    "features": [
+      {
+        "name": "Quick Reactions",
+        "text": "**Mark a Stress** to gain advantage on a reaction roll."
+      },
+      {
+        "name": "Celestial Trance",
+        "text": "During a rest, you can drop into a trance to choose an additional downtime move."
+      }
+    ]
+  },
+  {
+    "name": "Faerie",
+    "description": "Faeries are winged humanoid creatures with insectile features. These characteristics cover a broad spectrum from humanoid to insectoid—some possess additional arms, compound eyes, lantern organs, chitinous exoskeletons, or stingers. Because of their close ties to the natural world, they also frequently possess attributes that allow them to blend in with various plants. The average height of a faerie ranges from about 2 feet to 5 feet, but some faeries grow up to 7 feet tall. All faeries possess membranous wings and they each go through a process of metamorphosis. The process and changes differ from faerie to faerie, but during this transformation each individual manifests the unique appearance they will carry throughout the rest of their approximately 50-year lifespan.",
+    "features": [
+      {
+        "name": "Luckbender",
+        "text": "Once per session, after you or a willing ally within Close range makes an action roll, you can **spend 3 Hope** to reroll the Duality Dice."
+      },
+      {
+        "name": "Wings",
+        "text": "You can fly. While flying, you can **mark a Stress** after an adversary makes an attack against you to gain a +2 bonus to your Evasion against that attack."
+      }
+    ]
+  },
+  {
+    "name": "Faun",
+    "description": "Fauns resemble humanoid goats with curving horns, square pupils, and cloven hooves. Though their appearances may vary, most fauns have a humanoid torso and a goatlike lower body covered in dense fur. Faun faces can be more caprine or more humanlike, and they have a wide variety of ear and horn shapes. Faun horns range from short with minimal curvature to much larger with a distinct curl. The average faun ranges from 4 feet to 6 ½ feet tall, but their height can change dramatically from one moment to the next based on their stance. The majority of fauns have proportionately long limbs, no matter their size or shape, and are known for their ability to deliver powerful blows with their split hooves. Fauns live for roughly 225 years, and as they age, their appearance can become increasingly goatlike.",
+    "features": [
+      {
+        "name": "Caprine Leap",
+        "text": "You can leap anywhere within Close range as though you were using normal movement, allowing you to vault obstacles, jump across gaps, or scale barriers with ease."
+      },
+      {
+        "name": "Kick",
+        "text": "When you succeed on an attack against a target within Melee range, you can **mark a Stress** to kick yourself off them, dealing an extra **2d6** damage and knocking back either yourself or the target to Very Close range."
+      }
+    ]
+  },
+  {
+    "name": "Firbolg",
+    "description": "Firbolgs are bovine humanoids typically recognized by their broad noses and long, drooping ears. Some have faces that are a blend of humanoid and bison, ox, cow, or other bovine creatures. Others, often referred to as minotaurs, have heads that entirely resemble cattle. They are tall and muscular creatures, with heights ranging from around 5 feet to 7 feet, and possess remarkable strength no matter their age. Some firbolgs are known to use this strength to charge their adversaries, an action that is particuarly effective for those who have one of the many varieties of horn styles commonly found in this ancestry. Though their unique characteristics can vary, all firbolgs are covered in fur, which can be muted and earth-toned in color, or come in a variety of pastels, such as soft pinks and blues. On average, firbolgs live for about 150 years.",
+    "features": [
+      {
+        "name": "Charge",
+        "text": "When you succeed on an Agility Roll to move from Far or Very Far range into Melee range with one or more targets, you can **mark a Stress** to deal **1d12** physical damage to all targets within Melee range."
+      },
+      {
+        "name": "Unshakable",
+        "text": "When you would mark a Stress, roll a **d6.** On a result of 6, don't mark it."
+      }
+    ]
+  },
+  {
+    "name": "Fungril",
+    "description": "Fungril resemble humanoid mushrooms. They can be either more humanoid or more fungal in appearance, and they come in an assortment of colors, from earth tones to bright reds, yellows, purples, and blues. Fungril display an incredible variety of bodies, faces, and limbs, as there's no single common shape among them. Even their heights range from a tiny 2 feet tall to a staggering 7 feet tall. While the common lifespan of a fungril is about 300 years, some have been reported to live much longer. They can communicate nonverbally, and many members of this ancestry use a mycelial array to chemically exchange information with other fungril across long distances.",
+    "features": [
+      {
+        "name": "Fungril Network",
+        "text": "Make an **Instinct Roll (12)** to use your mycelial array to speak with others of your ancestry. On a success, you can communicate across any distance."
+      },
+      {
+        "name": "Death Connection",
+        "text": "While touching a corpse that died recently, you can **mark a Stress** to extract one memory from the corpse related to a specific emotion or sensation of your choice."
+      }
+    ]
+  },
+  {
+    "name": "Galapa",
+    "description": "Galapa resemble anthropomorphic turtles with large, domed shells into which they can retract. On average, they range from 4 feet to 6 feet in height, and their head and body shapes can resemble any type of turtle. Galapa come in a variety of earth tones—most often shades of green and brown— and possess unique patterns on their shells. Members of this ancestry can draw their head, arms, and legs into their shell for protection to use it as a natural shield when defensive measures are needed. Some supplement their shell's strength or appearance by attaching armor or carving unique designs, but the process is exceedingly painful. Most galapa move slowly no matter their age, and they can live approximately 150 years.",
+    "features": [
+      {
+        "name": "Shell",
+        "text": "Gain a bonus to your damage thresholds equal to your Proficiency."
+      },
+      {
+        "name": "Retract",
+        "text": "**Mark a Stress** to retract into your shell. While in your shell, you have resistance to physical damage, you have disadvantage on action rolls, and you can't move."
+      }
+    ]
+  },
+  {
+    "name": "Giant",
+    "description": "Giants are towering humanoids with broad shoulders, long arms, and one to three eyes. Adult giants range from 6 ½ to 8 ½ feet tall and are naturally muscular, regardless of body type. They are easily recognized by their wide frames and elongated arms and necks. Though they can have up to three eyes, all giants are born with none and remain sightless for their first year of life. Until a giant reaches the age of 10 and their features fully develop, the formation of their eyes may fluctuate. Those with a single eye are commonly known as cyclops. The average giant lifespan is about 75 years.",
+    "features": [
+      {
+        "name": "Endurance",
+        "text": "Gain an additional Hit Point slot at character creation."
+      },
+      {
+        "name": "Reach",
+        "text": "Treat any weapon, ability, spell, or other feature that has a Melee range as though it has a Very Close range instead."
+      }
+    ]
+  },
+  {
+    "name": "Goblin",
+    "description": "Goblins are small humanoids easily recognizable by their large eyes and massive membranous ears. With keen hearing and sharp eyesight, they perceive details both at great distances and in darkness, allowing them to move through less-optimal environments with ease. Their skin and eye colors are incredibly varied, with no one hue, either vibrant or subdued, more dominant than another. A typical goblin stands between 3 feet and 4 feet tall, and each of their ears is about the size of their head. Goblins are known to use ear positions to very specific effect when communicating nonverbally. A goblin's lifespan is roughly 100 years, and many maintain their keen hearing and sight well into advanced age.",
+    "features": [
+      {
+        "name": "Surefooted",
+        "text": "You ignore disadvantage on Agility Rolls."
+      },
+      {
+        "name": "Danger Sense",
+        "text": "Once per rest, **mark a Stress** to force an adversary to reroll an attack against you or an ally within Very Close range."
+      }
+    ]
+  },
+  {
+    "name": "Halfling",
+    "description": "Halflings are small humanoids with large hairy feet and prominent rounded ears. On average, halflings are 3 to 4 feet in height, and their ears, nose, and feet are larger in proportion to the rest of their body. Members of this ancestry live for around 150 years, and a halfling's appearance is likely to remain youthful even as they progress from adulthood into old age. Halflings are naturally attuned to the magnetic fields of the Mortal Realm, granting them a strong internal compass. They also possess acute senses of hearing and smell, and can often detect those who are familiar to them by the sound of their movements.",
+    "features": [
+      {
+        "name": "Luckbringer",
+        "text": "At the start of each session, everyone in your party gains a Hope."
+      },
+      {
+        "name": "Internal Compass",
+        "text": "When you roll a 1 on your Hope Die, you can reroll it."
+      }
+    ]
+  },
+  {
+    "name": "Human",
+    "description": "Humans are most easily recognized by their dexterous hands, rounded ears, and bodies built for endurance. Their average height ranges from just under 5 feet to about 6 ½ feet. They have a wide variety of builds, with some being quite broad, others lithe, and many inhabiting the spectrum in between. Humans are physically adaptable and adjust to harsh climates with relative ease. In general, humans live to an age of about 100, with their bodies changing dramatically between their youngest and oldest years.",
+    "features": [
+      {
+        "name": "High Stamina",
+        "text": "Gain an additional Stress slot at character creation."
+      },
+      {
+        "name": "Adaptability",
+        "text": "When you fail a roll that utilized one of your Experiences, you can **mark a Stress** to reroll."
+      }
+    ]
+  },
+  {
+    "name": "Infernis",
+    "description": "Infernis are humanoids who possess sharp canine teeth, pointed ears, and horns. They are the descendants of demons from the Circles Below. On average, infernis range in height from 5 feet to 7 feet and are known to have long fingers and pointed nails. Some have long, thin, and smooth tails that end in points, forks, or arrowheads. It's common for infernis to have two or four horns—though some have crowns of many horns, or only one. These horns can also grow asymmetrically, forming unique, often curving, shapes that infernis enhance with carving and ornamentation. Their skin, hair, and horns come in an assortment of colors that can include soft pastels, stark tones, or vibrant hues, such as rosy scarlet, deep purple, and pitch black.\n\nInfernis possess a \"dread visage\" that manifests both involuntarily, such as when they experience fear or other strong emotions, or purposefully, such as when they wish to intimidate an adversary. This visage can briefly modify their appearance in a variety of ways, including lengthening their teeth and nails, changing the colors of their eyes, twisting their horns, or enhancing their height. On average, infernis live up to 350 years, with some attributing this lifespan to their demonic lineage.",
+    "features": [
+      {
+        "name": "Fearless",
+        "text": "When you roll with Fear, you can **mark 2 Stress** to change it into a roll with Hope instead."
+      },
+      {
+        "name": "Dread Visage",
+        "text": "You have advantage on rolls to intimidate hostile creatures."
+      }
+    ]
+  },
+  {
+    "name": "Katari",
+    "description": "Katari are feline humanoids with retractable claws, vertically slit pupils, and high, triangular ears. They can also have small, pointed canine teeth, soft fur, and long whiskers that assist their perception and navigation. Their ears can swivel nearly 180 degrees to detect sound, adding to their heightened senses. Katari may look more or less feline or humanoid, with catlike attributes in the form of hair, whiskers, and a muzzle. About half of the katari population have tails. Their skin and fur come in a wide range of hues and patterns, including solid colors, calico tones, tabby stripes, and an array of spots, patches, marbling, or bands. Their height ranges from about 3 feet to 6 ½ feet, and they live to around 150 years.",
+    "features": [
+      {
+        "name": "Feline Instincts",
+        "text": "When you make an Agility Roll, you can **spend 2 Hope** to reroll your Hope Die."
+      },
+      {
+        "name": "Retracting Claws",
+        "text": "Make an **Agility Roll** to scratch a target within Melee range. On a success, they become temporarily _Vulnerable._"
+      }
+    ]
+  },
+  {
+    "name": "Orc",
+    "description": "Orcs are humanoids most easily recognized by their square features and boar-like tusks that protrude from their lower jaw. Tusks come in various sizes, and though they extend from the mouth, they aren't used for consuming food. Instead, many orcs choose to decorate their tusks with significant ornamentation. Orcs typically live for 125 years, and unless altered, their tusks continue to grow throughout the course of their lives. Their ears are pointed, and their hair and skin typically have green, blue, pink, or gray tones. Orcs tend toward a muscular build, and their average height ranges from 5 feet to 6 ½ feet.",
+    "features": [
+      {
+        "name": "Sturdy",
+        "text": "When you have 1 Hit Point remaining, attacks against you have disadvantage."
+      },
+      {
+        "name": "Tusks",
+        "text": "When you succeed on an attack against a target within Melee range, you can **spend a Hope** to gore the target with your tusks, dealing an extra **1d6** damage."
+      }
+    ]
+  },
+  {
+    "name": "Ribbet",
+    "description": "Ribbets resemble anthropomorphic frogs with protruding eyes and webbed hands and feet. They have smooth (though sometimes warty) moist skin and eyes positioned on either side of their head. Some ribbets have hind legs more than twice the length of their torso, while others have short limbs. No matter their size (which ranges from about 3 feet to 4 ½ feet), ribbets primarily move by hopping. All ribbets have webbed appendages, allowing them to swim with ease. Some ribbets possess a natural green-and-brown camouflage, while others are vibrantly colored with bold patterns. No matter their appearance, all ribbets are born from eggs laid in the water, hatch into tadpoles, and after about 6 to 7 years, grow into amphibians that can move around on land. Ribbets live for approximately 100 years.",
+    "features": [
+      {
+        "name": "Amphibious",
+        "text": "You can breathe and move naturally underwater."
+      },
+      {
+        "name": "Long Tongue",
+        "text": "You can use your long tongue to grab onto things within Close range. **Mark a Stress** to use your tongue as a Finesse Close weapon that deals **d12** physical damage using your Proficiency."
+      }
+    ]
+  },
+  {
+    "name": "Simiah",
+    "description": "Simiah resemble anthropomorphic monkeys and apes with long limbs and prehensile feet. While their appearance reflects all simian creatures, from the largest gorilla to the smallest marmoset, their size does not align with their animal counterparts, and they can be anywhere from 2 to 6 feet tall. All simiah can use their dexterous feet for nonverbal communication, work, and combat. Additionally, some also have prehensile tails that can grasp objects or help with balance during dicult maneuvers. These traits grant members of this ancestry unique agility that aids them in a variety of physical tasks. In particular, simiah are skilled climbers and can easily transition from bipedal movement to knuckle-walking and climbing, and back again. On average, simiah live for about 100 years.",
+    "features": [
+      {
+        "name": "Natural Climber",
+        "text": "You have advantage on Agility Rolls that involve balancing and climbing."
+      },
+      {
+        "name": "Nimble",
+        "text": "Gain a permanent +1 bonus to your Evasion at character creation."
+      }
+    ]
+  }
+] as const
+
+export const SRD_COMMUNITIES: SrdCommunity[] = [
+  {
+    "name": "Highborne",
+    "description": "Being part of a highborne community means you're accustomed to a life of elegance, opulence, and prestige within the upper echelons of society. Traditionally, members of a highborne community possess incredible material wealth. While this can take a variety of forms depending on the community—including gold and other minerals, land, or controlling the means of production—this status always comes with power and influence. Highborne place great value on titles and possessions, and there is little social mobility within their ranks. Members of a highborne community often control the political and economic status of the areas in which they live due to their ability to influence people and the economy with their substantial wealth. The health and safety of the less affuent people who live in these locations often hinges on the ability of this highborne ruling class to prioritize the well-being of their subjects over profit.",
+    "note": "Highborne are often amiable, candid, conniving, enterprising, ostentatious, and unflappable.",
+    "features": [
+      {
+        "name": "Privilege",
+        "text": "You have advantage on rolls to consort with nobles, negotiate prices, or leverage your reputation to get what you want."
+      }
+    ]
+  },
+  {
+    "name": "Loreborne",
+    "description": "Being part of a loreborne community means you're from a society that favors strong academic or political prowess. Loreborne communities highly value knowledge, frequently in the form of historical preservation, political advancement, scientific study, skill development, or lore and mythology compilation. Most members of these communities research in institutions built in bastions of civilization, while some eclectic few thrive in gathering information from the natural world. Some may be isolationists, operating in smaller enclaves, schools, or guilds and following their own unique ethos. Others still wield their knowledge on a larger scale, making deft political maneuvers across governmental landscapes.",
+    "note": "Loreborne are often direct, eloquent, inquisitive, patient, rhapsodic, and witty.",
+    "features": [
+      {
+        "name": "Well-Read",
+        "text": "You have advantage on rolls that involve the history, culture, or politics of a prominent person or place."
+      }
+    ]
+  },
+  {
+    "name": "Orderborne",
+    "description": "Being part of an orderborne community means you're from a collective that focuses on discipline or faith, and you uphold a set of principles that reflect your experience there. Orderborne are frequently some of the most powerful among the surrounding communities. By aligning the members of their society around a common value or goal, such as a god, doctrine, ethos, or even a shared business or trade, the ruling bodies of these enclaves can mobilize larger populations with less effort. While orderborne communities take a variety of forms—some even profoundly pacifistic—perhaps the most feared are those that structure themselves around military prowess. In such a case, it's not uncommon for orderborne to provide soldiers for hire to other cities or countries.",
+    "note": "Orderborne are often ambitious, benevolent, pensive, prudent, sardonic, and stoic.",
+    "features": [
+      {
+        "name": "Dedicated",
+        "text": "Record three sayings or values your upbringing instilled in you. Once per rest, when you describe how you're embodying one of these principles through your current action, you can roll a **d20** as your Hope Die."
+      }
+    ]
+  },
+  {
+    "name": "Ridgeborne",
+    "description": "Being part of a ridgeborne community means you've called the rocky peaks and sharp cliffs of the mountainside home. Those who've lived in the mountains often consider themselves hardier than most because they've thrived among the most dangerous terrain many continents have to offer. These groups are adept at adaptation, developing unique technologies and equipment to move both people and products across dicult terrain. As such, ridgeborne grow up scrambling and climbing, making them sturdy and strong-willed. Ridgeborne localities appear in a variety of forms—some cities carve out entire cliff faces, others construct castles of stone, and still more live in small homes on windblown peaks. Outside forces often struggle to attack ridgeborne groups, as the small militias and large military forces of the mountains are adept at utilizing their high-ground advantage.",
+    "note": "Ridgeborne are often bold, hardy, indomitable, loyal, reserved, and stubborn.",
+    "features": [
+      {
+        "name": "Steady",
+        "text": "You have advantage on rolls to traverse dangerous cliffs and ledges, navigate harsh environments, and use your survival knowledge."
+      }
+    ]
+  },
+  {
+    "name": "Seaborne",
+    "description": "Being part of a seaborne community means you lived on or near a large body of water. Seaborne communities are built, both physically and culturally, around the specific waters they call home. Some of these groups live along the shore, constructing ports for locals and travelers alike. These harbors function as centers of commerce, tourist attractions, or even just a safe place to lay down one's head after weeks of travel. Other seaborne live on the water in small boats or large ships, with the idea of \"home\" comprising a ship and its crew, rather than any one landmass. No matter their exact location, seaborne communities are closely tied to the ocean tides and the creatures who inhabit them. Seaborne learn to fish at a young age, and train from birth to hold their breath and swim in even the most tumultuous waters. Individuals from these groups are highly sought after for their sailing skills, and many become captains of vessels, whether within their own community, working for another, or even at the helm of a powerful naval operation.",
+    "note": "Seaborne are often candid, cooperative, exuberant, fierce, resolute, and weathered.",
+    "features": [
+      {
+        "name": "Know the Tide",
+        "text": "You can sense the ebb and flow of life. When you roll with Fear, place a token on your community card. You can hold a number of tokens equal to your level. Before you make an action roll, you can spend any number of these tokens to gain a +1 bonus to the roll for each token spent. At the end of each session, clear all unspent tokens."
+      }
+    ]
+  },
+  {
+    "name": "Slyborne",
+    "description": "Being part of a slyborne community means you come from a group that operates outside the law, including all manner of criminals, grifters, and con artists. Members of slyborne communities are brought together by their disreputable goals and their clever means of achieving them. Many people in these communities have an array of unscrupulous skills: forging, thievery, smuggling, and violence. People of any social class can be slyborne, from those who have garnered vast wealth and influence to those without a coin to their name. To the outside eye, slyborne might appear to be ruans with no loyalty, but these communities possess some of the strictest codes of honor which, when broken, can result in a terrifying end for the transgressor.",
+    "note": "Slyborne are often calculating, clever, formidable, perceptive, shrewd, and tenacious.",
+    "features": [
+      {
+        "name": "Scoundrel",
+        "text": "You have advantage on rolls to negotiate with criminals, detect lies, or find a safe place to hide."
+      }
+    ]
+  },
+  {
+    "name": "Underborne",
+    "description": "Being part of an underborne community means you're from a subterranean society. Many underborne live right beneath the cities and villages of other collectives, while some live much deeper. These communities range from small family groups in burrows to massive metropolises in caverns of stone. In many locales, underborne are recognized for their incredible boldness and skill that enable great feats of architecture and engineering. Underborne are regularly hired for their bravery, as even the least daring among them has likely encountered formidable belowground beasts, and learning to dispatch such creatures is common practice amongst these societies. Because of the dangers of their environment, many underborne communities develop unique nonverbal languages that prove equally useful on the surface.",
+    "note": "Underborne are often composed, elusive, indomitable, innovative, resourceful, and unpretentious.",
+    "features": [
+      {
+        "name": "Low-Light Living",
+        "text": "When you're in an area with low light or heavy shadow, you have advantage on rolls to hide, investigate, or perceive details within that area."
+      }
+    ]
+  },
+  {
+    "name": "Wanderborne",
+    "description": "Being part of a wanderborne community means you've lived as a nomad, forgoing a permanent home and experiencing a wide variety of cultures. Unlike many communities that are defined by their locale, wanderborne are defined by their traveling lifestyle. Because of their frequent migration, wanderborne put less value on the accumulation of material possessions in favor of acquiring information, skills, and connections. While some wanderborne are allied by a common ethos, such as a religion or a set of political or economic values, others come together after shared tragedy, such as the loss of their home or land. No matter the reason, the dangers posed by life on the road and the choice to continue down that road together mean that wanderborne are known for their unwavering loyalty.",
+    "note": "Wanderborne are often inscrutable, magnanimous, mirthful, reliable, savvy, and unorthodox.",
+    "features": [
+      {
+        "name": "Nomadic Pack",
+        "text": "Add a Nomadic Pack to your inventory. Once per session, you can **spend a Hope** to reach into this pack and pull out a mundane item that's useful to your situation. Work with the GM to figure out what item you take out."
+      }
+    ]
+  },
+  {
+    "name": "Wildborne",
+    "description": "Being part of a wildborne community means you lived deep within the forest. Wildborne communities are defined by their dedication to the conservation of their homelands, and many have strong religious or cultural ties to the fauna they live among. This results in unique architectural and technological advancements that favor sustainability over short-term, high-yield results. It is a hallmark of wildborne societies to integrate their villages and cities with the natural environment and avoid disturbing the lives of the plants and animals. While some construct their lodgings high in the branches of trees, others establish their homes on the ground beneath the forest canopy. It's not uncommon for wildborne to remain reclusive and hidden within their woodland homes.",
+    "note": "Wildborne are often hardy, loyal, nurturing, reclusive, sagacious, and vibrant.",
+    "features": [
+      {
+        "name": "Lightfoot",
+        "text": "Your movement is naturally silent. You have advantage on rolls to move without being heard."
+      }
+    ]
+  }
+] as const
+
+export const SRD_SUBCLASSES: SrdSubclass[] = [
+  {
+    "name": "Beastbound",
+    "description": "Play the Beastbound if you want to form a deep bond with an animal ally.",
+    "spellcastTrait": "Agility",
+    "foundation": [
+      {
+        "name": "Companion",
+        "text": "You have an animal companion of your choice (at the GM's discretion). They stay by your side unless you tell them otherwise.\n\nTake the Ranger Companion sheet. When you level up your character, choose a level-up option for your companion from this sheet as well."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Expert Training",
+        "text": "Choose an additional level-up option for your companion."
+      },
+      {
+        "name": "Battle-Bonded",
+        "text": "When an adversary attacks you while they're within your companion's Melee range, you gain a +2 bonus to your Evasion against the attack."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Advanced Training",
+        "text": "Choose two additional level-up options for your companion."
+      },
+      {
+        "name": "Loyal Friend",
+        "text": "Once per long rest, when the damage from an attack would mark your companion's last Stress or your last Hit Point and you're within Close range of each other, you or your companion can rush to the other's side and take that damage instead."
+      }
+    ]
+  },
+  {
+    "name": "Call of the Brave",
+    "description": "Play the Call of the Brave if you want to use the might of your enemies to fuel your own power.",
+    "spellcastTrait": "",
+    "foundation": [
+      {
+        "name": "Courage",
+        "text": "When you fail a roll with Fear, you gain a Hope."
+      },
+      {
+        "name": "Battle Ritual",
+        "text": "Once per long rest, before you attempt something incredibly dangerous or face off against a foe who clearly outmatches you, describe what ritual you perform or preparations you make. When you do, clear 2 Stress and gain 2 Hope."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Rise to the Challenge",
+        "text": "You are vigilant in the face of mounting danger. While you have 2 or fewer Hit Points unmarked, you can roll a **d20** as your Hope Die."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Camaraderie",
+        "text": "Your unwavering bravery is a rallying point for your allies. You can initiate a Tag Team Roll one additional time per session. Additionally, when an ally initiates a Tag Team Roll with you, they only need to spend 2 Hope to do so."
+      }
+    ]
+  },
+  {
+    "name": "Call of the Slayer",
+    "description": "Play the Call of the Slayer if you want to strike down adversaries with immense force.",
+    "spellcastTrait": "",
+    "foundation": [
+      {
+        "name": "Slayer",
+        "text": "You gain a pool of dice called Slayer Dice. On a roll with Hope, you can place a **d6** on this card instead of gaining a Hope, adding the die to the pool. You can store a number of Slayer Dice equal to your Proficiency. When you make an attack roll or damage roll, you can spend any number of these Slayer Dice, rolling them and adding their result to the roll. At the end of each session, clear any unspent Slayer Dice on this card and gain a Hope per die cleared."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Weapon Specialist",
+        "text": "You can wield multiple weapons with dangerous ease. When you succeed on an attack, you can **spend a Hope** to add one of the damage dice from your secondary weapon to the damage roll. Additionally, once per long rest when you roll your Slayer Dice, reroll any 1s."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Martial Preparation",
+        "text": "You're an inspirational warrior to all who travel with you. Your party gains access to the Martial Preparation downtime move. To use this move during a rest, describe how you instruct and train with your party. You and each ally who chooses this downtime move gain a **d6** Slayer Die. A PC with a Slayer Die can spend it to roll the die and add the result to an attack or damage roll of their choice."
+      }
+    ]
+  },
+  {
+    "name": "Divine Wielder",
+    "description": "Play the Divine Wielder if you want to dominate the battlefield with a legendary weapon.",
+    "spellcastTrait": "Strength",
+    "foundation": [
+      {
+        "name": "Spirit Weapon",
+        "text": "When you have an equipped weapon with a range of Melee or Very Close, it can fly from your hand to attack an adversary within Close range and then return to you. You can **mark a Stress** to target an additional adversary within range with the same attack roll."
+      },
+      {
+        "name": "Sparing Touch",
+        "text": "Once per long rest, touch a creature and clear 2 Hit Points or 2 Stress from them."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Devout",
+        "text": "When you roll your Prayer Dice, you can roll an additional die and discard the lowest result. Additionally, you can use your \"Sparing Touch\" feature twice instead of once per long rest."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Sacred Resonance",
+        "text": "When you roll damage for your \"Spirit Weapon\" feature, if any of the die results match, double the value of each matching die. For example, if you roll two 5s, they count as two 10s."
+      }
+    ]
+  },
+  {
+    "name": "Elemental Origin",
+    "description": "Play the Elemental Origin if you want to channel raw magic to take the shape of a particular element.",
+    "spellcastTrait": "Instinct",
+    "foundation": [
+      {
+        "name": "Elementalist",
+        "text": "Choose one of the following elements at character creation: air, earth, fire, lightning, water.\n\nYou can shape this element into harmless effects. Additionally, **spend a Hope** and describe how your control over this element helps an action roll you're about to make, then either gain a +2 bonus to the roll or a +3 bonus to the roll's damage."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Natural Evasion",
+        "text": "You can call forth your element to protect you from harm. When an attack roll against you succeeds, you can **mark a Stress** and describe how you use your element to defend you. When you do, roll a **d6** and add its result to your Evasion against the attack."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Transcendence",
+        "text": "Once per long rest, you can transform into a physical manifestation of your element. When you do, describe your transformation and choose two of the following benefits to gain until your next rest:\n\n- +4 bonus to your Severe threshold\n- +1 bonus to a character trait of your choice\n- +1 bonus to your Proficiency\n- +2 bonus to your Evasion"
+      }
+    ]
+  },
+  {
+    "name": "Nightwalker",
+    "description": "Play the Nightwalker if you want to manipulate shadows to maneuver through the environment.",
+    "spellcastTrait": "Finesse",
+    "foundation": [
+      {
+        "name": "Shadow Stepper",
+        "text": "You can move from shadow to shadow. When you move into an area of darkness or a shadow cast by another creature or object, you can **mark a Stress** to disappear from where you are and reappear inside another shadow within Far range. When you reappear, you are _Cloaked._"
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Dark Cloud",
+        "text": "Make a **Spellcast Roll (15).** On a success, create a temporary dark cloud that covers any area within Close range. Anyone in this cloud can't see outside of it, and anyone outside of it can't see in. You're considered _Cloaked_ from any adversary for whom the cloud blocks line of sight."
+      },
+      {
+        "name": "Adrenaline",
+        "text": "While you're _Vulnerable,_ add your level to your damage rolls."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Fleeting Shadow",
+        "text": "Gain a permanent +1 bonus to your Evasion. You can use your \"Shadow Stepper\" feature to move within Very Far range."
+      },
+      {
+        "name": "Vanishing Act",
+        "text": "**Mark a Stress** to become _Cloaked_ at any time. When _Cloaked_ from this feature, you automatically clear the _Restrained_ condition if you have it. You remain _Cloaked_ in this way until you roll with Fear or until your next rest."
+      }
+    ]
+  },
+  {
+    "name": "Primal Origin",
+    "description": "Play the Primal Origin if you want to extend the versatility of your spells in powerful ways.",
+    "spellcastTrait": "Instinct",
+    "foundation": [
+      {
+        "name": "Manipulate Magic",
+        "text": "Your primal origin allows you to modify the essence of magic itself. After you cast a spell or make an attack using a weapon that deals magic damage, you can **mark a Stress** to do one of the following:\n\n- Extend the spell or attack's reach by one range\n- Gain a +2 bonus to the action roll's result\n- Double a damage die of your choice\n- Hit an additional target within range"
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Enchanted Aid",
+        "text": "You can enhance the magic of others with your essence. When you Help an Ally with a Spellcast Roll, you can roll a **d8** as your advantage die. Once per long rest, after an ally has made a Spellcast Roll with your help, you can swap the results of their Duality Dice."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Arcane Charge",
+        "text": "You can gather magical energy to enhance your capabilities. When you take magic damage, you become _Charged_. Alternatively, you can **spend 2 Hope** to become _Charged_. When you successfully make an attack that deals magic damage while _Charged_, you can clear your _Charge_ to either gain a +10 bonus to the damage roll or gain a +3 bonus to the Difficulty of a reaction roll the spell causes the target to make. You stop being _Charged_ at your next long rest."
+      }
+    ]
+  },
+  {
+    "name": "School of Knowledge",
+    "description": "Play the School of Knowledge if you want a keen understanding of the world around you.",
+    "spellcastTrait": "Knowledge",
+    "foundation": [
+      {
+        "name": "Prepared",
+        "text": "Take an additional domain card of your level or lower from a domain you have access to."
+      },
+      {
+        "name": "Adept",
+        "text": "When you Utilize an Experience, you can **mark a Stress** instead of spending a Hope. If you do, double your Experience modifier for that roll."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Accomplished",
+        "text": "Take an additional domain card of your level or lower from a domain you have access to."
+      },
+      {
+        "name": "Perfect Recall",
+        "text": "Once per rest, when you recall a domain card in your vault, you can reduce its Recall Cost by 1."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Brilliant",
+        "text": "Take an additional domain card of your level or lower from a domain you have access to."
+      },
+      {
+        "name": "Honed Expertise",
+        "text": "When you use an Experience, roll a **d6.** On a result of 5 or higher, you can use it without spending Hope."
+      }
+    ]
+  },
+  {
+    "name": "School of War",
+    "description": "Play the School of War if you want to utilize trained magic for violence.",
+    "spellcastTrait": "Knowledge",
+    "foundation": [
+      {
+        "name": "Battlemage",
+        "text": "You've focused your studies on becoming an unconquerable force on the battlefield. Gain an additional Hit Point slot."
+      },
+      {
+        "name": "Face Your Fear",
+        "text": "When you succeed with Fear on an attack roll, you deal an extra **1d10** magic damage."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Conjure Shield",
+        "text": "You can maintain a protective barrier of magic. While you have at least 2 Hope, you add your Proficiency to your Evasion."
+      },
+      {
+        "name": "Fueled by Fear",
+        "text": "The extra magic damage from your \"Face Your Fear\" feature increases to **2d10**."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Thrive in Chaos",
+        "text": "When you succeed on an attack, you can **mark a Stress** after rolling damage to force the target to mark an additional Hit Point."
+      },
+      {
+        "name": "Have No Fear",
+        "text": "The extra magic damage from your \"Face Your Fear\" feature increases to **3d10.**"
+      }
+    ]
+  },
+  {
+    "name": "Stalwart",
+    "description": "Play the Stalwart if you want to take heavy blows and keep fighting.",
+    "spellcastTrait": "",
+    "foundation": [
+      {
+        "name": "Unwavering",
+        "text": "Gain a permanent +1 bonus to your damage thresholds."
+      },
+      {
+        "name": "Iron Will",
+        "text": "When you take physical damage, you can **mark an additional Armor Slot** to reduce the severity."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Unrelenting",
+        "text": "Gain a permanent +2 bonus to your damage thresholds."
+      },
+      {
+        "name": "Partners-in-Arms",
+        "text": "When an ally within Very Close range takes damage, you can **mark an Armor Slot** to reduce the severity by one threshold."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Undaunted",
+        "text": "Gain a permanent +3 bonus to your damage thresholds."
+      },
+      {
+        "name": "Loyal Protector",
+        "text": "When an ally within Close range has 2 or fewer Hit Points and would take damage, you can **mark a Stress** to sprint to their side and take the damage instead."
+      }
+    ]
+  },
+  {
+    "name": "Syndicate",
+    "description": "Play the Syndicate if you want to have a web of contacts everywhere you go.",
+    "spellcastTrait": "Finesse",
+    "foundation": [
+      {
+        "name": "Well-Connected",
+        "text": "When you arrive in a prominent town or environment, you know somebody who calls this place home. Give them a name, note how you think they could be useful, and choose one fact from the following list:\n\n- They owe me a favor, but they'll be hard to find.\n- They're going to ask for something in exchange.\n- They're always in a great deal of trouble.\n- We used to be together. It's a long story.\n- We didn't part on great terms."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Contacts Everywhere",
+        "text": "Once per session, you can briefly call on a shady contact. Choose one of the following benefits and describe what brought them here to help you in this moment:\n\n- They provide 1 handful of gold, a unique tool, or a mundane object that the situation requires.\n- On your next action roll, their help provides a +3 bonus to the result of your Hope or Fear Die.\n- The next time you deal damage, they snipe from the shadows, adding **2d8** to your damage roll."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Reliable Backup",
+        "text": "You can use your \"Contacts Everywhere\" feature three times per session. The following options are added to the list of benefits you can choose from when you use that feature:\n\n- When you mark 1 or more Hit Points, they can rush out to shield you, reducing the Hit Points marked by 1.\n- When you make a Presence Roll in conversation, they back you up. You can roll a **d20** as your Hope Die."
+      }
+    ]
+  },
+  {
+    "name": "Troubadour",
+    "description": "Play the Troubadour if you want to play music to bolster your allies.",
+    "spellcastTrait": "Presence",
+    "foundation": [
+      {
+        "name": "Gifted Performer",
+        "text": "You can play three different types of songs, once each per long rest; describe how you perform for others to gain the listed benefit:\n\n- _Relaxing Song:_ You and all allies within Close range clear a Hit Point.\n- _Epic Song:_ Make a target within Close range temporarily _Vulnerable._\n- _Heartbreaking Song:_ You and all allies within Close range gain a Hope."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Maestro",
+        "text": "Your rallying songs steel the courage of those who listen. When you give a Rally Die to an ally, they can gain a Hope or clear a Stress."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Virtuoso",
+        "text": "You are among the greatest of your craft and your skill is boundless. You can perform each of your \"Gifted Performer\" feature's songs twice per long rest."
+      }
+    ]
+  },
+  {
+    "name": "Vengeance",
+    "description": "Play the Vengeance if you want to strike down enemies who harm you or your allies.",
+    "spellcastTrait": "",
+    "foundation": [
+      {
+        "name": "At Ease",
+        "text": "Gain an additional Stress slot."
+      },
+      {
+        "name": "Revenge",
+        "text": "When an adversary within Melee range succeeds on an attack against you, you can **mark 2 Stress** to force the attacker to mark a Hit Point."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Act of Reprisal",
+        "text": "When an adversary damages an ally within Melee range, you gain a +1 bonus to your Proficiency for the next successful attack you make against that adversary."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Nemesis",
+        "text": "**Spend 2 Hope** to _Prioritize_ an adversary until your next rest. When you make an attack against your _Prioritized_ adversary, you can swap the results of your Hope and Fear Dice. You can only _Prioritize_ one adversary at a time."
+      }
+    ]
+  },
+  {
+    "name": "Warden of Renewal",
+    "description": "_Play the Warden of Renewal if you want to use powerful magic to heal your party._",
+    "spellcastTrait": "Instinct",
+    "foundation": [
+      {
+        "name": "Clarity of Nature",
+        "text": "Once per long rest, you can create a space of natural serenity within Close range. When you spend a few minutes resting within the space, clear Stress equal to your Instinct, distributed as you choose between you and your allies."
+      },
+      {
+        "name": "Regeneration",
+        "text": "Touch a creature and **spend 3 Hope.** That creature clears **1d4** Hit Points."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Regenerative Reach",
+        "text": "You can target creatures within Very Close range with your \"Regeneration\" feature."
+      },
+      {
+        "name": "Warden's Protection",
+        "text": "Once per long rest, **spend 2 Hope** to clear 2 Hit Points on **1d4** allies within Close range."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Defender",
+        "text": "Your animal transformation embodies a healing guardian spirit. When you're in Beastform and an ally within Close range marks 2 or more Hit Points, you can **mark a Stress** to reduce the number of Hit Points they mark by 1."
+      }
+    ]
+  },
+  {
+    "name": "Warden of the Elements",
+    "description": "Play the Warden of the Elements if you want to embody the natural elements of the wild.",
+    "spellcastTrait": "Instinct",
+    "foundation": [
+      {
+        "name": "Elemental Incarnation",
+        "text": "**Mark a Stress** to _Channel_ one of the following elements until you take Severe damage or until your next rest:\n\n- _Fire:_ When an adversary within Melee range deals damage to you, they take **1d10** magic damage.\n- _Earth:_ Gain a bonus to your damage thresholds equal to your Proficiency.\n- _Water:_ When you deal damage to an adversary within Melee range, all other adversaries within Very Close range must mark a Stress.\n- _Air:_ You can hover, gaining advantage on Agility Rolls."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Elemental Aura",
+        "text": "Once per rest while _Channeling_, you can assume an aura matching your element. The aura affects targets within Close range until your _Channeling_ ends.\n\n- _Fire:_ When an adversary marks 1 or more Hit Points, they must also mark a Stress.\n- _Earth:_ Your allies gain a +1 bonus to Strength.\n- _Water:_ When an adversary deals damage to you, you can **mark a Stress** to move them anywhere within Very Close range of where they are.\n- _Air:_ When you or an ally takes damage from an attack beyond Melee range, reduce the damage by **1d8**."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Elemental Dominion",
+        "text": "You further embody your element. While _Channeling_, you gain the following benefit:\n\n- _Fire:_ You gain a +1 bonus to your Proficiency for attacks and spells that deal damage.\n- _Earth:_ When you would mark Hit Points, roll a **d6** per Hit Point marked. For each result of 6, reduce the number of Hit Points you mark by 1.\n- _Water:_ When an attack against you succeeds, you can **mark a Stress** to make the attacker temporarily _Vulnerable_.\n- _Air:_ You gain a +1 bonus to your Evasion and can fly."
+      }
+    ]
+  },
+  {
+    "name": "Wayfinder",
+    "description": "Play the Wayfinder if you want to hunt your prey and strike with deadly force.",
+    "spellcastTrait": "Agility",
+    "foundation": [
+      {
+        "name": "Ruthless Predator",
+        "text": "When you make a damage roll, you can **mark a Stress** to gain a +1 bonus to your Proficiency. Additionally, when you deal Severe damage to an adversary, they must mark a Stress."
+      },
+      {
+        "name": "Path Forward",
+        "text": "When you're traveling to a place you've previously visited or you carry an object that has been at the location before, you can identify the shortest, most direct path to your destination."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Elusive Predator",
+        "text": "When your Focus makes an attack against you, you gain a +2 bonus to your Evasion against the attack."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Apex Predator",
+        "text": "Before you make an attack roll against your _Focus_, you can **spend a Hope.** On a successful attack, you remove a Fear from the GM's Fear pool."
+      }
+    ]
+  },
+  {
+    "name": "Winged Sentinel",
+    "description": "Play the Winged Sentinel if you want to take flight and strike crushing blows from the sky.",
+    "spellcastTrait": "Strength",
+    "foundation": [
+      {
+        "name": "Wings of Light",
+        "text": "You can fly. While flying, you can do the following:\n\n- **Mark a Stress** to pick up and carry another willing creature approximately your size or smaller.\n- **Spend a Hope** to deal an extra **1d8** damage on a successful attack."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Ethereal Visage",
+        "text": "Your supernatural visage strikes awe and fear. While flying, you have advantage on Presence Rolls. When you succeed with Hope on a Presence Roll, you can remove a Fear from the GM's Fear pool instead of gaining Hope."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Ascendant",
+        "text": "Gain a permanent +4 bonus to your Severe damage threshold."
+      },
+      {
+        "name": "Power of the Gods",
+        "text": "While flying, you deal an extra **1d12** damage instead of 1d8 from your \"Wings of Light\" feature."
+      }
+    ]
+  },
+  {
+    "name": "Wordsmith",
+    "description": "Play the Wordsmith if you want to use clever wordplay and captivate crowds.",
+    "spellcastTrait": "Presence",
+    "foundation": [
+      {
+        "name": "Rousing Speech",
+        "text": "Once per long rest, you can give a heartfelt, inspiring speech. All allies within Far range clear 2 Stress."
+      },
+      {
+        "name": "Heart of a Poet",
+        "text": "After you make an action roll to impress, persuade, or offend someone, you can **spend a Hope** to add a **d4** to the roll."
+      }
+    ],
+    "specialization": [
+      {
+        "name": "Eloquent",
+        "text": "Your moving words boost morale. Once per session, when you encourage an ally, you can do one of the following:\n\n- Allow them to find a mundane object or tool they need.\n- Help an Ally without spending Hope.\n- Give them an additional downtime move during their next rest."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Epic Poetry",
+        "text": "Your Rally Die increases to a **d10.** Additionally, when you Help an Ally, you can narrate the moment as if you were writing the tale of their heroism in a memoir. When you do, roll a **d10** as your advantage die."
+      }
+    ]
   }
 ] as const
