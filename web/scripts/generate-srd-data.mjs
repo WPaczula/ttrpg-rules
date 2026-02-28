@@ -24,6 +24,11 @@ function readDir(sub) {
     }));
 }
 
+function readJson(sub) {
+  const file = join(SRD, ".build", "03_json", `${sub}.json`);
+  return JSON.parse(readFileSync(file, "utf-8").replace(/^\ufeff/, ""));
+}
+
 // ── Weapons ──────────────────────────────────────────────────────────────────
 
 function parseWeapon({ name, content }) {
@@ -191,21 +196,109 @@ function parseDomain({ name, content }) {
   };
 }
 
+// ── Classes (from JSON) ─────────────────────────────────────────────────────
+
+function parseClass(raw) {
+  return {
+    name: raw.name,
+    description: raw.description,
+    domains: [raw.domain_1, raw.domain_2],
+    subclasses: [raw.subclass_1, raw.subclass_2],
+    evasion: Number(raw.evasion),
+    hp: Number(raw.hp),
+    items: raw.items || "",
+    suggestedTraits: raw.suggested_traits || "",
+    suggestedPrimary: raw.suggested_primary || "",
+    suggestedSecondary: raw.suggested_secondary || "",
+    suggestedArmor: raw.suggested_armor || "",
+    hopeFeature: {
+      name: raw.hope_feature_name,
+      text: raw.hope_feature_text,
+    },
+    features: (raw.feature || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+  };
+}
+
+// ── Ancestries (from JSON) ──────────────────────────────────────────────────
+
+function parseAncestry(raw) {
+  return {
+    name: raw.name,
+    description: raw.description,
+    features: (raw.feature || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+  };
+}
+
+// ── Communities (from JSON) ──────────────────────────────────────────────────
+
+function parseCommunity(raw) {
+  return {
+    name: raw.name,
+    description: raw.description,
+    note: raw.note || "",
+    features: (raw.feature || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+  };
+}
+
+// ── Subclasses (from JSON) ──────────────────────────────────────────────────
+
+function parseSubclass(raw) {
+  return {
+    name: raw.name,
+    description: raw.description,
+    spellcastTrait: raw.spellcast_trait || "",
+    foundation: (raw.foundation || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+    specialization: (raw.specialization || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+    mastery: (raw.mastery || []).map((f) => ({
+      name: f.name,
+      text: f.text,
+    })),
+  };
+}
+
 // ── Generate ─────────────────────────────────────────────────────────────────
 
 const weapons = readDir("weapons").map(parseWeapon);
 const armors = readDir("armor").map(parseArmor);
 const abilities = readDir("abilities").map(parseAbility);
 const domains = readDir("domains").map(parseDomain);
+const classes = readJson("classes").map(parseClass);
+const ancestries = readJson("ancestries").map(parseAncestry);
+const communities = readJson("communities").map(parseCommunity);
+const subclasses = readJson("subclasses").map(parseSubclass);
 
 // Sort weapons: Tier 1 first, then alphabetical
 weapons.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
 armors.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
 abilities.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 domains.sort((a, b) => a.name.localeCompare(b.name));
+classes.sort((a, b) => a.name.localeCompare(b.name));
+ancestries.sort((a, b) => a.name.localeCompare(b.name));
+communities.sort((a, b) => a.name.localeCompare(b.name));
+subclasses.sort((a, b) => a.name.localeCompare(b.name));
 
 const output = `// Auto-generated from Daggerheart SRD. Do not edit by hand.
 // Run: node web/scripts/generate-srd-data.mjs
+
+export interface SrdFeature {
+  name: string
+  text: string
+}
 
 export interface SrdWeapon {
   name: string
@@ -242,6 +335,44 @@ export interface SrdDomain {
   cardsByLevel: Record<number, string[]>
 }
 
+export interface SrdClass {
+  name: string
+  description: string
+  domains: [string, string]
+  subclasses: [string, string]
+  evasion: number
+  hp: number
+  items: string
+  suggestedTraits: string
+  suggestedPrimary: string
+  suggestedSecondary: string
+  suggestedArmor: string
+  hopeFeature: SrdFeature
+  features: SrdFeature[]
+}
+
+export interface SrdAncestry {
+  name: string
+  description: string
+  features: SrdFeature[]
+}
+
+export interface SrdCommunity {
+  name: string
+  description: string
+  note: string
+  features: SrdFeature[]
+}
+
+export interface SrdSubclass {
+  name: string
+  description: string
+  spellcastTrait: string
+  foundation: SrdFeature[]
+  specialization: SrdFeature[]
+  mastery: SrdFeature[]
+}
+
 export const SRD_WEAPONS: SrdWeapon[] = ${JSON.stringify(weapons, null, 2)} as const
 
 export const SRD_ARMOR: SrdArmor[] = ${JSON.stringify(armors, null, 2)} as const
@@ -249,6 +380,14 @@ export const SRD_ARMOR: SrdArmor[] = ${JSON.stringify(armors, null, 2)} as const
 export const SRD_DOMAIN_CARDS: SrdDomainCard[] = ${JSON.stringify(abilities, null, 2)} as const
 
 export const SRD_DOMAINS: SrdDomain[] = ${JSON.stringify(domains, null, 2)} as const
+
+export const SRD_CLASSES: SrdClass[] = ${JSON.stringify(classes, null, 2)} as const
+
+export const SRD_ANCESTRIES: SrdAncestry[] = ${JSON.stringify(ancestries, null, 2)} as const
+
+export const SRD_COMMUNITIES: SrdCommunity[] = ${JSON.stringify(communities, null, 2)} as const
+
+export const SRD_SUBCLASSES: SrdSubclass[] = ${JSON.stringify(subclasses, null, 2)} as const
 `;
 
 writeFileSync(OUT, output, "utf-8");
@@ -258,5 +397,9 @@ console.log(
   `${weapons.length} weapons,`,
   `${armors.length} armors,`,
   `${abilities.length} domain cards,`,
-  `${domains.length} domains`
+  `${domains.length} domains,`,
+  `${classes.length} classes,`,
+  `${ancestries.length} ancestries,`,
+  `${communities.length} communities,`,
+  `${subclasses.length} subclasses`
 );
