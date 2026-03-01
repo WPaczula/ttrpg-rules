@@ -1,0 +1,141 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
+import type { CharacterData } from "@/lib/character-types"
+import { SRD_WEAPONS, SRD_ARMOR } from "@/lib/srd-data"
+import { Sword, Plus, Trash2 } from "lucide-react"
+import { Section } from "./primitives"
+
+interface EquipmentSectionProps {
+  character: CharacterData
+  update: (patch: Partial<CharacterData>) => void
+  primaryWeaponItems: ComboboxItem[]
+  secondaryWeaponItems: ComboboxItem[]
+  armorItems: ComboboxItem[]
+}
+
+export function EquipmentSection({
+  character: c,
+  update,
+  primaryWeaponItems,
+  secondaryWeaponItems,
+  armorItems,
+}: EquipmentSectionProps) {
+  const addItem = () => {
+    update({ items: [...c.items, ""] })
+  }
+
+  const updateItem = (index: number, value: string) => {
+    const items = [...c.items]
+    items[index] = value
+    update({ items })
+  }
+
+  const removeItem = (index: number) => {
+    update({ items: c.items.filter((_, i) => i !== index) })
+  }
+
+  return (
+    <Section icon={<Sword className="w-4 h-4" />} title="Equipment">
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">Primary Weapon</label>
+          <Combobox
+            items={primaryWeaponItems}
+            value={c.primaryWeapon}
+            onSelect={(v) => update({ primaryWeapon: v })}
+            placeholder="Search weapons…"
+            searchPlaceholder="Type to search weapons…"
+            className="text-sm"
+          />
+          {(() => {
+            const w = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
+            return w ? (
+              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                <span>{w.damage}</span>
+                <span>· {w.trait}</span>
+                <span>· {w.range}</span>
+                <span>· {w.burden}</span>
+                {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
+              </div>
+            ) : null
+          })()}
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">Secondary Weapon</label>
+          <Combobox
+            items={secondaryWeaponItems}
+            value={c.secondaryWeapon}
+            onSelect={(v) => update({ secondaryWeapon: v })}
+            placeholder="Search weapons…"
+            searchPlaceholder="Type to search weapons…"
+            className="text-sm"
+          />
+          {(() => {
+            const w = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
+            return w ? (
+              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                <span>{w.damage}</span>
+                <span>· {w.trait}</span>
+                <span>· {w.range}</span>
+                <span>· {w.burden}</span>
+                {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
+              </div>
+            ) : null
+          })()}
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">Armor</label>
+          <Combobox
+            items={armorItems}
+            value={c.armorName}
+            onSelect={(v) => update({ armorName: v })}
+            placeholder="Search armor…"
+            searchPlaceholder="Type to search armor…"
+            className="text-sm"
+          />
+          {(() => {
+            const a = SRD_ARMOR.find((a) => a.name === c.armorName)
+            return a ? (
+              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                <span>Score {a.baseScore}</span>
+                <span>· Thresholds {a.baseThresholds}</span>
+                {a.feature && <span className="text-gold-muted">· {a.feature}</span>}
+              </div>
+            ) : null
+          })()}
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">Other Items</label>
+          {c.items.map((item, i) => (
+            <div key={i} className="flex gap-2">
+              <Input
+                value={item}
+                onChange={(e) => updateItem(i, e.target.value)}
+                placeholder="Item…"
+                className="flex-1 h-8 bg-input border-border text-sm"
+              />
+              <button
+                onClick={() => removeItem(i)}
+                className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95"
+                aria-label="Remove item"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addItem}
+            className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-gold"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> Add Item
+          </Button>
+        </div>
+      </div>
+    </Section>
+  )
+}

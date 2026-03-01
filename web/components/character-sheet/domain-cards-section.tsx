@@ -1,0 +1,131 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
+import { type DomainCard, type CharacterData } from "@/lib/character-types"
+import { SRD_DOMAIN_CARDS } from "@/lib/srd-data"
+import { BookOpen, Plus, Trash2 } from "lucide-react"
+import { Section } from "./primitives"
+
+interface DomainCardsSectionProps {
+  domainCards: DomainCard[]
+  domainCardItems: ComboboxItem[]
+  update: (patch: Partial<CharacterData>) => void
+}
+
+export function DomainCardsSection({ domainCards, domainCardItems, update }: DomainCardsSectionProps) {
+  const addDomainCard = () => {
+    if (domainCards.length >= 5) return
+    const newCard: DomainCard = { id: crypto.randomUUID(), name: "", level: 1, domain: "" }
+    update({ domainCards: [...domainCards, newCard] })
+  }
+
+  const updateDomainCard = (id: string, patch: Partial<DomainCard>) => {
+    update({
+      domainCards: domainCards.map((d) => (d.id === id ? { ...d, ...patch } : d)),
+    })
+  }
+
+  const removeDomainCard = (id: string) => {
+    update({ domainCards: domainCards.filter((d) => d.id !== id) })
+  }
+
+  return (
+    <Section icon={<BookOpen className="w-4 h-4" />} title="Domain Cards">
+      <div className="space-y-3">
+        {domainCards.length === 0 && (
+          <p className="text-xs text-muted-foreground italic">No domain cards yet.</p>
+        )}
+        {domainCards.map((card) => {
+          const srdCard = SRD_DOMAIN_CARDS.find((dc) => dc.name === card.name)
+          return (
+            <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Combobox
+                    items={domainCardItems}
+                    value={card.name}
+                    onSelect={(name) => {
+                      const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === name)
+                      if (match) {
+                        updateDomainCard(card.id, { name, level: match.level, domain: match.domain })
+                      } else {
+                        updateDomainCard(card.id, { name })
+                      }
+                    }}
+                    placeholder="Search domain cards…"
+                    searchPlaceholder="Type to search cards…"
+                    className="h-8 text-sm font-medium"
+                  />
+                </div>
+                <button
+                  onClick={() => removeDomainCard(card.id)}
+                  className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95 shrink-0"
+                  aria-label="Remove card"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {srdCard && (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
+                      {srdCard.domain}
+                    </Badge>
+                    <span>Lvl {srdCard.level}</span>
+                    <span>· Recall {srdCard.recallCost}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3">
+                    {srdCard.description}
+                  </p>
+                </div>
+              )}
+              {!srdCard && card.name && (
+                <div className="flex gap-2">
+                  <Input
+                    value={card.domain}
+                    onChange={(e) => updateDomainCard(card.id, { domain: e.target.value })}
+                    placeholder="Domain"
+                    className="flex-1 h-7 bg-input border-border text-xs"
+                  />
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground">Lvl</span>
+                    <select
+                      value={card.level}
+                      onChange={(e) => updateDomainCard(card.id, { level: Number(e.target.value) })}
+                      className="bg-input border border-border rounded px-1.5 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-gold h-7"
+                      aria-label="Card level"
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((l) => (
+                        <option key={l} value={l}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+        {domainCards.length < 5 ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={addDomainCard}
+            className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-gold"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> Add Card
+            <span className="ml-auto text-xs text-muted-foreground">
+              {domainCards.length}/5
+            </span>
+          </Button>
+        ) : (
+          <p className="text-xs text-muted-foreground text-center italic">
+            Maximum 5 active domain cards.
+          </p>
+        )}
+      </div>
+    </Section>
+  )
+}
