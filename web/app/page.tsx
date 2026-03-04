@@ -9,6 +9,7 @@ import { MessageSquare, Scroll } from "lucide-react"
 
 export default function Home() {
   const [password, setPassword] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("chat")
 
   if (!password) {
     return <AccessGate onValidPassword={setPassword} />
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     <Tabs
       defaultValue="chat"
+      onValueChange={setActiveTab}
       className="flex flex-col h-dvh bg-background gap-0"
     >
       <TabsList className="shrink-0 w-full rounded-none border-b border-border bg-card/80 backdrop-blur-sm h-12 justify-start gap-1 px-2 p-1.5">
@@ -37,7 +39,7 @@ export default function Home() {
       </TabsList>
 
       <TabsContent value="chat" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
-        <ChatInterface password={password} />
+        <ChatInterface password={password} isActive={activeTab === "chat"} />
       </TabsContent>
 
       <TabsContent value="sheet" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
