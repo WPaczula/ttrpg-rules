@@ -25,6 +25,7 @@ function getMessageContent(message: UIMessage): string {
 
 interface ChatInterfaceProps {
   password: string
+  isActive?: boolean
 }
 
 const STORAGE_KEY = "daggerheart-chat-messages"
@@ -79,7 +80,7 @@ function clearMessages() {
   }
 }
 
-export function ChatInterface({ password }: ChatInterfaceProps) {
+export function ChatInterface({ password, isActive }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
@@ -119,6 +120,16 @@ export function ChatInterface({ password }: ChatInterfaceProps) {
       })
     }
   }, [messages.length])
+
+  // Auto-scroll to bottom when switching back to the chat tab
+  useEffect(() => {
+    if (isActive) {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "instant",
+      })
+    }
+  }, [isActive])
 
   // Scroll input area into view when focused (for mobile keyboard)
   const handleInputFocus = () => {
