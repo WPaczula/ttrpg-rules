@@ -85,15 +85,14 @@ export function useAdversaryStore() {
   // ─── Encounter Operations ────────────────────────────────────────────
 
   const addEncounter = useCallback(
-    (name: string) => {
-      setStore((prev) => {
-        const enc = createEncounter(name)
-        return {
-          ...prev,
-          encounters: [...prev.encounters, enc],
-          activeEncounterId: enc.id,
-        }
-      })
+    (name: string): string => {
+      const enc = createEncounter(name)
+      setStore((prev) => ({
+        ...prev,
+        encounters: [...prev.encounters, enc],
+        activeEncounterId: enc.id,
+      }))
+      return enc.id
     },
     [setStore]
   )

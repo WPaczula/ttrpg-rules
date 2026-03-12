@@ -54,8 +54,8 @@ export default function Home() {
         <CharacterSheetTab />
       </TabsContent>
 
-      <TabsContent value="adversaries" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
-        <EncounterTab />
+      <TabsContent value="adversaries" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
+        <EncounterTab password={password} />
       </TabsContent>
     </Tabs>
   )

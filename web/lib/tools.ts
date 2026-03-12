@@ -1,5 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { ADVERSARY_TYPES } from '@/lib/adversary-types';
 
 const serverUrl = process.env.SERVER_URL || 'http://localhost:3001';
 
@@ -11,6 +12,7 @@ const categories = [
   { plural: 'domains', singular: 'domain' },
   { plural: 'armor', singular: 'armor' },
   { plural: 'weapons', singular: 'weapon' },
+  { plural: 'adversaries', singular: 'adversary' },
 ];
 
 // Helper to create list tools
@@ -75,6 +77,40 @@ export const rulesTools = {
       return data.map((r: { id: string; content: string }) =>
         `## ${r.id}\n\n${r.content}`
       ).join('\n\n---\n\n');
+    },
+  }),
+};
+
+// Tools for the adversary encounter builder chat
+export const adversaryChatTools = {
+  ...rulesTools,
+  propose_encounter: tool({
+    description: 'Propose a complete encounter with adversaries for the GM to review. Call this when you have built a balanced encounter and are ready to present it. The GM will see a preview and can accept or reject it.',
+    inputSchema: z.object({
+      name: z.string().describe('A descriptive name for this encounter'),
+      adversaries: z.array(z.object({
+        name: z.string().describe('Adversary name'),
+        type: z.enum(ADVERSARY_TYPES).describe('Adversary role type'),
+        tier: z.number().describe('Adversary tier (1-4)'),
+        hp: z.number().describe('Hit points'),
+        stress: z.number().describe('Stress points'),
+        difficulty: z.number().describe('Difficulty / DC'),
+        thresholds: z.string().describe('Major/severe thresholds e.g. "8/14"'),
+        atk: z.string().describe('Attack modifier e.g. "+1"'),
+        attack: z.string().describe('Attack/weapon name'),
+        range: z.string().describe('Range: Melee, Very Close, Close, Far, Very Far'),
+        damage: z.string().describe('Damage expression e.g. "1d8+1 phy"'),
+        description: z.string().optional().describe('Brief description'),
+        motives_and_tactics: z.string().optional().describe('Motives and tactics'),
+        experience: z.string().optional().describe('Experience value'),
+        features: z.array(z.object({
+          name: z.string().describe('Feature name'),
+          text: z.string().describe('Feature description'),
+        })).optional().describe('Special features/abilities'),
+      })).describe('Array of adversaries in this encounter'),
+    }),
+    execute: async (input) => {
+      return JSON.stringify(input);
     },
   }),
 };
