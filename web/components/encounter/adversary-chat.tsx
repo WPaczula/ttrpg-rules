@@ -65,7 +65,6 @@ function getProposalFromMessage(message: UIMessage): { data: ReturnType<typeof p
 }
 
 interface AdversaryChatProps {
-  password: string
   isActive?: boolean
   onAcceptEncounter: (name: string, adversaries: Adversary[]) => void
   onAddAdversary: (adversary: Adversary) => void
@@ -145,7 +144,7 @@ function loadPcTier(): number {
   return Number(localStorage.getItem(PC_TIER_KEY)) || 1
 }
 
-export function AdversaryChat({ password, isActive, onAcceptEncounter, onAddAdversary }: AdversaryChatProps) {
+export function AdversaryChat({ isActive, onAcceptEncounter, onAddAdversary }: AdversaryChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [pcCount, setPcCountState] = useState(loadPcCount)
@@ -153,7 +152,7 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter, onAddAdve
   const [acceptedProposals, setAcceptedProposals] = useState<Set<string>>(loadAccepted)
 
   // Mutable body ref so the transport always sends current values
-  const bodyRef = useRef({ password, pcCount, pcTier })
+  const bodyRef = useRef({ pcCount, pcTier })
 
   const setPcCount = useCallback((v: number) => {
     setPcCountState(v)
@@ -167,9 +166,6 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter, onAddAdve
     try { localStorage.setItem(PC_TIER_KEY, String(v)) } catch { /* ignore */ }
   }, [])
 
-  // Keep password in sync
-  bodyRef.current.password = password
-
   // Stable transport — bodyRef.current is mutated in place so the
   // same object reference always reflects current pcCount/pcTier
   const transport = useMemo(
@@ -179,7 +175,7 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter, onAddAdve
         body: bodyRef.current,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [password]
+    []
   )
 
   const { messages, sendMessage, setMessages, status } = useChat({
