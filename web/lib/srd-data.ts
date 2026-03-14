@@ -23,6 +23,7 @@ export interface SrdArmor {
   tier: number
   baseThresholds: string
   baseScore: number
+  evasionModifier?: number
   feature?: string
 }
 
@@ -2007,13 +2008,15 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Chainmail Armor",
     "tier": 1,
     "baseThresholds": "7 / 15",
-    "baseScore": 4
+    "baseScore": 4,
+    "evasionModifier": -1
   },
   {
     "name": "Full Plate Armor",
     "tier": 1,
     "baseThresholds": "8 / 17",
-    "baseScore": 4
+    "baseScore": 4,
+    "evasionModifier": -2
   },
   {
     "name": "Gambeson Armor",
@@ -2031,7 +2034,8 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Elundrian Chain Armor",
     "tier": 2,
     "baseThresholds": "9 / 21",
-    "baseScore": 4
+    "baseScore": 4,
+    "evasionModifier": -1
   },
   {
     "name": "Harrowbone Armor",
@@ -2043,13 +2047,15 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Improved Chainmail Armor",
     "tier": 2,
     "baseThresholds": "11 / 24",
-    "baseScore": 5
+    "baseScore": 5,
+    "evasionModifier": -1
   },
   {
     "name": "Improved Full Plate Armor",
     "tier": 2,
     "baseThresholds": "13 / 28",
-    "baseScore": 5
+    "baseScore": 5,
+    "evasionModifier": -2
   },
   {
     "name": "Improved Gambeson Armor",
@@ -2067,7 +2073,8 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Irontree Breastplate Armor",
     "tier": 2,
     "baseThresholds": "9 / 20",
-    "baseScore": 4
+    "baseScore": 4,
+    "evasionModifier": -1
   },
   {
     "name": "Rosewild Armor",
@@ -2091,13 +2098,15 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Advanced Chainmail Armor",
     "tier": 3,
     "baseThresholds": "13 / 31",
-    "baseScore": 6
+    "baseScore": 6,
+    "evasionModifier": -1
   },
   {
     "name": "Advanced Full Plate Armor",
     "tier": 3,
     "baseThresholds": "15 / 35",
-    "baseScore": 6
+    "baseScore": 6,
+    "evasionModifier": -2
   },
   {
     "name": "Advanced Gambeson Armor",
@@ -2121,7 +2130,8 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Bladefare Armor",
     "tier": 3,
     "baseThresholds": "16 / 39",
-    "baseScore": 6
+    "baseScore": 6,
+    "evasionModifier": -2
   },
   {
     "name": "Dragonscale Armor",
@@ -2139,13 +2149,15 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Runes of Fortification",
     "tier": 3,
     "baseThresholds": "17 / 43",
-    "baseScore": 6
+    "baseScore": 6,
+    "evasionModifier": -2
   },
   {
     "name": "Spiked Plate Armor",
     "tier": 3,
     "baseThresholds": "10 / 25",
-    "baseScore": 5
+    "baseScore": 5,
+    "evasionModifier": -2
   },
   {
     "name": "Channeling Armor",
@@ -2169,19 +2181,22 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Full Fortified Armor",
     "tier": 4,
     "baseThresholds": "15 / 40",
-    "baseScore": 4
+    "baseScore": 4,
+    "evasionModifier": -2
   },
   {
     "name": "Legendary Chainmail Armor",
     "tier": 4,
     "baseThresholds": "15 / 40",
-    "baseScore": 7
+    "baseScore": 7,
+    "evasionModifier": -1
   },
   {
     "name": "Legendary Full Plate Armor",
     "tier": 4,
     "baseThresholds": "17 / 44",
-    "baseScore": 7
+    "baseScore": 7,
+    "evasionModifier": -2
   },
   {
     "name": "Legendary Gambeson Armor",
@@ -2199,7 +2214,8 @@ export const SRD_ARMOR: SrdArmor[] = [
     "name": "Savior Chainmail",
     "tier": 4,
     "baseThresholds": "18 / 48",
-    "baseScore": 8
+    "baseScore": 8,
+    "evasionModifier": -1
   },
   {
     "name": "Veritas Opal Armor",

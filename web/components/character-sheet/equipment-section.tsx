@@ -91,7 +91,25 @@ export function EquipmentSection({
           <Combobox
             items={armorItems}
             value={c.armorName}
-            onSelect={(v) => update({ armorName: v })}
+            onSelect={(v) => {
+              const newArmor = SRD_ARMOR.find((a) => a.name === v)
+              const oldArmor = SRD_ARMOR.find((a) => a.name === c.armorName)
+              const patch: Partial<CharacterData> = { armorName: v }
+              if (newArmor) {
+                patch.armorScore = newArmor.baseScore
+                const parts = newArmor.baseThresholds.split("/").map((s) => parseInt(s.trim(), 10))
+                if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                  patch.minorThreshold = parts[0]
+                  patch.majorThreshold = parts[1]
+                }
+                const oldMod = oldArmor?.evasionModifier ?? 0
+                const newMod = newArmor.evasionModifier ?? 0
+                if (oldMod !== newMod) {
+                  patch.evasion = c.evasion - oldMod + newMod
+                }
+              }
+              update(patch)
+            }}
             placeholder="Search armor…"
             searchPlaceholder="Type to search armor…"
             className="text-sm"
@@ -102,6 +120,9 @@ export function EquipmentSection({
               <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
                 <span>Score {a.baseScore}</span>
                 <span>· Thresholds {a.baseThresholds}</span>
+                {a.evasionModifier !== undefined && a.evasionModifier !== 0 && (
+                  <span className="text-amber-400">· Evasion {a.evasionModifier}</span>
+                )}
                 {a.feature && <span className="text-gold-muted">· {a.feature}</span>}
               </div>
             ) : null
