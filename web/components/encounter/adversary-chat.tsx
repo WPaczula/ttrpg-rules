@@ -24,26 +24,25 @@ function getMessageContent(message: UIMessage): string {
     .join("\n")
 }
 
+// AI SDK v6: tool parts use type "tool-{toolName}", state "output-available", result at part.output
+
+function getToolOutput(part: unknown): string | null {
+  const p = part as any
+  if (p.state !== "output-available" || p.output == null) return null
+  return typeof p.output === "string" ? p.output : JSON.stringify(p.output)
+}
+
 // Check if a message has a create_adversary tool invocation
 function getAdversaryFromMessage(message: UIMessage): { data: ReturnType<typeof parseAdversaryFromToolCall>; state: string } | null {
   if (!message.parts) return null
   for (const part of message.parts) {
-    if (
-      part.type === "tool-invocation" &&
-      (part as any).toolInvocation?.toolName === "create_adversary"
-    ) {
-      const invocation = (part as any).toolInvocation
-      if (invocation.state === "result" && invocation.result) {
-        const data = parseAdversaryFromToolCall(
-          typeof invocation.result === "string"
-            ? invocation.result
-            : JSON.stringify(invocation.result)
-        )
-        return data ? { data, state: "result" } : null
+    if ((part as any).type === "tool-create_adversary") {
+      const output = getToolOutput(part)
+      if (output != null) {
+        const data = parseAdversaryFromToolCall(output)
+        return data ? { data, state: "output-available" } : null
       }
-      if (invocation.state === "call" || invocation.state === "partial-call") {
-        return { data: null, state: invocation.state }
-      }
+      return { data: null, state: (part as any).state ?? "input-streaming" }
     }
   }
   return null
@@ -53,23 +52,13 @@ function getAdversaryFromMessage(message: UIMessage): { data: ReturnType<typeof 
 function getProposalFromMessage(message: UIMessage): { data: ReturnType<typeof parseProposalFromToolCall>; state: string } | null {
   if (!message.parts) return null
   for (const part of message.parts) {
-    if (
-      part.type === "tool-invocation" &&
-      (part as any).toolInvocation?.toolName === "propose_encounter"
-    ) {
-      const invocation = (part as any).toolInvocation
-      if (invocation.state === "result" && invocation.result) {
-        const data = parseProposalFromToolCall(
-          typeof invocation.result === "string"
-            ? invocation.result
-            : JSON.stringify(invocation.result)
-        )
-        return data ? { data, state: "result" } : null
+    if ((part as any).type === "tool-propose_encounter") {
+      const output = getToolOutput(part)
+      if (output != null) {
+        const data = parseProposalFromToolCall(output)
+        return data ? { data, state: "output-available" } : null
       }
-      // Still pending/streaming — show loading state
-      if (invocation.state === "call" || invocation.state === "partial-call") {
-        return { data: null, state: invocation.state }
-      }
+      return { data: null, state: (part as any).state ?? "input-streaming" }
     }
   }
   return null
