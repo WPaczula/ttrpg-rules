@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ChatMessage } from "@/components/chat-message"
 import { TypingIndicator } from "@/components/typing-indicator"
 import { EncounterProposal, parseProposalFromToolCall } from "@/components/encounter/encounter-proposal"
+import { AdversarySummaryCard, parseAdversaryFromToolCall } from "@/components/encounter/adversary-summary-card"
 import { Counter } from "@/components/character-sheet/primitives"
 import type { Adversary } from "@/lib/adversary-types"
 import { Send, Bot, Users, Shield } from "lucide-react"
@@ -21,6 +22,31 @@ function getMessageContent(message: UIMessage): string {
     .filter((part): part is { type: "text"; text: string } => part.type === "text")
     .map((part) => part.text)
     .join("\n")
+}
+
+// Check if a message has a create_adversary tool invocation
+function getAdversaryFromMessage(message: UIMessage): { data: ReturnType<typeof parseAdversaryFromToolCall>; state: string } | null {
+  if (!message.parts) return null
+  for (const part of message.parts) {
+    if (
+      part.type === "tool-invocation" &&
+      (part as any).toolInvocation?.toolName === "create_adversary"
+    ) {
+      const invocation = (part as any).toolInvocation
+      if (invocation.state === "result" && invocation.result) {
+        const data = parseAdversaryFromToolCall(
+          typeof invocation.result === "string"
+            ? invocation.result
+            : JSON.stringify(invocation.result)
+        )
+        return data ? { data, state: "result" } : null
+      }
+      if (invocation.state === "call" || invocation.state === "partial-call") {
+        return { data: null, state: invocation.state }
+      }
+    }
+  }
+  return null
 }
 
 // Check if a message has a propose_encounter tool invocation
@@ -53,6 +79,7 @@ interface AdversaryChatProps {
   password: string
   isActive?: boolean
   onAcceptEncounter: (name: string, adversaries: Adversary[]) => void
+  onAddAdversary: (adversary: Adversary) => void
 }
 
 const STORAGE_KEY = "daggerheart-adversary-chat-messages"
@@ -129,7 +156,7 @@ function loadPcTier(): number {
   return Number(localStorage.getItem(PC_TIER_KEY)) || 1
 }
 
-export function AdversaryChat({ password, isActive, onAcceptEncounter }: AdversaryChatProps) {
+export function AdversaryChat({ password, isActive, onAcceptEncounter, onAddAdversary }: AdversaryChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [pcCount, setPcCountState] = useState(loadPcCount)
@@ -207,6 +234,16 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter }: Adversa
     })
   }, [onAcceptEncounter])
 
+  const handleAddAdversary = useCallback((messageId: string, adversary: Adversary) => {
+    onAddAdversary(adversary)
+    setAcceptedProposals(prev => {
+      const next = new Set(prev)
+      next.add(messageId)
+      saveAccepted(next)
+      return next
+    })
+  }, [onAddAdversary])
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
@@ -280,6 +317,7 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter }: Adversa
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => {
               const proposal = message.role === "assistant" ? getProposalFromMessage(message) : null
+              const adversaryCard = message.role === "assistant" ? getAdversaryFromMessage(message) : null
               const textContent = getMessageContent(message)
 
               return (
@@ -304,6 +342,20 @@ export function AdversaryChat({ password, isActive, onAcceptEncounter }: Adversa
                   {proposal && !proposal.data && (
                     <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
                       Building encounter...
+                    </div>
+                  )}
+                  {/* Render adversary summary card if present */}
+                  {adversaryCard?.data && (
+                    <AdversarySummaryCard
+                      data={adversaryCard.data}
+                      onAddToEncounter={(adv) => handleAddAdversary(message.id, adv)}
+                      accepted={acceptedProposals.has(message.id)}
+                    />
+                  )}
+                  {/* Adversary card loading state */}
+                  {adversaryCard && !adversaryCard.data && (
+                    <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
+                      Designing adversary...
                     </div>
                   )}
                 </div>

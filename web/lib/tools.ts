@@ -81,33 +81,43 @@ export const rulesTools = {
   }),
 };
 
+// Shared adversary input schema fields (reused by propose_encounter and create_adversary)
+const adversaryFields = {
+  name: z.string().describe('Adversary name'),
+  type: z.enum(ADVERSARY_TYPES).describe('Adversary role type'),
+  tier: z.number().describe('Adversary tier (1-4)'),
+  hp: z.number().describe('Hit points'),
+  stress: z.number().describe('Stress points'),
+  difficulty: z.number().describe('Difficulty / DC'),
+  thresholds: z.string().describe('Major/severe thresholds e.g. "8/14"'),
+  atk: z.string().describe('Attack modifier e.g. "+1"'),
+  attack: z.string().describe('Attack/weapon name'),
+  range: z.string().describe('Range: Melee, Very Close, Close, Far, Very Far'),
+  damage: z.string().describe('Damage expression e.g. "1d8+1 phy"'),
+  description: z.string().optional().describe('Brief description'),
+  motives_and_tactics: z.string().optional().describe('Motives and tactics'),
+  experience: z.string().optional().describe('Experience value'),
+  features: z.array(z.object({
+    name: z.string().describe('Feature name'),
+    text: z.string().describe('Feature description'),
+  })).optional().describe('Special features/abilities'),
+};
+
 // Tools for the adversary encounter builder chat
 export const adversaryChatTools = {
   ...rulesTools,
+  create_adversary: tool({
+    description: 'Create a single custom adversary for the GM to review and add to the active encounter. Call this when the GM asks to design or add an individual adversary rather than a full encounter.',
+    inputSchema: z.object(adversaryFields),
+    execute: async (input) => {
+      return JSON.stringify(input);
+    },
+  }),
   propose_encounter: tool({
     description: 'Propose a complete encounter with adversaries for the GM to review. Call this when you have built a balanced encounter and are ready to present it. The GM will see a preview and can accept or reject it.',
     inputSchema: z.object({
       name: z.string().describe('A descriptive name for this encounter'),
-      adversaries: z.array(z.object({
-        name: z.string().describe('Adversary name'),
-        type: z.enum(ADVERSARY_TYPES).describe('Adversary role type'),
-        tier: z.number().describe('Adversary tier (1-4)'),
-        hp: z.number().describe('Hit points'),
-        stress: z.number().describe('Stress points'),
-        difficulty: z.number().describe('Difficulty / DC'),
-        thresholds: z.string().describe('Major/severe thresholds e.g. "8/14"'),
-        atk: z.string().describe('Attack modifier e.g. "+1"'),
-        attack: z.string().describe('Attack/weapon name'),
-        range: z.string().describe('Range: Melee, Very Close, Close, Far, Very Far'),
-        damage: z.string().describe('Damage expression e.g. "1d8+1 phy"'),
-        description: z.string().optional().describe('Brief description'),
-        motives_and_tactics: z.string().optional().describe('Motives and tactics'),
-        experience: z.string().optional().describe('Experience value'),
-        features: z.array(z.object({
-          name: z.string().describe('Feature name'),
-          text: z.string().describe('Feature description'),
-        })).optional().describe('Special features/abilities'),
-      })).describe('Array of adversaries in this encounter'),
+      adversaries: z.array(z.object(adversaryFields)).describe('Array of adversaries in this encounter'),
     }),
     execute: async (input) => {
       return JSON.stringify(input);

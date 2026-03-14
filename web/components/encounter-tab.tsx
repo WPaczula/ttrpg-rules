@@ -53,6 +53,17 @@ export function EncounterTab({ password }: EncounterTabProps) {
     setSubTab("encounters")
   }, [importAdversaries, addEncounter, addToEncounter])
 
+  const handleAddAdversary = useCallback((adversary: Adversary) => {
+    // 1. Import to library (required as source for encounter instances)
+    importAdversaries([adversary])
+    // 2. Use active encounter or create a new one
+    const encId = store.activeEncounterId ?? addEncounter("New Encounter")
+    // 3. Add instance to the encounter
+    addToEncounter(encId, adversary.name)
+    // 4. Switch to encounters sub-tab so user sees the result
+    setSubTab("encounters")
+  }, [store.activeEncounterId, importAdversaries, addEncounter, addToEncounter])
+
   if (!isLoaded) {
     return (
       <div className="p-4 space-y-4">
@@ -98,6 +109,7 @@ export function EncounterTab({ password }: EncounterTabProps) {
           password={password}
           isActive={subTab === "builder"}
           onAcceptEncounter={handleAcceptEncounter}
+          onAddAdversary={handleAddAdversary}
         />
       </TabsContent>
 
