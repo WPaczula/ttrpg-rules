@@ -32,8 +32,19 @@ import { GoldSection } from "@/components/character-sheet/gold-section"
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function CharacterSheetTab() {
-  const { character: c, setCharacter, resetCharacter, isLoaded } = useCharacterSheet()
+interface CharacterSheetTabProps {
+  character?: import("@/lib/character-types").CharacterData
+  setCharacter?: (updater: import("@/lib/character-types").CharacterData | ((prev: import("@/lib/character-types").CharacterData) => import("@/lib/character-types").CharacterData)) => void
+  resetCharacter?: () => void
+  isLoaded?: boolean
+}
+
+export function CharacterSheetTab(props: CharacterSheetTabProps) {
+  const internal = useCharacterSheet()
+  const c = props.character ?? internal.character
+  const setCharacter = props.setCharacter ?? internal.setCharacter
+  const resetCharacter = props.resetCharacter ?? internal.resetCharacter
+  const isLoaded = props.isLoaded ?? internal.isLoaded
   const [confirmReset, setConfirmReset] = useState(false)
   const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
 

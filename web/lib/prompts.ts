@@ -19,8 +19,8 @@ export const CHARACTER_CREATION_PROMPT = `You are a friendly character creation 
 - When presenting options, use numbered lists
 - Keep responses concise but informative
 
-## Output Format
-At the end, provide a summary of all choices in a structured format.
+## Finalizing the Character
+Once all 8 steps are complete, call the **finalize_character** tool with the full character data. This generates a summary card the player can review and apply to their character sheet. Always call finalize_character — never just describe the final character in text.
 `;
 
 export function buildAdversaryChatPrompt(pcCount: number, pcTier: number): string {

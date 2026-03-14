@@ -103,6 +103,52 @@ const adversaryFields = {
   })).optional().describe('Special features/abilities'),
 };
 
+// Tool for the character creator chat
+export const characterChatTools = {
+  ...rulesTools,
+  finalize_character: tool({
+    description: 'Finalize a completed character and present it as a summary card for the player to apply to their character sheet. Call this once all character creation steps are done (class, subclass, ancestry, community, traits, equipment, experiences, domain cards).',
+    inputSchema: z.object({
+      name: z.string().describe('Character name'),
+      class: z.string().describe('Character class'),
+      subclass: z.string().describe('Character subclass'),
+      ancestry: z.string().describe('Character ancestry'),
+      community: z.string().describe('Character community'),
+      level: z.number().optional().describe('Character level (default 1)'),
+      agility: z.number().describe('Agility trait modifier'),
+      strength: z.number().describe('Strength trait modifier'),
+      finesse: z.number().describe('Finesse trait modifier'),
+      instinct: z.number().describe('Instinct trait modifier'),
+      presence: z.number().describe('Presence trait modifier'),
+      knowledge: z.number().describe('Knowledge trait modifier'),
+      hpTotal: z.number().describe('Total hit points'),
+      stressTotal: z.number().optional().describe('Total stress (default 6)'),
+      evasion: z.number().describe('Evasion score'),
+      armorScore: z.number().optional().describe('Armor score from equipped armor'),
+      minorThreshold: z.number().optional().describe('Minor damage threshold'),
+      majorThreshold: z.number().optional().describe('Major damage threshold'),
+      severeThreshold: z.number().optional().describe('Severe damage threshold'),
+      primaryWeapon: z.string().optional().describe('Primary weapon name'),
+      secondaryWeapon: z.string().optional().describe('Secondary weapon name'),
+      armorName: z.string().optional().describe('Armor name'),
+      experiences: z.array(z.object({
+        name: z.string().describe('Experience phrase'),
+        modifier: z.number().describe('Experience modifier (usually +2)'),
+      })).optional().describe('Character experiences'),
+      domainCards: z.array(z.object({
+        name: z.string().describe('Domain card name'),
+        level: z.number().describe('Card level'),
+        domain: z.string().describe('Domain name'),
+      })).optional().describe('Selected domain cards'),
+      features: z.string().optional().describe('Class/ancestry/community features summary'),
+      notes: z.string().optional().describe('Backstory or other notes'),
+    }),
+    execute: async (input) => {
+      return JSON.stringify(input);
+    },
+  }),
+};
+
 // Tools for the adversary encounter builder chat
 export const adversaryChatTools = {
   ...rulesTools,

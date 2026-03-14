@@ -2,7 +2,7 @@ import { streamText, convertToModelMessages, stepCountIs, ToolLoopAgent, Output 
 import { anthropic } from '@/lib/anthropic';
 import { validateSessionToken } from '@/lib/auth';
 import { CHARACTER_CREATION_PROMPT, ROUTING_INSTRUCTIONS } from '@/lib/prompts';
-import { rulesTools } from '@/lib/tools';
+import { characterChatTools } from '@/lib/tools';
 import { cookies } from 'next/headers';
 import z from 'zod';
 
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       model: selectModel(isCreative),
       system: CHARACTER_CREATION_PROMPT,
       messages: modelMessages,
-      tools: rulesTools,
+      tools: characterChatTools,
       stopWhen: stepCountIs(5),
     });
 
