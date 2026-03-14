@@ -18,6 +18,8 @@ function parseMarkdown(content: string) {
   let inTable = false
   let tableRows: string[][] = []
   let tableHasHeader = false
+  let inBlockquote = false
+  let blockquoteLines: string[] = []
 
   const formatInline = (text: string): string => {
     return text
@@ -46,6 +48,22 @@ function parseMarkdown(content: string) {
 
   const isTableSeparator = (line: string): boolean =>
     /^\|?[\s\-|:]+\|?$/.test(line) && line.includes("-")
+
+  const flushBlockquote = () => {
+    if (blockquoteLines.length > 0) {
+      elements.push(
+        <blockquote key={`bq-${elements.length}`} className="border-l-2 border-gold/50 pl-3 my-2 text-sm italic text-foreground/70">
+          {blockquoteLines.map((line, i) => (
+            <p key={i} className="leading-relaxed">
+              <span dangerouslySetInnerHTML={{ __html: formatInline(line) }} />
+            </p>
+          ))}
+        </blockquote>
+      )
+      blockquoteLines = []
+      inBlockquote = false
+    }
+  }
 
   const flushTable = () => {
     if (tableRows.length > 0) {
@@ -88,10 +106,22 @@ function parseMarkdown(content: string) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
 
+    // Blockquote
+    if (line.startsWith("> ") || line === ">") {
+      flushList()
+      flushTable()
+      inBlockquote = true
+      blockquoteLines.push(line.startsWith("> ") ? line.slice(2) : "")
+      continue
+    } else if (inBlockquote) {
+      flushBlockquote()
+    }
+
     // Horizontal rule
     if (/^---+$/.test(line.trim())) {
       flushList()
       flushTable()
+      flushBlockquote()
       elements.push(
         <hr key={i} className="border-t border-border/60 my-3" />
       )
@@ -102,6 +132,7 @@ function parseMarkdown(content: string) {
     if (line.startsWith("# ")) {
       flushList()
       flushTable()
+      flushBlockquote()
       elements.push(
         <h1 key={i} className="text-xl font-sans font-semibold text-gold mb-3 mt-2">
           {line.slice(2)}
@@ -114,6 +145,7 @@ function parseMarkdown(content: string) {
     if (line.startsWith("## ")) {
       flushList()
       flushTable()
+      flushBlockquote()
       elements.push(
         <h2 key={i} className="text-lg font-sans font-semibold text-gold mb-2 mt-3">
           {line.slice(3)}
@@ -126,6 +158,7 @@ function parseMarkdown(content: string) {
     if (line.startsWith("### ")) {
       flushList()
       flushTable()
+      flushBlockquote()
       elements.push(
         <h3 key={i} className="text-base font-sans font-semibold text-gold/80 mb-1 mt-2">
           {line.slice(4)}
@@ -165,12 +198,14 @@ function parseMarkdown(content: string) {
     if (line.trim() === "") {
       flushList()
       flushTable()
+      flushBlockquote()
       continue
     }
 
     // Regular paragraph
     flushList()
     flushTable()
+    flushBlockquote()
     elements.push(
       <p key={i} className="text-sm leading-relaxed text-foreground/90 mb-2">
         <span dangerouslySetInnerHTML={{ __html: formatInline(line) }} />
@@ -180,6 +215,7 @@ function parseMarkdown(content: string) {
 
   flushList()
   flushTable()
+  flushBlockquote()
   return elements
 }
 
