@@ -116,20 +116,54 @@ function saveAccepted(accepted: Set<string>) {
   } catch { /* ignore */ }
 }
 
+const PC_COUNT_KEY = "daggerheart-adversary-pc-count"
+const PC_TIER_KEY = "daggerheart-adversary-pc-tier"
+
+function loadPcCount(): number {
+  if (typeof window === "undefined") return 4
+  return Number(localStorage.getItem(PC_COUNT_KEY)) || 4
+}
+
+function loadPcTier(): number {
+  if (typeof window === "undefined") return 1
+  return Number(localStorage.getItem(PC_TIER_KEY)) || 1
+}
+
 export function AdversaryChat({ password, isActive, onAcceptEncounter }: AdversaryChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const [pcCount, setPcCount] = useState(4)
-  const [pcTier, setPcTier] = useState(1)
+  const [pcCount, setPcCountState] = useState(loadPcCount)
+  const [pcTier, setPcTierState] = useState(loadPcTier)
   const [acceptedProposals, setAcceptedProposals] = useState<Set<string>>(loadAccepted)
 
+  // Mutable body ref so the transport always sends current values
+  const bodyRef = useRef({ password, pcCount, pcTier })
+
+  const setPcCount = useCallback((v: number) => {
+    setPcCountState(v)
+    bodyRef.current.pcCount = v
+    try { localStorage.setItem(PC_COUNT_KEY, String(v)) } catch { /* ignore */ }
+  }, [])
+
+  const setPcTier = useCallback((v: number) => {
+    setPcTierState(v)
+    bodyRef.current.pcTier = v
+    try { localStorage.setItem(PC_TIER_KEY, String(v)) } catch { /* ignore */ }
+  }, [])
+
+  // Keep password in sync
+  bodyRef.current.password = password
+
+  // Stable transport — bodyRef.current is mutated in place so the
+  // same object reference always reflects current pcCount/pcTier
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/adversary-chat",
-        body: { password, pcCount, pcTier },
+        body: bodyRef.current,
       }),
-    [password, pcCount, pcTier]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [password]
   )
 
   const { messages, sendMessage, setMessages, status } = useChat({
