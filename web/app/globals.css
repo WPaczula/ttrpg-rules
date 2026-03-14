@@ -82,7 +82,7 @@
 }
 
 @theme inline {
-  --font-sans: 'Cinzel', 'Geist', 'Geist Fallback';
+  --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
   --color-gold: var(--gold);
   --color-gold-muted: var(--gold-muted);
