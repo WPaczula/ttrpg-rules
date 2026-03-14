@@ -15,11 +15,7 @@ import type { Adversary } from "@/lib/adversary-types"
 import { BookOpen, Swords, Upload, RotateCcw, Bot, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface EncounterTabProps {
-  password: string
-}
-
-export function EncounterTab({ password }: EncounterTabProps) {
+export function EncounterTab() {
   const {
     store,
     isLoaded,
@@ -106,7 +102,6 @@ export function EncounterTab({ password }: EncounterTabProps) {
       {/* AI Builder sub-tab */}
       <TabsContent value="builder" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
         <AdversaryChat
-          password={password}
           isActive={subTab === "builder"}
           onAcceptEncounter={handleAcceptEncounter}
           onAddAdversary={handleAddAdversary}

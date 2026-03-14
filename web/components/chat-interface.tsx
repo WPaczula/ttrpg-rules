@@ -24,7 +24,6 @@ function getMessageContent(message: UIMessage): string {
 }
 
 interface ChatInterfaceProps {
-  password: string
   isActive?: boolean
 }
 
@@ -80,7 +79,7 @@ function clearMessages() {
   }
 }
 
-export function ChatInterface({ password, isActive }: ChatInterfaceProps) {
+export function ChatInterface({ isActive }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
@@ -90,9 +89,8 @@ export function ChatInterface({ password, isActive }: ChatInterfaceProps) {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: { password },
       }),
-    [password]
+    []
   )
 
   const { messages, sendMessage, setMessages, status } = useChat({

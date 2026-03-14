@@ -1,16 +1,19 @@
 import { streamText, convertToModelMessages, stepCountIs } from 'ai';
 import { anthropic } from '@/lib/anthropic';
-import { validatePassword } from '@/lib/auth';
+import { validateSessionToken } from '@/lib/auth';
 import { buildAdversaryChatPrompt } from '@/lib/prompts';
 import { adversaryChatTools } from '@/lib/tools';
+import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
-    const { messages, password, pcCount = 4, pcTier = 1 } = await req.json();
-
-    if (!validatePassword(password)) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_session')?.value;
+    if (!validateSessionToken(token)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const { messages, pcCount = 4, pcTier = 1 } = await req.json();
 
     const modelMessages = await convertToModelMessages(messages);
     const systemPrompt = buildAdversaryChatPrompt(

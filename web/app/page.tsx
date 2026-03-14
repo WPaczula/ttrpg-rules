@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AccessGate } from "@/components/access-gate"
 import { ChatInterface } from "@/components/chat-interface"
 import { CharacterSheetTab } from "@/components/character-sheet-tab"
@@ -9,11 +9,21 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { MessageSquare, Scroll, Swords } from "lucide-react"
 
 export default function Home() {
-  const [password, setPassword] = useState<string | null>(null)
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null)
   const [activeTab, setActiveTab] = useState("chat")
 
-  if (!password) {
-    return <AccessGate onValidPassword={setPassword} />
+  useEffect(() => {
+    fetch('/api/auth')
+      .then(res => setAuthenticated(res.ok))
+      .catch(() => setAuthenticated(false))
+  }, [])
+
+  if (authenticated === null) {
+    return null
+  }
+
+  if (!authenticated) {
+    return <AccessGate onValidPassword={() => setAuthenticated(true)} />
   }
 
   return (
@@ -47,7 +57,7 @@ export default function Home() {
       </TabsList>
 
       <TabsContent value="chat" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
-        <ChatInterface password={password} isActive={activeTab === "chat"} />
+        <ChatInterface isActive={activeTab === "chat"} />
       </TabsContent>
 
       <TabsContent value="sheet" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
@@ -55,7 +65,7 @@ export default function Home() {
       </TabsContent>
 
       <TabsContent value="adversaries" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
-        <EncounterTab password={password} />
+        <EncounterTab />
       </TabsContent>
     </Tabs>
   )

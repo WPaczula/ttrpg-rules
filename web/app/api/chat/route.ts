@@ -1,8 +1,9 @@
 import { streamText, convertToModelMessages, stepCountIs, ToolLoopAgent, Output } from 'ai';
 import { anthropic } from '@/lib/anthropic';
-import { validatePassword } from '@/lib/auth';
+import { validateSessionToken } from '@/lib/auth';
 import { CHARACTER_CREATION_PROMPT, ROUTING_INSTRUCTIONS } from '@/lib/prompts';
 import { rulesTools } from '@/lib/tools';
+import { cookies } from 'next/headers';
 import z from 'zod';
 
 const routingSchema = z.object({
@@ -39,11 +40,13 @@ function selectModel(isCreative: boolean) {
 
 export async function POST(req: Request) {
   try {
-    const { messages, password } = await req.json();
-
-    if (!validatePassword(password)) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_session')?.value;
+    if (!validateSessionToken(token)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const { messages } = await req.json();
 
     const [modelMessages, isCreative] = await Promise.all([
       convertToModelMessages(messages),
