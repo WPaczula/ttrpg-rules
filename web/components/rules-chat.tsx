@@ -1,24 +1,16 @@
 "use client"
 
 import { useRef, useEffect, useMemo, useState } from "react"
-import { useChat, UIMessage } from "@ai-sdk/react"
+import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChatMessage } from "@/components/chat-message"
 import { TypingIndicator } from "@/components/typing-indicator"
+import { getMessageContent, makeWelcomeMessage } from "@/lib/chat-messages"
+import { createChatStorage } from "@/lib/chat-storage"
+import { useChatScroll } from "@/hooks/use-chat-scroll"
 import { Send, BookOpen } from "lucide-react"
-
-function getMessageContent(message: UIMessage): string {
-  if (message.content) return message.content
-  if (!message.parts) return ""
-  return message.parts
-    .filter((part): part is { type: "text"; text: string } => part.type === "text")
-    .map((part) => part.text)
-    .join("\n")
-}
-
-const STORAGE_KEY = "daggerheart-rules-chat"
 
 const WELCOME_TEXT = `# Rules Reference
 
@@ -28,39 +20,10 @@ I'm your Daggerheart rules assistant. Ask me anything about the game mechanics, 
 
 *Type /clear to start fresh.*`
 
-function makeWelcomeMessage() {
-  const text = WELCOME_TEXT
-  return {
-    id: "welcome",
-    role: "assistant" as const,
-    content: text,
-    parts: [{ type: "text" as const, text }],
-  }
-}
-
-function loadMessages(): UIMessage[] {
-  if (typeof window === "undefined") return [makeWelcomeMessage()]
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch { /* ignore */ }
-  return [makeWelcomeMessage()]
-}
-
-function saveMessages(messages: UIMessage[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-  } catch { /* ignore */ }
-}
-
-function clearMessages() {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch { /* ignore */ }
-}
+const storage = createChatStorage(
+  "daggerheart-rules-chat",
+  () => makeWelcomeMessage(WELCOME_TEXT),
+)
 
 interface RulesChatProps {
   isActive?: boolean
@@ -80,27 +43,16 @@ export function RulesChat({ isActive }: RulesChatProps) {
   const { messages, sendMessage, setMessages, status } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    messages: loadMessages(),
+    messages: storage.load(),
   })
 
   useEffect(() => {
-    if (messages.length > 0) saveMessages(messages)
+    if (messages.length > 0) storage.save(messages)
   }, [messages])
 
   const isLoading = status === "streaming" || status === "submitted"
 
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1]
-    if (lastMessage?.role === "user") {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
-    }
-  }, [messages.length])
-
-  useEffect(() => {
-    if (isActive) {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "instant" })
-    }
-  }, [isActive])
+  useChatScroll(scrollRef, messages, isActive)
 
   const handleInputFocus = () => {
     setIsInputFocused(true)
@@ -119,8 +71,8 @@ export function RulesChat({ isActive }: RulesChatProps) {
 
     if (value && !isLoading) {
       if (value.toLowerCase() === "/clear") {
-        clearMessages()
-        setMessages([makeWelcomeMessage()])
+        storage.clear()
+        setMessages([makeWelcomeMessage(WELCOME_TEXT)])
         input.value = ""
         return
       }

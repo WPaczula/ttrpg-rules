@@ -9,53 +9,10 @@ import { ChatMessage } from "@/components/chat-message"
 import { TypingIndicator } from "@/components/typing-indicator"
 import { CharacterSummaryCard, parseCharacterFromToolCall } from "@/components/character/character-summary-card"
 import type { CharacterData } from "@/lib/character-types"
+import { getMessageContent, getToolResultFromMessage, makeWelcomeMessage } from "@/lib/chat-messages"
+import { createChatStorage } from "@/lib/chat-storage"
+import { useChatScroll } from "@/hooks/use-chat-scroll"
 import { Send, Swords } from "lucide-react"
-
-// Extract text content from AI SDK v6 message parts
-function getMessageContent(message: UIMessage): string {
-  // If content exists (e.g., our initial message), use it
-  if (message.content) return message.content
-
-  // Otherwise extract from parts
-  if (!message.parts) return ""
-
-  return message.parts
-    .filter((part): part is { type: "text"; text: string } => part.type === "text")
-    .map((part) => part.text)
-    .join("\n")
-}
-
-// AI SDK v6: tool parts use type "tool-{toolName}", state "output-available", result at part.output
-
-function getToolOutput(part: unknown): string | null {
-  const p = part as any
-  if (p.state !== "output-available" || p.output == null) return null
-  return typeof p.output === "string" ? p.output : JSON.stringify(p.output)
-}
-
-// Check if a message has a finalize_character tool invocation
-function getCharacterFromMessage(message: UIMessage): { data: CharacterData | null; state: string } | null {
-  if (!message.parts) return null
-  for (const part of message.parts) {
-    if ((part as any).type === "tool-finalize_character") {
-      const output = getToolOutput(part)
-      if (output != null) {
-        const data = parseCharacterFromToolCall(output)
-        return data ? { data, state: "output-available" } : null
-      }
-      return { data: null, state: (part as any).state ?? "input-streaming" }
-    }
-  }
-  return null
-}
-
-interface ChatInterfaceProps {
-  isActive?: boolean
-  onApplyCharacter?: (character: CharacterData) => void
-}
-
-const STORAGE_KEY = "daggerheart-chat-messages"
-const ACCEPTED_KEY = "daggerheart-chat-accepted"
 
 const WELCOME_TEXT = `# Welcome, Adventurer!
 
@@ -65,62 +22,15 @@ I'm here to help you create your character. Together, we'll craft a hero with a 
 
 *Your conversation is saved automatically. Type /clear to start fresh.*`
 
-function makeWelcomeMessage() {
-  const text = WELCOME_TEXT
-  return {
-    id: "welcome",
-    role: "assistant" as const,
-    content: text,
-    parts: [{ type: "text" as const, text }],
-  }
-}
+const storage = createChatStorage(
+  "daggerheart-chat-messages",
+  () => makeWelcomeMessage(WELCOME_TEXT),
+  "daggerheart-chat-accepted",
+)
 
-function loadMessages(): UIMessage[] {
-  if (typeof window === "undefined") return [makeWelcomeMessage()]
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
-      }
-    }
-  } catch {
-    // Invalid data, ignore
-  }
-  return [makeWelcomeMessage()]
-}
-
-function saveMessages(messages: UIMessage[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-  } catch {
-    // Storage full or unavailable, ignore
-  }
-}
-
-function clearMessages() {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem(ACCEPTED_KEY)
-  } catch {
-    // Ignore errors
-  }
-}
-
-function loadAccepted(): Set<string> {
-  if (typeof window === "undefined") return new Set()
-  try {
-    const saved = localStorage.getItem(ACCEPTED_KEY)
-    if (saved) return new Set(JSON.parse(saved))
-  } catch { /* ignore */ }
-  return new Set()
-}
-
-function saveAccepted(accepted: Set<string>) {
-  try {
-    localStorage.setItem(ACCEPTED_KEY, JSON.stringify([...accepted]))
-  } catch { /* ignore */ }
+interface ChatInterfaceProps {
+  isActive?: boolean
+  onApplyCharacter?: (character: CharacterData) => void
 }
 
 export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps) {
@@ -128,7 +38,7 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
   const inputRef = useRef<HTMLInputElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
   const [isInputFocused, setIsInputFocused] = useState(false)
-  const [acceptedCards, setAcceptedCards] = useState<Set<string>>(loadAccepted)
+  const [acceptedCards, setAcceptedCards] = useState<Set<string>>(storage.loadAccepted)
 
   const transport = useMemo(
     () =>
@@ -141,45 +51,22 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
   const { messages, sendMessage, setMessages, status } = useChat({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    messages: loadMessages(),
+    messages: storage.load(),
   })
 
-  // Save messages to localStorage whenever they change
   useEffect(() => {
-    if (messages.length > 0) {
-      saveMessages(messages)
-    }
+    if (messages.length > 0) storage.save(messages)
   }, [messages])
 
   const isLoading = status === "streaming" || status === "submitted"
 
-  // Auto-scroll to bottom when user sends a message (so they see the assistant response)
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1]
-    if (lastMessage?.role === "user") {
-      scrollRef.current?.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      })
-    }
-  }, [messages.length])
+  useChatScroll(scrollRef, messages, isActive)
 
-  // Auto-scroll to bottom when switching back to the chat tab
-  useEffect(() => {
-    if (isActive) {
-      scrollRef.current?.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "instant",
-      })
-    }
-  }, [isActive])
-
-  // Scroll input area into view when focused (for mobile keyboard)
   const handleInputFocus = () => {
     setIsInputFocused(true)
     setTimeout(() => {
       inputAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-    }, 300) // Delay to allow keyboard to appear
+    }, 300)
   }
 
   const handleInputBlur = () => {
@@ -191,7 +78,7 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
     setAcceptedCards(prev => {
       const next = new Set(prev)
       next.add(messageId)
-      saveAccepted(next)
+      storage.saveAccepted(next)
       return next
     })
   }, [onApplyCharacter])
@@ -203,10 +90,9 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
     const value = input.value.trim()
 
     if (value && !isLoading) {
-      // Handle /clear command
       if (value.toLowerCase() === "/clear") {
-        clearMessages()
-        setMessages([makeWelcomeMessage()])
+        storage.clear()
+        setMessages([makeWelcomeMessage(WELCOME_TEXT)])
         setAcceptedCards(new Set())
         input.value = ""
         return
@@ -237,19 +123,19 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
         <div className="flex-1 overflow-y-auto p-4 pb-24" ref={scrollRef}>
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => {
-              const characterCard = message.role === "assistant" ? getCharacterFromMessage(message) : null
+              const characterCard = message.role === "assistant"
+                ? getToolResultFromMessage(message, "finalize_character", parseCharacterFromToolCall)
+                : null
               const textContent = getMessageContent(message)
 
               return (
                 <div key={message.id} className="space-y-3">
-                  {/* Render text content if present */}
                   {textContent && (
                     <ChatMessage
                       role={message.role === "assistant" ? "bot" : "user"}
                       content={textContent}
                     />
                   )}
-                  {/* Render character summary card if present */}
                   {characterCard?.data && (
                     <CharacterSummaryCard
                       data={characterCard.data}
@@ -257,7 +143,6 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
                       accepted={acceptedCards.has(message.id)}
                     />
                   )}
-                  {/* Character card loading state */}
                   {characterCard && !characterCard.data && (
                     <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
                       Building character sheet...
