@@ -5,3 +5,4 @@
 .claude/
 
 node_modules
+.next/
