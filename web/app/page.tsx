@@ -5,11 +5,12 @@ import { AccessGate } from "@/components/access-gate"
 import { ChatInterface } from "@/components/chat-interface"
 import { CharacterSheetTab } from "@/components/character-sheet-tab"
 import { EncounterTab } from "@/components/encounter-tab"
+import { LootTab } from "@/components/loot-tab"
 import { RulesChat } from "@/components/rules-chat"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import type { CharacterData } from "@/lib/character-types"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { MessageSquare, Scroll, Swords, BookOpen, User, Shield } from "lucide-react"
+import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices } from "lucide-react"
 
 type Role = "pc" | "gm"
 
@@ -57,7 +58,37 @@ export default function Home() {
       onValueChange={setActiveTab}
       className="flex flex-col h-dvh bg-background gap-0"
     >
-      <TabsList className="shrink-0 w-full rounded-none border-b border-border bg-card/80 backdrop-blur-sm h-12 justify-start gap-1 px-2 p-1.5">
+      {/* Row 1: role switcher */}
+      <div className="shrink-0 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-3 h-10">
+        <span className="text-xs text-muted-foreground font-medium">Daggerheart</span>
+        <div className="flex items-center">
+          <button
+            onClick={() => handleRoleChange("pc")}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium border transition-colors ${
+              role === "pc"
+                ? "bg-gold/15 text-gold border-gold/30"
+                : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            PC
+          </button>
+          <button
+            onClick={() => handleRoleChange("gm")}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-r-md text-xs font-medium border border-l-0 transition-colors ${
+              role === "gm"
+                ? "bg-gold/15 text-gold border-gold/30"
+                : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5" />
+            GM
+          </button>
+        </div>
+      </div>
+
+      {/* Row 2: tabs */}
+      <TabsList className="shrink-0 w-full rounded-none border-b border-border bg-card/60 h-10 justify-start gap-1 px-2 p-1">
         {role === "pc" ? (
           <>
             <TabsTrigger value="chat" className={triggerClass}>
@@ -79,34 +110,12 @@ export default function Home() {
               <Swords className="w-4 h-4" />
               Adversaries
             </TabsTrigger>
+            <TabsTrigger value="loot" className={triggerClass}>
+              <Dices className="w-4 h-4" />
+              Loot
+            </TabsTrigger>
           </>
         )}
-
-        {/* Role switcher */}
-        <div className="ml-auto flex items-center">
-          <button
-            onClick={() => handleRoleChange("pc")}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-l-md text-xs font-medium border transition-colors ${
-              role === "pc"
-                ? "bg-gold/15 text-gold border-gold/30"
-                : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            PC
-          </button>
-          <button
-            onClick={() => handleRoleChange("gm")}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-r-md text-xs font-medium border border-l-0 transition-colors ${
-              role === "gm"
-                ? "bg-gold/15 text-gold border-gold/30"
-                : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            GM
-          </button>
-        </div>
       </TabsList>
 
       {/* PC tabs */}
@@ -130,6 +139,10 @@ export default function Home() {
 
       <TabsContent value="adversaries" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
         <EncounterTab />
+      </TabsContent>
+
+      <TabsContent value="loot" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
+        <LootTab />
       </TabsContent>
     </Tabs>
   )
