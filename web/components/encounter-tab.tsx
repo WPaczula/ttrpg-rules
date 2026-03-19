@@ -6,13 +6,12 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useAdversaryStore } from "@/hooks/use-adversary-store"
 import { Section } from "@/components/character-sheet/primitives"
-import { AdversaryImport } from "@/components/encounter/adversary-import"
 import { AdversaryLibrary } from "@/components/encounter/adversary-library"
 import { AdversaryCard } from "@/components/encounter/adversary-card"
 import { EncounterBuilder } from "@/components/encounter/encounter-builder"
 import { AdversaryChat } from "@/components/encounter/adversary-chat"
 import type { Adversary } from "@/lib/adversary-types"
-import { BookOpen, Swords, Upload, RotateCcw, Bot, Shield } from "lucide-react"
+import { BookOpen, Swords, RotateCcw, Bot, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function EncounterTab() {
@@ -32,7 +31,6 @@ export function EncounterTab() {
     updateAdversaryInstance,
   } = useAdversaryStore()
 
-  const [importOpen, setImportOpen] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
   const [subTab, setSubTab] = useState("builder")
 
@@ -127,15 +125,6 @@ export function EncounterTab() {
           <Section icon={<BookOpen className="w-4 h-4" />} title="Adversary Library" defaultOpen={store.library.length === 0}>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setImportOpen(true)}
-                  className="border-border text-gold hover:bg-gold/10"
-                >
-                  <Upload className="w-3.5 h-3.5 mr-1.5" />
-                  Import JSON
-                </Button>
                 {store.library.length > 0 && (
                   <Button
                     variant="ghost"
@@ -168,13 +157,6 @@ export function EncounterTab() {
               />
             </div>
           </Section>
-
-          {/* Import dialog */}
-          <AdversaryImport
-            open={importOpen}
-            onOpenChange={setImportOpen}
-            onImport={importAdversaries}
-          />
 
           {/* Encounter Builder section */}
           <Section icon={<Swords className="w-4 h-4" />} title="Encounter Builder" defaultOpen>
@@ -230,7 +212,7 @@ export function EncounterTab() {
               <p className="text-sm">No adversaries in this encounter yet.</p>
               <p className="text-xs mt-1">
                 {store.library.length === 0
-                  ? "Import some adversaries first, then add them here."
+                  ? "Use the AI Builder to create adversaries, then add them here."
                   : "Use the library or the dropdown above to add adversaries."}
               </p>
             </div>
