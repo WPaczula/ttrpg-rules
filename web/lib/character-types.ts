@@ -54,6 +54,7 @@ export interface CharacterData {
 
   // Progression
   proficiency: number
+  markedTraits: string[]
   experiences: Experience[]
   domainCards: DomainCard[]
 
@@ -96,6 +97,7 @@ export const DEFAULT_CHARACTER: CharacterData = {
   goldBags: 0,
   goldChests: 0,
   proficiency: 1,
+  markedTraits: [],
   experiences: [],
   domainCards: [],
   primaryWeapon: "",

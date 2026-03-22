@@ -167,6 +167,8 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
               (((patch as Record<string, unknown>)[t1] as number | undefined) ?? (prev[t1] as number)) + 1
             ;(patch as Record<string, unknown>)[t2] =
               (((patch as Record<string, unknown>)[t2] as number | undefined) ?? (prev[t2] as number)) + 1
+            // Mark traits so they can't be picked again in future level-ups
+            patch.markedTraits = [...(patch.markedTraits ?? prev.markedTraits ?? []), t1, t2]
             break
           }
           case "add-hp":
@@ -460,16 +462,17 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
               {(canAddAdvancement || advancements.some((a) => a.type === "increase-traits")) && (
                 <div className="space-y-2 mt-2">
                   <p className="text-xs text-muted-foreground">
-                    Select 2 traits to increase:
+                    Select 2 unmarked traits to increase:
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {TRAIT_KEYS.map((trait) => {
                       const picked = traitPicks.includes(trait)
                       const locked = advancements.some((a) => a.type === "increase-traits")
+                      const alreadyMarked = (c.markedTraits ?? []).includes(trait)
                       return (
                         <button
                           key={trait}
-                          disabled={locked || (!picked && traitPicks.length >= 2)}
+                          disabled={alreadyMarked || locked || (!picked && traitPicks.length >= 2)}
                           onClick={() => {
                             const next = picked
                               ? traitPicks.filter((t) => t !== trait)
@@ -492,16 +495,19 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
                             }
                           }}
                           className={`px-3 py-2 rounded-md border text-xs font-medium transition-all active:scale-95 ${
-                            picked
-                              ? "bg-gold/15 border-gold/40 text-gold"
-                              : "bg-input border-border text-muted-foreground hover:border-gold/30 hover:text-foreground"
-                          } ${locked ? "opacity-60" : ""}`}
+                            alreadyMarked
+                              ? "bg-muted/30 border-border text-muted-foreground/40 cursor-not-allowed line-through"
+                              : picked
+                                ? "bg-gold/15 border-gold/40 text-gold"
+                                : "bg-input border-border text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                          } ${locked && !alreadyMarked ? "opacity-60" : ""}`}
                         >
                           {TRAIT_LABELS[trait]}
                           <span className="ml-1 text-[10px]">
                             ({c[trait as keyof CharacterData] as number >= 0 ? "+" : ""}
                             {c[trait as keyof CharacterData] as number})
                           </span>
+                          {alreadyMarked && <span className="ml-0.5 text-[9px]"> marked</span>}
                         </button>
                       )
                     })}
