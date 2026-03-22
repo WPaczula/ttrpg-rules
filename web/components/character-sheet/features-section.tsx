@@ -13,6 +13,7 @@ interface FeaturesSectionProps {
   selectedSubclass: SrdSubclass | undefined
   selectedAncestry: SrdAncestry | undefined
   selectedCommunity: SrdCommunity | undefined
+  editing?: boolean
 }
 
 export function FeaturesSection({
@@ -22,6 +23,7 @@ export function FeaturesSection({
   selectedSubclass,
   selectedAncestry,
   selectedCommunity,
+  editing = false,
 }: FeaturesSectionProps) {
   return (
     <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
@@ -56,12 +58,16 @@ export function FeaturesSection({
             Select a class, subclass, ancestry, or community to see their features here.
           </p>
         )}
-        <Textarea
-          value={c.features}
-          onChange={(e) => update({ features: e.target.value })}
-          placeholder="Additional custom features or notes…"
-          className="min-h-[80px] bg-input border-border text-sm resize-none"
-        />
+        {editing ? (
+          <Textarea
+            value={c.features}
+            onChange={(e) => update({ features: e.target.value })}
+            placeholder="Additional custom features or notes…"
+            className="min-h-[80px] bg-input border-border text-sm resize-none"
+          />
+        ) : c.features ? (
+          <p className="text-xs text-muted-foreground whitespace-pre-wrap">{c.features}</p>
+        ) : null}
       </div>
     </Section>
   )

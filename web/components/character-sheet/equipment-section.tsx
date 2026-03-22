@@ -14,6 +14,7 @@ interface EquipmentSectionProps {
   primaryWeaponItems: ComboboxItem[]
   secondaryWeaponItems: ComboboxItem[]
   armorItems: ComboboxItem[]
+  editing?: boolean
 }
 
 export function EquipmentSection({
@@ -22,6 +23,7 @@ export function EquipmentSection({
   primaryWeaponItems,
   secondaryWeaponItems,
   armorItems,
+  editing = false,
 }: EquipmentSectionProps) {
   const addItem = () => {
     update({ items: [...c.items, ""] })
@@ -42,14 +44,18 @@ export function EquipmentSection({
       <div className="space-y-3">
         <div className="space-y-1.5">
           <label className="text-xs text-muted-foreground uppercase tracking-wider">Primary Weapon</label>
-          <Combobox
-            items={primaryWeaponItems}
-            value={c.primaryWeapon}
-            onSelect={(v) => update({ primaryWeapon: v })}
-            placeholder="Search weapons…"
-            searchPlaceholder="Type to search weapons…"
-            className="text-sm"
-          />
+          {editing ? (
+            <Combobox
+              items={primaryWeaponItems}
+              value={c.primaryWeapon}
+              onSelect={(v) => update({ primaryWeapon: v })}
+              placeholder="Search weapons…"
+              searchPlaceholder="Type to search weapons…"
+              className="text-sm"
+            />
+          ) : (
+            <p className="text-sm text-foreground">{c.primaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
+          )}
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
             return w ? (
@@ -65,14 +71,18 @@ export function EquipmentSection({
         </div>
         <div className="space-y-1.5">
           <label className="text-xs text-muted-foreground uppercase tracking-wider">Secondary Weapon</label>
-          <Combobox
-            items={secondaryWeaponItems}
-            value={c.secondaryWeapon}
-            onSelect={(v) => update({ secondaryWeapon: v })}
-            placeholder="Search weapons…"
-            searchPlaceholder="Type to search weapons…"
-            className="text-sm"
-          />
+          {editing ? (
+            <Combobox
+              items={secondaryWeaponItems}
+              value={c.secondaryWeapon}
+              onSelect={(v) => update({ secondaryWeapon: v })}
+              placeholder="Search weapons…"
+              searchPlaceholder="Type to search weapons…"
+              className="text-sm"
+            />
+          ) : (
+            <p className="text-sm text-foreground">{c.secondaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
+          )}
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
             return w ? (
@@ -88,32 +98,36 @@ export function EquipmentSection({
         </div>
         <div className="space-y-1.5">
           <label className="text-xs text-muted-foreground uppercase tracking-wider">Armor</label>
-          <Combobox
-            items={armorItems}
-            value={c.armorName}
-            onSelect={(v) => {
-              const newArmor = SRD_ARMOR.find((a) => a.name === v)
-              const oldArmor = SRD_ARMOR.find((a) => a.name === c.armorName)
-              const patch: Partial<CharacterData> = { armorName: v }
-              if (newArmor) {
-                patch.armorScore = newArmor.baseScore
-                const parts = newArmor.baseThresholds.split("/").map((s) => parseInt(s.trim(), 10))
-                if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                  patch.minorThreshold = parts[0]
-                  patch.majorThreshold = parts[1]
+          {editing ? (
+            <Combobox
+              items={armorItems}
+              value={c.armorName}
+              onSelect={(v) => {
+                const newArmor = SRD_ARMOR.find((a) => a.name === v)
+                const oldArmor = SRD_ARMOR.find((a) => a.name === c.armorName)
+                const patch: Partial<CharacterData> = { armorName: v }
+                if (newArmor) {
+                  patch.armorScore = newArmor.baseScore
+                  const parts = newArmor.baseThresholds.split("/").map((s) => parseInt(s.trim(), 10))
+                  if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                    patch.minorThreshold = parts[0]
+                    patch.majorThreshold = parts[1]
+                  }
+                  const oldMod = oldArmor?.evasionModifier ?? 0
+                  const newMod = newArmor.evasionModifier ?? 0
+                  if (oldMod !== newMod) {
+                    patch.evasion = c.evasion - oldMod + newMod
+                  }
                 }
-                const oldMod = oldArmor?.evasionModifier ?? 0
-                const newMod = newArmor.evasionModifier ?? 0
-                if (oldMod !== newMod) {
-                  patch.evasion = c.evasion - oldMod + newMod
-                }
-              }
-              update(patch)
-            }}
-            placeholder="Search armor…"
-            searchPlaceholder="Type to search armor…"
-            className="text-sm"
-          />
+                update(patch)
+              }}
+              placeholder="Search armor…"
+              searchPlaceholder="Type to search armor…"
+              className="text-sm"
+            />
+          ) : (
+            <p className="text-sm text-foreground">{c.armorName || <span className="text-muted-foreground italic">None</span>}</p>
+          )}
           {(() => {
             const a = SRD_ARMOR.find((a) => a.name === c.armorName)
             return a ? (
@@ -130,31 +144,42 @@ export function EquipmentSection({
         </div>
         <div className="space-y-2">
           <label className="text-xs text-muted-foreground uppercase tracking-wider">Other Items</label>
+          {c.items.length === 0 && !editing && (
+            <p className="text-xs text-muted-foreground italic">No items.</p>
+          )}
           {c.items.map((item, i) => (
             <div key={i} className="flex gap-2">
-              <Input
-                value={item}
-                onChange={(e) => updateItem(i, e.target.value)}
-                placeholder="Item…"
-                className="flex-1 h-8 bg-input border-border text-sm"
-              />
-              <button
-                onClick={() => removeItem(i)}
-                className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95"
-                aria-label="Remove item"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {editing ? (
+                <Input
+                  value={item}
+                  onChange={(e) => updateItem(i, e.target.value)}
+                  placeholder="Item…"
+                  className="flex-1 h-8 bg-input border-border text-sm"
+                />
+              ) : (
+                <span className="flex-1 text-sm text-foreground">{item || <span className="text-muted-foreground italic">—</span>}</span>
+              )}
+              {editing && (
+                <button
+                  onClick={() => removeItem(i)}
+                  className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95"
+                  aria-label="Remove item"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addItem}
-            className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-gold"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Item
-          </Button>
+          {editing && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addItem}
+              className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-gold"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Item
+            </Button>
+          )}
         </div>
       </div>
     </Section>

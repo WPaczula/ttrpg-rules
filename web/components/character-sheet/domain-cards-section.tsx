@@ -13,9 +13,10 @@ interface DomainCardsSectionProps {
   domainCards: DomainCard[]
   domainCardItems: ComboboxItem[]
   update: (patch: Partial<CharacterData>) => void
+  editing?: boolean
 }
 
-export function DomainCardsSection({ domainCards, domainCardItems, update }: DomainCardsSectionProps) {
+export function DomainCardsSection({ domainCards, domainCardItems, update, editing = false }: DomainCardsSectionProps) {
   const addDomainCard = () => {
     if (domainCards.length >= 5) return
     const newCard: DomainCard = { id: crypto.randomUUID(), name: "", level: 1, domain: "" }
@@ -43,30 +44,38 @@ export function DomainCardsSection({ domainCards, domainCardItems, update }: Dom
           return (
             <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
               <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <Combobox
-                    items={domainCardItems}
-                    value={card.name}
-                    onSelect={(name) => {
-                      const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === name)
-                      if (match) {
-                        updateDomainCard(card.id, { name, level: match.level, domain: match.domain })
-                      } else {
-                        updateDomainCard(card.id, { name })
-                      }
-                    }}
-                    placeholder="Search domain cards…"
-                    searchPlaceholder="Type to search cards…"
-                    className="h-8 text-sm font-medium"
-                  />
-                </div>
-                <button
-                  onClick={() => removeDomainCard(card.id)}
-                  className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95 shrink-0"
-                  aria-label="Remove card"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {editing ? (
+                  <div className="flex-1">
+                    <Combobox
+                      items={domainCardItems}
+                      value={card.name}
+                      onSelect={(name) => {
+                        const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === name)
+                        if (match) {
+                          updateDomainCard(card.id, { name, level: match.level, domain: match.domain })
+                        } else {
+                          updateDomainCard(card.id, { name })
+                        }
+                      }}
+                      placeholder="Search domain cards…"
+                      searchPlaceholder="Type to search cards…"
+                      className="h-8 text-sm font-medium"
+                    />
+                  </div>
+                ) : (
+                  <span className="flex-1 text-sm font-medium text-foreground truncate">
+                    {card.name || <span className="text-muted-foreground italic">Unnamed card</span>}
+                  </span>
+                )}
+                {editing && (
+                  <button
+                    onClick={() => removeDomainCard(card.id)}
+                    className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95 shrink-0"
+                    aria-label="Remove card"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
               {srdCard && (
                 <div className="space-y-1">
@@ -82,7 +91,7 @@ export function DomainCardsSection({ domainCards, domainCardItems, update }: Dom
                   </p>
                 </div>
               )}
-              {!srdCard && card.name && (
+              {!srdCard && card.name && editing && (
                 <div className="flex gap-2">
                   <Input
                     value={card.domain}
@@ -105,10 +114,20 @@ export function DomainCardsSection({ domainCards, domainCardItems, update }: Dom
                   </div>
                 </div>
               )}
+              {!srdCard && card.name && !editing && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  {card.domain && (
+                    <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
+                      {card.domain}
+                    </Badge>
+                  )}
+                  <span>Lvl {card.level}</span>
+                </div>
+              )}
             </div>
           )
         })}
-        {domainCards.length < 5 ? (
+        {editing && domainCards.length < 5 ? (
           <Button
             variant="outline"
             size="sm"
@@ -120,6 +139,10 @@ export function DomainCardsSection({ domainCards, domainCardItems, update }: Dom
               {domainCards.length}/5
             </span>
           </Button>
+        ) : !editing ? (
+          <p className="text-xs text-muted-foreground text-center">
+            {domainCards.length}/5 active cards
+          </p>
         ) : (
           <p className="text-xs text-muted-foreground text-center italic">
             Maximum 5 active domain cards.

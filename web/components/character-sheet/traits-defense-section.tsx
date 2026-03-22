@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input"
 import type { CharacterData } from "@/lib/character-types"
+import { formatModifier } from "@/lib/character-types"
 import { Shield } from "lucide-react"
 import { Section, StatBox, TraitStepper, NumberStepper, SlotTracker } from "./primitives"
 
@@ -9,23 +10,39 @@ interface TraitsDefenseSectionProps {
   character: CharacterData
   tier: number
   update: (patch: Partial<CharacterData>) => void
+  editing?: boolean
 }
 
-export function TraitsDefenseSection({ character: c, tier, update }: TraitsDefenseSectionProps) {
+export function TraitsDefenseSection({ character: c, tier, update, editing = false }: TraitsDefenseSectionProps) {
   return (
     <Section icon={<Shield className="w-4 h-4" />} title="Traits & Defense" defaultOpen>
       <div className="space-y-5">
         <div className="grid grid-cols-2 gap-2">
-          <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
-          <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
-          <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
-          <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
-          <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
-          <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
+          {editing ? (
+            <>
+              <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
+              <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
+              <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
+              <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
+              <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
+              <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
+            </>
+          ) : (
+            <>
+              <StatBox label="AGI" value={formatModifier(c.agility)} />
+              <StatBox label="STR" value={formatModifier(c.strength)} />
+              <StatBox label="FIN" value={formatModifier(c.finesse)} />
+              <StatBox label="INS" value={formatModifier(c.instinct)} />
+              <StatBox label="PRE" value={formatModifier(c.presence)} />
+              <StatBox label="KNO" value={formatModifier(c.knowledge)} />
+            </>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Distribute: +2, +1, +1, +0, +0, −1
-        </p>
+        {editing && (
+          <p className="text-xs text-muted-foreground">
+            Distribute: +2, +1, +1, +0, +0, −1
+          </p>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <StatBox label="Evasion" value={c.evasion} />
@@ -41,13 +58,15 @@ export function TraitsDefenseSection({ character: c, tier, update }: TraitsDefen
                 {c.armorMarked}/{c.armorScore} marked
               </span>
             </span>
-            <NumberStepper
-              label="Slots"
-              value={c.armorScore}
-              onChange={(v) => update({ armorScore: v, armorMarked: Math.min(c.armorMarked, v) })}
-              min={0}
-              max={5}
-            />
+            {editing && (
+              <NumberStepper
+                label="Slots"
+                value={c.armorScore}
+                onChange={(v) => update({ armorScore: v, armorMarked: Math.min(c.armorMarked, v) })}
+                min={0}
+                max={5}
+              />
+            )}
           </div>
           {c.armorScore > 0 ? (
             <SlotTracker

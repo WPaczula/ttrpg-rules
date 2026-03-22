@@ -5,12 +5,13 @@ import { AccessGate } from "@/components/access-gate"
 import { ChatInterface } from "@/components/chat-interface"
 import { CharacterSheetTab } from "@/components/character-sheet-tab"
 import { EncounterTab } from "@/components/encounter-tab"
+import { LevelUpTab } from "@/components/level-up-tab"
 import { LootTab } from "@/components/loot-tab"
 import { RulesChat } from "@/components/rules-chat"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import type { CharacterData } from "@/lib/character-types"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices } from "lucide-react"
+import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices, ArrowUpCircle } from "lucide-react"
 
 type Role = "pc" | "gm"
 
@@ -99,6 +100,10 @@ export default function Home() {
               <Scroll className="w-4 h-4" />
               Character Sheet
             </TabsTrigger>
+            <TabsTrigger value="levelup" className={triggerClass}>
+              <ArrowUpCircle className="w-4 h-4" />
+              Lvl Up
+            </TabsTrigger>
           </>
         ) : (
           <>
@@ -128,6 +133,14 @@ export default function Home() {
           character={character}
           setCharacter={setCharacter}
           resetCharacter={resetCharacter}
+          isLoaded={isLoaded}
+        />
+      </TabsContent>
+
+      <TabsContent value="levelup" className="flex-1 min-h-0 mt-0 overflow-y-auto data-[state=inactive]:hidden">
+        <LevelUpTab
+          character={character}
+          setCharacter={setCharacter}
           isLoaded={isLoaded}
         />
       </TabsContent>
