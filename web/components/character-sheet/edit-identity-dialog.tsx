@@ -59,7 +59,7 @@ export function EditIdentityDialog({
   const primaryFeatureItems = useMemo<ComboboxItem[]>(
     () =>
       primaryAncestry
-        ? primaryAncestry.features.map((f) => ({
+        ? primaryAncestry.features.map((f, i) => ({
             value: f.name,
             label: f.name,
             detail: f.text.slice(0, 80) + (f.text.length > 80 ? "…" : ""),
@@ -68,19 +68,15 @@ export function EditIdentityDialog({
     [primaryAncestry]
   )
 
-  const secondaryFeatureItems = useMemo<ComboboxItem[]>(
-    () =>
-      secondaryAncestry
-        ? secondaryAncestry.features.map((f) => ({
-            value: f.name,
-            label: f.name,
-            detail: f.text.slice(0, 80) + (f.text.length > 80 ? "…" : ""),
-          }))
-        : [],
-    [secondaryAncestry]
-  )
-
   const isMultiancestry = !!c.secondaryAncestry
+
+  // When picking feature #N from the primary ancestry, you get feature #(opposite) from the secondary
+  const selectedPrimaryIndex = primaryAncestry
+    ? primaryAncestry.features.findIndex((f) => f.name === c.ancestryFeature)
+    : -1
+  const autoSecondaryFeature = secondaryAncestry && selectedPrimaryIndex !== -1
+    ? secondaryAncestry.features[selectedPrimaryIndex === 0 ? 1 : 0]
+    : undefined
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
@@ -148,10 +144,9 @@ export function EditIdentityDialog({
               items={ancestryItems}
               value={c.ancestry}
               onSelect={(name) => {
-                const patch: Partial<CharacterData> = { ancestry: name, ancestryFeature: "" }
+                const patch: Partial<CharacterData> = { ancestry: name, ancestryFeature: "", secondaryAncestryFeature: "" }
                 if (name === c.secondaryAncestry) {
                   patch.secondaryAncestry = ""
-                  patch.secondaryAncestryFeature = ""
                 }
                 update(patch)
               }}
@@ -184,12 +179,15 @@ export function EditIdentityDialog({
             </p>
           </div>
 
-          {/* Feature selectors when multiancestry is active */}
-          {isMultiancestry && primaryAncestry && (
+          {/* Feature selector when multiancestry is active */}
+          {isMultiancestry && primaryAncestry && secondaryAncestry && (
             <div className="space-y-1.5 border border-border rounded-md p-3 bg-purple-deep/10">
               <span className="text-[10px] text-gold uppercase tracking-wider font-semibold">
                 Multiancestry Feature Selection
               </span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pick one feature from {primaryAncestry.name} — the opposite feature from {secondaryAncestry.name} is automatically paired.
+              </p>
               <div className="space-y-3 mt-2">
                 <div className="space-y-1.5">
                   <label className="text-xs text-muted-foreground">
@@ -198,25 +196,28 @@ export function EditIdentityDialog({
                   <Combobox
                     items={primaryFeatureItems}
                     value={c.ancestryFeature}
-                    onSelect={(name) => update({ ancestryFeature: name })}
+                    onSelect={(name) => {
+                      const idx = primaryAncestry.features.findIndex((f) => f.name === name)
+                      const pairedFeature = secondaryAncestry.features[idx === 0 ? 1 : 0]
+                      update({
+                        ancestryFeature: name,
+                        secondaryAncestryFeature: pairedFeature?.name ?? "",
+                      })
+                    }}
                     placeholder={`Pick a ${primaryAncestry.name} feature…`}
                     searchPlaceholder="Search features…"
                     className="text-sm"
                   />
                 </div>
-                {secondaryAncestry && (
+                {autoSecondaryFeature && (
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground">
-                      Feature from {secondaryAncestry.name}
+                      Paired feature from {secondaryAncestry.name}
                     </label>
-                    <Combobox
-                      items={secondaryFeatureItems}
-                      value={c.secondaryAncestryFeature}
-                      onSelect={(name) => update({ secondaryAncestryFeature: name })}
-                      placeholder={`Pick a ${secondaryAncestry.name} feature…`}
-                      searchPlaceholder="Search features…"
-                      className="text-sm"
-                    />
+                    <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
+                      <span className="text-xs font-medium text-gold">{autoSecondaryFeature.name}</span>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{autoSecondaryFeature.text}</p>
+                    </div>
                   </div>
                 )}
               </div>

@@ -72,9 +72,9 @@ export function FeaturesSection({
               label={ancestryLabel}
               features={[...primaryAncestryFeatures, ...secondaryAncestryFeatures]}
             />
-            {isMultiancestry && (primaryAncestryFeatures.length === 0 || secondaryAncestryFeatures.length === 0) && (
+            {isMultiancestry && primaryAncestryFeatures.length === 0 && (
               <p className="text-xs text-muted-foreground italic">
-                Select your ancestry features in the identity editor to see them here.
+                Select your ancestry feature in the identity editor to see the paired features here.
               </p>
             )}
           </div>
