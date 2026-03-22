@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
 import {
   Dialog,
@@ -9,7 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import type { CharacterData } from "@/lib/character-types"
-import { SRD_CLASSES } from "@/lib/srd-data"
+import { SRD_CLASSES, SRD_ANCESTRIES } from "@/lib/srd-data"
 import { NumberStepper } from "./primitives"
 
 interface EditIdentityDialogProps {
@@ -33,9 +34,57 @@ export function EditIdentityDialog({
   ancestryItems,
   communityItems,
 }: EditIdentityDialogProps) {
+  const primaryAncestry = useMemo(
+    () => SRD_ANCESTRIES.find((a) => a.name === c.ancestry),
+    [c.ancestry]
+  )
+
+  const secondaryAncestry = useMemo(
+    () => SRD_ANCESTRIES.find((a) => a.name === c.secondaryAncestry),
+    [c.secondaryAncestry]
+  )
+
+  const secondaryAncestryItems = useMemo<ComboboxItem[]>(
+    () => [
+      { value: "", label: "None (single ancestry)", detail: "" },
+      ...SRD_ANCESTRIES.filter((a) => a.name !== c.ancestry).map((a) => ({
+        value: a.name,
+        label: a.name,
+        detail: a.features.map((f) => f.name).join(", "),
+      })),
+    ],
+    [c.ancestry]
+  )
+
+  const primaryFeatureItems = useMemo<ComboboxItem[]>(
+    () =>
+      primaryAncestry
+        ? primaryAncestry.features.map((f) => ({
+            value: f.name,
+            label: f.name,
+            detail: f.text.slice(0, 80) + (f.text.length > 80 ? "…" : ""),
+          }))
+        : [],
+    [primaryAncestry]
+  )
+
+  const secondaryFeatureItems = useMemo<ComboboxItem[]>(
+    () =>
+      secondaryAncestry
+        ? secondaryAncestry.features.map((f) => ({
+            value: f.name,
+            label: f.name,
+            detail: f.text.slice(0, 80) + (f.text.length > 80 ? "…" : ""),
+          }))
+        : [],
+    [secondaryAncestry]
+  )
+
+  const isMultiancestry = !!c.secondaryAncestry
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="bg-card border-border">
+      <DialogContent className="bg-card border-border max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-gold">Edit Character Identity</DialogTitle>
           <DialogDescription>
@@ -89,17 +138,91 @@ export function EditIdentityDialog({
               className="text-sm"
             />
           </div>
+
+          {/* Primary Ancestry */}
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Ancestry</label>
+            <label className="text-xs text-muted-foreground uppercase tracking-wider">
+              {isMultiancestry ? "Primary Ancestry" : "Ancestry"}
+            </label>
             <Combobox
               items={ancestryItems}
               value={c.ancestry}
-              onSelect={(name) => update({ ancestry: name })}
+              onSelect={(name) => {
+                const patch: Partial<CharacterData> = { ancestry: name, ancestryFeature: "" }
+                if (name === c.secondaryAncestry) {
+                  patch.secondaryAncestry = ""
+                  patch.secondaryAncestryFeature = ""
+                }
+                update(patch)
+              }}
               placeholder="Select ancestry…"
               searchPlaceholder="Search ancestries…"
               className="text-sm"
             />
           </div>
+
+          {/* Secondary Ancestry */}
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground uppercase tracking-wider">
+              Secondary Ancestry
+            </label>
+            <Combobox
+              items={secondaryAncestryItems}
+              value={c.secondaryAncestry}
+              onSelect={(name) => {
+                update({
+                  secondaryAncestry: name,
+                  secondaryAncestryFeature: "",
+                })
+              }}
+              placeholder="None (single ancestry)"
+              searchPlaceholder="Search ancestries…"
+              className="text-sm"
+            />
+            <p className="text-xs text-muted-foreground">
+              Pick a second ancestry to create a mixed heritage. You'll choose one feature from each.
+            </p>
+          </div>
+
+          {/* Feature selectors when multiancestry is active */}
+          {isMultiancestry && primaryAncestry && (
+            <div className="space-y-1.5 border border-border rounded-md p-3 bg-purple-deep/10">
+              <span className="text-[10px] text-gold uppercase tracking-wider font-semibold">
+                Multiancestry Feature Selection
+              </span>
+              <div className="space-y-3 mt-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">
+                    Feature from {primaryAncestry.name}
+                  </label>
+                  <Combobox
+                    items={primaryFeatureItems}
+                    value={c.ancestryFeature}
+                    onSelect={(name) => update({ ancestryFeature: name })}
+                    placeholder={`Pick a ${primaryAncestry.name} feature…`}
+                    searchPlaceholder="Search features…"
+                    className="text-sm"
+                  />
+                </div>
+                {secondaryAncestry && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">
+                      Feature from {secondaryAncestry.name}
+                    </label>
+                    <Combobox
+                      items={secondaryFeatureItems}
+                      value={c.secondaryAncestryFeature}
+                      onSelect={(name) => update({ secondaryAncestryFeature: name })}
+                      placeholder={`Pick a ${secondaryAncestry.name} feature…`}
+                      searchPlaceholder="Search features…"
+                      className="text-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Community</label>
             <Combobox

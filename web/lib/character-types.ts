@@ -18,6 +18,9 @@ export interface CharacterData {
   class: string
   subclass: string
   ancestry: string
+  secondaryAncestry: string
+  ancestryFeature: string
+  secondaryAncestryFeature: string
   community: string
 
   // Six traits
@@ -73,6 +76,9 @@ export const DEFAULT_CHARACTER: CharacterData = {
   class: "",
   subclass: "",
   ancestry: "",
+  secondaryAncestry: "",
+  ancestryFeature: "",
+  secondaryAncestryFeature: "",
   community: "",
   agility: 0,
   strength: 0,
