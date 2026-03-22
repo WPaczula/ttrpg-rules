@@ -837,15 +837,24 @@ function AdvancementOption({
   children?: React.ReactNode
 }) {
   return (
-    <button
-      onClick={onSelect}
-      disabled={disabled && !selected}
+    <div
+      onClick={() => {
+        if (!(disabled && !selected)) onSelect()
+      }}
+      role="button"
+      tabIndex={disabled && !selected ? -1 : 0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          if (!(disabled && !selected)) onSelect()
+        }
+      }}
       className={`w-full text-left rounded-lg border p-3 transition-all ${
         selected
           ? "bg-gold/10 border-gold/40"
           : disabled
             ? "bg-card/30 border-border opacity-50 cursor-not-allowed"
-            : "bg-card/50 border-border hover:border-gold/30"
+            : "bg-card/50 border-border hover:border-gold/30 cursor-pointer"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -862,8 +871,8 @@ function AdvancementOption({
         )}
       </div>
       <p className="text-xs text-muted-foreground mt-1 ml-6">{description}</p>
-      {children && <div className="ml-6">{children}</div>}
-    </button>
+      {children && <div className="ml-6" onClick={(e) => e.stopPropagation()}>{children}</div>}
+    </div>
   )
 }
 
