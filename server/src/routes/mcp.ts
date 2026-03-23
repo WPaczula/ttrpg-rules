@@ -3,9 +3,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { listDocumentsWithSummary, getDocument } from '../services/documents.js';
 import { SearchService } from '../services/search.js';
-import { getDriver } from '../campaign/neo4j.js';
-import { initSchema } from '../campaign/schema.js';
-import { registerCampaignTools } from '../campaign/campaign-tools.js';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 
@@ -85,22 +82,6 @@ export function createMcpRouter(options: McpRouterOptions): Router {
     return mcpServer;
   }
 
-  // Initialize campaign tools on first server creation
-  let campaignToolsInitialized = false;
-  async function initCampaignTools(mcpServer: McpServer): Promise<void> {
-    if (campaignToolsInitialized) return;
-
-    try {
-      const driver = getDriver();
-      await initSchema(driver);
-      registerCampaignTools(mcpServer, driver);
-      campaignToolsInitialized = true;
-      console.log('MCP HTTP: Campaign tools initialized');
-    } catch (err) {
-      console.warn('MCP HTTP: Campaign tools not available (Neo4j may not be running)');
-    }
-  }
-
   // Unified /mcp endpoint - handles GET (SSE) and POST (messages)
   router.all('/', async (req: Request, res: Response) => {
     try {
@@ -133,7 +114,6 @@ export function createMcpRouter(options: McpRouterOptions): Router {
 
         // Create and connect MCP server
         const mcpServer = createMcpServer();
-        await initCampaignTools(mcpServer);
         await mcpServer.connect(transport);
 
         console.log(`MCP: New session created`);

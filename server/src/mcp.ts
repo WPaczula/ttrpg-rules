@@ -3,9 +3,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { listDocumentsWithSummary, getDocument } from './services/documents.js';
 import { SearchService } from './services/search.js';
-import { getDriver, closeDriver } from './campaign/neo4j.js';
-import { initSchema } from './campaign/schema.js';
-import { registerCampaignTools } from './campaign/campaign-tools.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { z } from 'zod';
@@ -83,25 +80,10 @@ mcpServer.registerTool('search_rules', {
   return { content: [{ type: 'text', text }] };
 });
 
-// Initialize Neo4j and campaign tools
-async function initCampaign() {
-  try {
-    const driver = getDriver();
-    await initSchema(driver);
-    registerCampaignTools(mcpServer, driver);
-    console.error('Campaign engine initialized (Neo4j connected)');
-  } catch (err) {
-    // Silently skip campaign tools if Neo4j is not available
-    // This is expected for most users who don't have Neo4j running
-    console.error('Info: Campaign tools not available (Neo4j not running). Rules tools are still available.');
-  }
-}
-
 // Graceful shutdown
 function setupShutdown() {
   const shutdown = async () => {
     console.error('Shutting down...');
-    await closeDriver();
     process.exit(0);
   };
   process.on('SIGINT', shutdown);
@@ -110,7 +92,6 @@ function setupShutdown() {
 
 // Start the server
 async function main() {
-  await initCampaign();
   setupShutdown();
 
   const transport = new StdioServerTransport();
