@@ -1,69 +1,10 @@
-import { streamText, convertToModelMessages, stepCountIs, ToolLoopAgent, Output } from 'ai';
-import { anthropic } from '@/lib/anthropic';
-import { validatePassword } from '@/lib/auth';
-import { CHARACTER_CREATION_PROMPT, ROUTING_INSTRUCTIONS } from '@/lib/prompts';
-import { rulesTools } from '@/lib/tools';
-import z from 'zod';
+import { createChatHandler } from '@/lib/chat-handler';
+import { CHARACTER_CREATION_PROMPT } from '@/lib/prompts';
+import { characterChatTools } from '@/lib/tools';
 
-const routingSchema = z.object({
-  isCreative: z.boolean(),
-  reason: z.string().optional()
+export const POST = createChatHandler({
+  getSystemPrompt: () => CHARACTER_CREATION_PROMPT,
+  tools: characterChatTools,
+  label: 'Chat',
+  useSmartRouting: true,
 });
-
-function serializeMessages(messages: any[]) {
-  return messages.slice(-2).map((m: any) => ({
-    role: m.role,
-    content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
-  }));
-}
-
-async function determineIfCreative(messages: any[]): Promise<boolean> {
-  const agent = new ToolLoopAgent({
-    model: anthropic('claude-haiku-4-5'),
-    instructions: ROUTING_INSTRUCTIONS,
-    stopWhen: stepCountIs(1),
-    output: Output.object({ schema: routingSchema }),
-  });
-
-  const recentContext = serializeMessages(messages);
-  const { output } = await agent.generate({
-    prompt: `Based on this conversation, should the response be CREATIVE or FACTUAL?\n\n${JSON.stringify(recentContext)}`
-  });
-
-  return output?.isCreative ?? false;
-}
-
-function selectModel(isCreative: boolean) {
-  return anthropic(isCreative ? 'claude-sonnet-4-6' : 'claude-haiku-4-5');
-}
-
-export async function POST(req: Request) {
-  try {
-    const { messages, password } = await req.json();
-
-    if (!validatePassword(password)) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const [modelMessages, isCreative] = await Promise.all([
-      convertToModelMessages(messages),
-      determineIfCreative(messages)
-    ]);
-
-    const result = streamText({
-      model: selectModel(isCreative),
-      system: CHARACTER_CREATION_PROMPT,
-      messages: modelMessages,
-      tools: rulesTools,
-      stopWhen: stepCountIs(5),
-    });
-
-    return result.toUIMessageStreamResponse();
-  } catch (error) {
-    console.error('Chat API error:', error);
-    return Response.json(
-      { error: 'Failed to process chat' },
-      { status: 500 }
-    );
-  }
-}

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Swords, Lock } from "lucide-react"
 
 interface AccessGateProps {
-  onValidPassword: (password: string) => void
+  onValidPassword: () => void
 }
 
 export function AccessGate({ onValidPassword }: AccessGateProps) {
@@ -29,7 +29,7 @@ export function AccessGate({ onValidPassword }: AccessGateProps) {
       })
 
       if (res.ok) {
-        onValidPassword(code)
+        onValidPassword()
       } else {
         setError("Invalid access code. Please try again.")
       }

@@ -15,6 +15,17 @@ function parseMarkdown(content: string) {
   const elements: React.ReactNode[] = []
   let inList = false
   let listItems: string[] = []
+  let inTable = false
+  let tableRows: string[][] = []
+  let tableHasHeader = false
+  let inBlockquote = false
+  let blockquoteLines: string[] = []
+
+  const formatInline = (text: string): string => {
+    return text
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-gold font-semibold">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+  }
 
   const flushList = () => {
     if (listItems.length > 0) {
@@ -32,18 +43,96 @@ function parseMarkdown(content: string) {
     }
   }
 
-  const formatInline = (text: string): string => {
-    return text
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-gold font-semibold">$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+  const parseTableCells = (line: string): string[] =>
+    line.split("|").map(cell => cell.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1 || (arr[0] !== "" && i === 0) || (arr[arr.length - 1] !== "" && i === arr.length - 1)).filter(Boolean)
+
+  const isTableSeparator = (line: string): boolean =>
+    /^\|?[\s\-|:]+\|?$/.test(line) && line.includes("-")
+
+  const flushBlockquote = () => {
+    if (blockquoteLines.length > 0) {
+      elements.push(
+        <blockquote key={`bq-${elements.length}`} className="border-l-2 border-gold/50 pl-3 my-2 text-sm italic text-foreground/70">
+          {blockquoteLines.map((line, i) => (
+            <p key={i} className="leading-relaxed">
+              <span dangerouslySetInnerHTML={{ __html: formatInline(line) }} />
+            </p>
+          ))}
+        </blockquote>
+      )
+      blockquoteLines = []
+      inBlockquote = false
+    }
+  }
+
+  const flushTable = () => {
+    if (tableRows.length > 0) {
+      const headerRow = tableHasHeader ? tableRows[0] : null
+      const bodyRows = tableHasHeader ? tableRows.slice(1) : tableRows
+      elements.push(
+        <div key={`table-${elements.length}`} className="overflow-x-auto my-3">
+          <table className="w-full text-sm border-collapse">
+            {headerRow && (
+              <thead>
+                <tr className="border-b border-gold/30">
+                  {headerRow.map((cell, i) => (
+                    <th key={i} className="px-3 py-1.5 text-left font-semibold text-gold">
+                      <span dangerouslySetInnerHTML={{ __html: formatInline(cell) }} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {bodyRows.map((row, ri) => (
+                <tr key={ri} className="border-b border-border/50 last:border-0">
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="px-3 py-1.5 text-foreground/90">
+                      <span dangerouslySetInnerHTML={{ __html: formatInline(cell) }} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+      tableRows = []
+      inTable = false
+      tableHasHeader = false
+    }
   }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
 
-    // Headings
+    // Blockquote
+    if (line.startsWith("> ") || line === ">") {
+      flushList()
+      flushTable()
+      inBlockquote = true
+      blockquoteLines.push(line.startsWith("> ") ? line.slice(2) : "")
+      continue
+    } else if (inBlockquote) {
+      flushBlockquote()
+    }
+
+    // Horizontal rule
+    if (/^---+$/.test(line.trim())) {
+      flushList()
+      flushTable()
+      flushBlockquote()
+      elements.push(
+        <hr key={i} className="border-t border-border/60 my-3" />
+      )
+      continue
+    }
+
+    // H1 heading
     if (line.startsWith("# ")) {
       flushList()
+      flushTable()
+      flushBlockquote()
       elements.push(
         <h1 key={i} className="text-xl font-sans font-semibold text-gold mb-3 mt-2">
           {line.slice(2)}
@@ -52,9 +141,54 @@ function parseMarkdown(content: string) {
       continue
     }
 
+    // H2 heading
+    if (line.startsWith("## ")) {
+      flushList()
+      flushTable()
+      flushBlockquote()
+      elements.push(
+        <h2 key={i} className="text-lg font-sans font-semibold text-gold mb-2 mt-3">
+          {line.slice(3)}
+        </h2>
+      )
+      continue
+    }
+
+    // H3 heading
+    if (line.startsWith("### ")) {
+      flushList()
+      flushTable()
+      flushBlockquote()
+      elements.push(
+        <h3 key={i} className="text-base font-sans font-semibold text-gold/80 mb-1 mt-2">
+          {line.slice(4)}
+        </h3>
+      )
+      continue
+    }
+
+    // Table rows
+    if (line.includes("|")) {
+      flushList()
+      if (isTableSeparator(line)) {
+        // This is the separator row — mark that next rows are body
+        if (tableRows.length > 0) tableHasHeader = true
+        continue
+      }
+      const cells = parseTableCells(line)
+      if (cells.length > 0) {
+        inTable = true
+        tableRows.push(cells)
+        continue
+      }
+    } else if (inTable) {
+      flushTable()
+    }
+
     // Numbered list items
     const listMatch = line.match(/^\d+\.\s*(.+)/)
     if (listMatch) {
+      flushTable()
       inList = true
       listItems.push(listMatch[1])
       continue
@@ -63,11 +197,15 @@ function parseMarkdown(content: string) {
     // Empty line or new paragraph
     if (line.trim() === "") {
       flushList()
+      flushTable()
+      flushBlockquote()
       continue
     }
 
     // Regular paragraph
     flushList()
+    flushTable()
+    flushBlockquote()
     elements.push(
       <p key={i} className="text-sm leading-relaxed text-foreground/90 mb-2">
         <span dangerouslySetInnerHTML={{ __html: formatInline(line) }} />
@@ -76,6 +214,8 @@ function parseMarkdown(content: string) {
   }
 
   flushList()
+  flushTable()
+  flushBlockquote()
   return elements
 }
 
