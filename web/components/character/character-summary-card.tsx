@@ -54,7 +54,7 @@ export function CharacterSummaryCard({ data, onApplyToSheet, accepted }: Charact
 
       {/* Identity row */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{data.ancestry}</span>
+        <span>{data.secondaryAncestry ? `${data.ancestry} + ${data.secondaryAncestry}` : data.ancestry}</span>
         <span className="text-border">·</span>
         <span>{data.community}</span>
         <span className="text-border">·</span>
