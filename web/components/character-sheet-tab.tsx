@@ -107,6 +107,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     () => SRD_ANCESTRIES.find((a) => a.name === c.ancestry),
     [c.ancestry]
   )
+  const selectedSecondaryAncestry = useMemo(
+    () => SRD_ANCESTRIES.find((a) => a.name === c.secondaryAncestry),
+    [c.secondaryAncestry]
+  )
   const selectedCommunity = useMemo(
     () => SRD_COMMUNITIES.find((cm) => cm.name === c.community),
     [c.community]
@@ -225,7 +229,12 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         </div>
         {(c.ancestry || c.community) && (
           <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
-            {c.ancestry && <span>{c.ancestry}</span>}
+            {c.ancestry && (
+              <span>
+                {c.ancestry}
+                {c.secondaryAncestry && ` + ${c.secondaryAncestry}`}
+              </span>
+            )}
             {c.ancestry && c.community && <span>·</span>}
             {c.community && <span>{c.community}</span>}
           </div>
@@ -265,6 +274,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         selectedClass={selectedClass}
         selectedSubclass={selectedSubclass}
         selectedAncestry={selectedAncestry}
+        selectedSecondaryAncestry={selectedSecondaryAncestry}
         selectedCommunity={selectedCommunity}
       />
       <EquipmentSection

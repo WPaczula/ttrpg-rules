@@ -12,6 +12,7 @@ interface FeaturesSectionProps {
   selectedClass: SrdClass | undefined
   selectedSubclass: SrdSubclass | undefined
   selectedAncestry: SrdAncestry | undefined
+  selectedSecondaryAncestry: SrdAncestry | undefined
   selectedCommunity: SrdCommunity | undefined
 }
 
@@ -21,8 +22,28 @@ export function FeaturesSection({
   selectedClass,
   selectedSubclass,
   selectedAncestry,
+  selectedSecondaryAncestry,
   selectedCommunity,
 }: FeaturesSectionProps) {
+  const isMultiancestry = !!selectedSecondaryAncestry
+
+  // For multiancestry, show only the selected features; for single ancestry, show all
+  const primaryAncestryFeatures = selectedAncestry
+    ? isMultiancestry
+      ? selectedAncestry.features.filter((f) => f.name === c.ancestryFeature)
+      : selectedAncestry.features
+    : []
+
+  const secondaryAncestryFeatures = selectedSecondaryAncestry
+    ? selectedSecondaryAncestry.features.filter((f) => f.name === c.secondaryAncestryFeature)
+    : []
+
+  const ancestryLabel = isMultiancestry
+    ? `${selectedAncestry?.name} + ${selectedSecondaryAncestry?.name} — Ancestry Features`
+    : selectedAncestry
+      ? `${selectedAncestry.name} — Ancestry Features`
+      : ""
+
   return (
     <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
       <div className="space-y-4">
@@ -46,7 +67,17 @@ export function FeaturesSection({
           </div>
         )}
         {selectedAncestry && (
-          <FeatureList label={`${selectedAncestry.name} — Ancestry Features`} features={selectedAncestry.features} />
+          <div className="space-y-2">
+            <FeatureList
+              label={ancestryLabel}
+              features={[...primaryAncestryFeatures, ...secondaryAncestryFeatures]}
+            />
+            {isMultiancestry && primaryAncestryFeatures.length === 0 && (
+              <p className="text-xs text-muted-foreground italic">
+                Select your ancestry feature in the identity editor to see the paired features here.
+              </p>
+            )}
+          </div>
         )}
         {selectedCommunity && (
           <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
