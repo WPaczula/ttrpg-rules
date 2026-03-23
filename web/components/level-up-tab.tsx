@@ -34,7 +34,7 @@ type AdvancementChoice =
   | { type: "increase-traits"; traits: [string, string] }
   | { type: "add-hp" }
   | { type: "add-stress" }
-  | { type: "boost-experiences" }
+  | { type: "boost-experiences"; experienceIds: string[] }
   | { type: "extra-domain-card" }
   | { type: "increase-evasion" }
 
@@ -201,7 +201,10 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
             break
           case "boost-experiences": {
             const exps = patch.experiences ?? [...prev.experiences]
-            patch.experiences = exps.map((e) => ({ ...e, modifier: Math.min(6, e.modifier + 1) }))
+            const boostedIds = new Set(adv.experienceIds)
+            patch.experiences = exps.map((e) =>
+              boostedIds.has(e.id) ? { ...e, modifier: Math.min(6, e.modifier + 1) } : e
+            )
             newSlots.experiences++
             break
           }
@@ -584,7 +587,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
             {/* Boost Experiences (1 slot) */}
             <AdvancementOption
               title="Boost Experiences"
-              description={`+1 bonus to all your Experiences. (${slots.experiences}/${SLOT_LIMITS.experiences} used)`}
+              description={`+1 bonus to two Experiences. Pick two below. (${slots.experiences}/${SLOT_LIMITS.experiences} used)`}
               icon={<Sparkles className="w-4 h-4" />}
               disabled={!canAddAdvancement || !slotAvailable("experiences")}
               selected={advancements.some((a) => a.type === "boost-experiences")}
@@ -592,10 +595,63 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
                 if (advancements.some((a) => a.type === "boost-experiences")) {
                   setAdvancements((prev) => prev.filter((a) => a.type !== "boost-experiences"))
                 } else if (canAddAdvancement && slotAvailable("experiences")) {
-                  setAdvancements((prev) => [...prev, { type: "boost-experiences" }])
+                  setAdvancements((prev) => [...prev, { type: "boost-experiences", experienceIds: [] }])
                 }
               }}
-            />
+            >
+              {advancements.some((a) => a.type === "boost-experiences") && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-[11px] text-muted-foreground mb-1.5">
+                    Choose 2 experiences to boost:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.experiences.map((exp) => {
+                      const boostAdv = advancements.find((a) => a.type === "boost-experiences") as
+                        | { type: "boost-experiences"; experienceIds: string[] }
+                        | undefined
+                      const picked = boostAdv?.experienceIds.includes(exp.id) ?? false
+                      const locked = (boostAdv?.experienceIds.length ?? 0) >= 2
+
+                      return (
+                        <button
+                          key={exp.id}
+                          type="button"
+                          disabled={locked && !picked}
+                          onClick={() => {
+                            setAdvancements((prev) => {
+                              const idx = prev.findIndex((a) => a.type === "boost-experiences")
+                              if (idx === -1) return prev
+                              const cur = prev[idx] as { type: "boost-experiences"; experienceIds: string[] }
+                              let next: string[]
+                              if (picked) {
+                                next = cur.experienceIds.filter((id) => id !== exp.id)
+                              } else if (cur.experienceIds.length < 2) {
+                                next = [...cur.experienceIds, exp.id]
+                              } else {
+                                return prev
+                              }
+                              const updated = [...prev]
+                              updated[idx] = { type: "boost-experiences", experienceIds: next }
+                              return updated
+                            })
+                          }}
+                          className={`px-3 py-2 rounded-md border text-xs font-medium transition-all active:scale-95 ${
+                            picked
+                              ? "bg-gold/15 border-gold/40 text-gold"
+                              : "bg-input border-border text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                          } ${locked && !picked ? "opacity-60" : ""}`}
+                        >
+                          {exp.name}
+                          <span className="ml-1 text-[10px]">
+                            ({formatModifier(exp.modifier)})
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </AdvancementOption>
 
             {/* Extra Domain Card (1 slot) */}
             <AdvancementOption
@@ -723,9 +779,14 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
                 case "add-stress":
                   desc = `Stress ${c.stressTotal} → ${c.stressTotal + 1}`
                   break
-                case "boost-experiences":
-                  desc = "+1 to two Experiences"
+                case "boost-experiences": {
+                  const names = adv.experienceIds
+                    .map((id) => c.experiences.find((e) => e.id === id)?.name)
+                    .filter(Boolean)
+                    .join(", ")
+                  desc = `+1 to ${names || "two Experiences"}`
                   break
+                }
                 case "extra-domain-card":
                   desc = "Extra domain card"
                   break
@@ -767,7 +828,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
           <Button
             size="sm"
             onClick={goNext}
-            disabled={step === "advancements" && slotsUsed < 2}
+            disabled={step === "advancements" && (slotsUsed < 2 || advancements.some((a) => a.type === "boost-experiences" && a.experienceIds.length < 2))}
             className="ml-auto bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25"
           >
             Next
