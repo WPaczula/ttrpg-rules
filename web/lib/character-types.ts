@@ -56,6 +56,20 @@ export interface CharacterData {
   goldChests: number
 
   // Progression
+  proficiency: number
+  markedTraits: string[]
+  // Tracks how many times each advancement option has been used per tier
+  // Each tier has its own set of slots that reset when you enter a new tier
+  advancementSlots: Record<number, {
+    traits: number       // max 3
+    hp: number           // max 1
+    stress: number       // max 1
+    experiences: number  // max 1
+    domainCard: number   // max 1
+    evasion: number      // max 1
+    subclassCard: number // max 1 (Tier 3+)
+    proficiency: number  // max 1, costs 2 slots (Tier 3+)
+  }>
   experiences: Experience[]
   domainCards: DomainCard[]
 
@@ -100,6 +114,9 @@ export const DEFAULT_CHARACTER: CharacterData = {
   goldHandfuls: 0,
   goldBags: 0,
   goldChests: 0,
+  proficiency: 1,
+  markedTraits: [],
+  advancementSlots: {},
   experiences: [],
   domainCards: [],
   primaryWeapon: "",

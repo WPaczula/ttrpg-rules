@@ -19,7 +19,7 @@ import {
   SRD_SUBCLASSES,
 } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
-import { NotebookPen, RotateCcw, Pencil } from "lucide-react"
+import { NotebookPen, RotateCcw, Pencil, PencilOff } from "lucide-react"
 import { Section } from "@/components/character-sheet/primitives"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
 import { TraitsDefenseSection } from "@/components/character-sheet/traits-defense-section"
@@ -47,6 +47,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const isLoaded = props.isLoaded ?? internal.isLoaded
   const [confirmReset, setConfirmReset] = useState(false)
   const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
 
   const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
 
@@ -195,20 +196,29 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       {/* ── Identity Header (static display) ────────────────────── */}
       <div className="py-4 space-y-2">
         <div className="flex items-center gap-2">
-          <Input
-            value={c.name}
-            onChange={(e) => update({ name: e.target.value })}
-            placeholder="Character name…"
-            className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50 flex-1"
-          />
+          {editing ? (
+            <Input
+              value={c.name}
+              onChange={(e) => update({ name: e.target.value })}
+              placeholder="Character name…"
+              className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50 flex-1"
+            />
+          ) : (
+            <span className="text-lg font-semibold text-gold flex-1 truncate">
+              {c.name || <span className="text-muted-foreground/50 italic font-normal">Character name…</span>}
+            </span>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIdentityDialogOpen(true)}
-            className="text-muted-foreground hover:text-gold shrink-0"
-            aria-label="Edit character identity"
+            onClick={() => setEditing(!editing)}
+            className={cn(
+              "shrink-0 transition-colors",
+              editing ? "text-gold hover:text-gold/80" : "text-muted-foreground hover:text-gold"
+            )}
+            aria-label={editing ? "Lock character sheet" : "Edit character sheet"}
           >
-            <Pencil className="w-4 h-4" />
+            {editing ? <PencilOff className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
           </Button>
         </div>
 
@@ -241,10 +251,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         )}
         {!c.class && !c.ancestry && !c.community && (
           <button
-            onClick={() => setIdentityDialogOpen(true)}
+            onClick={() => { setEditing(true); setIdentityDialogOpen(true) }}
             className="text-xs text-muted-foreground/70 italic hover:text-gold transition-colors"
           >
-            Tap the pencil icon to set your class, ancestry, and community
+            Tap the pencil icon to edit and set your class, ancestry, and community
           </button>
         )}
       </div>
@@ -252,22 +262,30 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       <Separator className="bg-border mb-1" />
 
       {/* ── Edit Identity Dialog ─────────────────────────────────── */}
-      <EditIdentityDialog
-        open={identityDialogOpen}
-        onOpenChange={setIdentityDialogOpen}
-        character={c}
-        update={update}
-        classItems={classItems}
-        subclassItems={subclassItems}
-        ancestryItems={ancestryItems}
-        communityItems={communityItems}
-      />
+      {editing && (
+        <EditIdentityDialog
+          open={identityDialogOpen}
+          onOpenChange={setIdentityDialogOpen}
+          character={c}
+          update={update}
+          classItems={classItems}
+          subclassItems={subclassItems}
+          ancestryItems={ancestryItems}
+          communityItems={communityItems}
+        />
+      )}
+
+      {editing && (
+        <p className="text-xs text-gold/70 italic text-center pb-2">
+          Edit mode — traits, experiences, domain cards, and equipment are unlocked
+        </p>
+      )}
 
       {/* ── Sections ─────────────────────────────────────────────── */}
-      <TraitsDefenseSection character={c} tier={tier} update={update} />
+      <TraitsDefenseSection character={c} tier={tier} update={update} editing={editing} />
       <HpStressHopeSection character={c} update={update} />
-      <ExperiencesSection experiences={c.experiences} update={update} />
-      <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} update={update} />
+      <ExperiencesSection experiences={c.experiences} update={update} editing={editing} />
+      <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} update={update} editing={editing} />
       <FeaturesSection
         character={c}
         update={update}
@@ -276,6 +294,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         selectedAncestry={selectedAncestry}
         selectedSecondaryAncestry={selectedSecondaryAncestry}
         selectedCommunity={selectedCommunity}
+        editing={editing}
       />
       <EquipmentSection
         character={c}
@@ -283,6 +302,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         primaryWeaponItems={primaryWeaponItems}
         secondaryWeaponItems={secondaryWeaponItems}
         armorItems={armorItems}
+        editing={editing}
       />
       <GoldSection character={c} update={update} />
 
@@ -297,22 +317,24 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       </Section>
 
       {/* ── Reset ────────────────────────────────────────────────── */}
-      <div className="pt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReset}
-          className={cn(
-            "w-full border-border text-muted-foreground transition-colors",
-            confirmReset
-              ? "border-destructive text-destructive hover:bg-destructive/10"
-              : "hover:border-destructive/50 hover:text-destructive/80"
-          )}
-        >
-          <RotateCcw className="w-3.5 h-3.5 mr-2" />
-          {confirmReset ? "Tap again to confirm reset" : "Reset Character Sheet"}
-        </Button>
-      </div>
+      {editing && (
+        <div className="pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            className={cn(
+              "w-full border-border text-muted-foreground transition-colors",
+              confirmReset
+                ? "border-destructive text-destructive hover:bg-destructive/10"
+                : "hover:border-destructive/50 hover:text-destructive/80"
+            )}
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-2" />
+            {confirmReset ? "Tap again to confirm reset" : "Reset Character Sheet"}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
