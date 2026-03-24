@@ -222,7 +222,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
       allSlots[nextTier] = newSlots
       patch.advancementSlots = allSlots
 
-      // Standard domain card (always gained on level-up)
+      // Extra domain card (only if selected as an advancement)
       if (newDomainCard) {
         const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === newDomainCard)
         const card: DomainCard = {
@@ -249,22 +249,30 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
   ])
 
   // ── Navigation ─────────────────────────────────────────────────
+  const needsDomainCard = advancements.some((a) => a.type === "extra-domain-card")
+
   const goNext = useCallback(() => {
-    const steps: WizardStep[] = tierTransition
-      ? ["tier-achievement", "advancements", "domain-card", "confirm"]
-      : ["advancements", "domain-card", "confirm"]
+    const steps: WizardStep[] = [
+      ...(tierTransition ? ["tier-achievement" as const] : []),
+      "advancements",
+      ...(needsDomainCard ? ["domain-card" as const] : []),
+      "confirm",
+    ]
     const idx = steps.indexOf(step)
     if (idx < steps.length - 1) setStep(steps[idx + 1])
-  }, [step, tierTransition])
+  }, [step, tierTransition, needsDomainCard])
 
   const goBack = useCallback(() => {
-    const steps: WizardStep[] = tierTransition
-      ? ["tier-achievement", "advancements", "domain-card", "confirm"]
-      : ["advancements", "domain-card", "confirm"]
+    const steps: WizardStep[] = [
+      ...(tierTransition ? ["tier-achievement" as const] : []),
+      "advancements",
+      ...(needsDomainCard ? ["domain-card" as const] : []),
+      "confirm",
+    ]
     const idx = steps.indexOf(step)
     if (idx > 0) setStep(steps[idx - 1])
     else reset()
-  }, [step, tierTransition, reset])
+  }, [step, tierTransition, needsDomainCard, reset])
 
   if (!isLoaded) {
     return (
@@ -663,6 +671,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
               onSelect={() => {
                 if (advancements.some((a) => a.type === "extra-domain-card")) {
                   setAdvancements((prev) => prev.filter((a) => a.type !== "extra-domain-card"))
+                  setNewDomainCard("")
                 } else if (canAddAdvancement && slotAvailable("domainCard")) {
                   setAdvancements((prev) => [...prev, { type: "extra-domain-card" }])
                 }
