@@ -135,37 +135,39 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     }))
   }, [selectedClass])
 
+  const playerTier = getTier(c.level)
+
   const primaryWeaponItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_WEAPONS.filter((w) => w.type === "Primary").map((w) => ({
+      SRD_WEAPONS.filter((w) => w.type === "Primary" && w.tier === playerTier).map((w) => ({
         value: w.name,
         label: w.name,
         detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
-        group: `Tier ${w.tier} — ${w.damageType}`,
+        group: w.damageType,
       })),
-    []
+    [playerTier]
   )
 
   const secondaryWeaponItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_WEAPONS.filter((w) => w.type === "Secondary").map((w) => ({
+      SRD_WEAPONS.filter((w) => w.type === "Secondary" && w.tier === playerTier).map((w) => ({
         value: w.name,
         label: w.name,
         detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
-        group: `Tier ${w.tier} — ${w.damageType}`,
+        group: w.damageType,
       })),
-    []
+    [playerTier]
   )
 
   const armorItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_ARMOR.map((a) => ({
+      SRD_ARMOR.filter((a) => a.tier === playerTier).map((a) => ({
         value: a.name,
         label: a.name,
         detail: `Score ${a.baseScore} · Thresholds ${a.baseThresholds}${a.feature ? ` · ${a.feature}` : ""}`,
         group: `Tier ${a.tier}`,
       })),
-    []
+    [playerTier]
   )
 
   if (!isLoaded) {
