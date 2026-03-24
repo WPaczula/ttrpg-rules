@@ -122,10 +122,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   )
 
   const domainCardItems = useMemo<ComboboxItem[]>(() => {
-    let cards = SRD_DOMAIN_CARDS
+    let cards = SRD_DOMAIN_CARDS.filter((dc) => dc.level <= c.level)
     if (selectedClass) {
       const classDomains = selectedClass.domains
-      cards = SRD_DOMAIN_CARDS.filter((dc) => classDomains.includes(dc.domain))
+      cards = cards.filter((dc) => classDomains.includes(dc.domain))
     }
     return cards.map((dc) => ({
       value: dc.name,
@@ -133,7 +133,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       detail: `Lvl ${dc.level} · Recall ${dc.recallCost}`,
       group: dc.domain,
     }))
-  }, [selectedClass])
+  }, [selectedClass, c.level])
 
   const playerTier = getTier(c.level)
 
