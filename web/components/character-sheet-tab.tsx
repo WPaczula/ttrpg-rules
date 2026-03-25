@@ -174,7 +174,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
   const primaryWeaponItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_WEAPONS.filter((w) => w.type === "Primary" && w.tier === playerTier).map((w) => ({
+      SRD_WEAPONS.filter((w) => w.type === "Primary" && w.tier <= playerTier).map((w) => ({
         value: w.name,
         label: w.name,
         detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
@@ -185,7 +185,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
   const secondaryWeaponItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_WEAPONS.filter((w) => w.type === "Secondary" && w.tier === playerTier).map((w) => ({
+      SRD_WEAPONS.filter((w) => w.type === "Secondary" && w.tier <= playerTier).map((w) => ({
         value: w.name,
         label: w.name,
         detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
@@ -196,7 +196,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
   const armorItems = useMemo<ComboboxItem[]>(
     () =>
-      SRD_ARMOR.filter((a) => a.tier === playerTier).map((a) => ({
+      SRD_ARMOR.filter((a) => a.tier <= playerTier).map((a) => ({
         value: a.name,
         label: a.name,
         detail: `Score ${a.baseScore} · Thresholds ${a.baseThresholds}${a.feature ? ` · ${a.feature}` : ""}`,
