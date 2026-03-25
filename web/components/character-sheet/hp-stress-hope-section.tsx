@@ -5,6 +5,7 @@ import { Heart, Info } from "lucide-react"
 import { Section, SlotTracker, NumberStepper, Counter } from "./primitives"
 import { SRD_CLASSES } from "@/lib/srd-data"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { SrdMarkdown } from "./srd-markdown"
 
 interface HpStressHopeSectionProps {
   character: CharacterData
@@ -88,17 +89,17 @@ export function HpStressHopeSection({ character: c, update }: HpStressHopeSectio
 
 function HopeActionItem({ label, description }: { label: string; description: string }) {
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="text-amber-500/70 hover:text-amber-400 transition-colors" aria-label={`Info about ${label}`}>
-            <Info className="w-3 h-3" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="text-sm">{description}</PopoverContent>
-      </Popover>
-    </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-purple-deep/70 border border-border hover:border-gold/40 hover:bg-purple-deep transition-colors cursor-pointer w-full">
+          <span className="text-xs text-muted-foreground">{label}</span>
+          <Info className="w-3 h-3 text-amber-500/70 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="text-sm max-w-xs">
+        <SrdMarkdown content={description} />
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -109,21 +110,21 @@ function HopeActions({ characterClass }: { characterClass: string }) {
   const hopeFeature = srdClass?.hopeFeature
 
   return (
-    <div className="flex flex-col items-center gap-1 mt-2 w-full">
+    <div className="grid grid-cols-2 gap-1.5 mt-2 w-full">
       <HopeActionItem
         label="Help an Ally (1)"
-        description="Spend 1 Hope to add +1d6 to an ally's action roll"
+        description="Spend 1 Hope to add **+1d6** to an ally's action roll"
       />
       <HopeActionItem
         label="Use Experience (1)"
-        description="Spend 1 Hope to add +2 to your roll using one of your experiences"
+        description="Spend 1 Hope to add **+2** to your roll using one of your experiences"
       />
       <HopeActionItem
         label="Tag Team (3)"
-        description="Spend 3 Hope to make a Tag Team Roll with an ally — both roll and use the better result"
+        description="Spend 3 Hope to make a **Tag Team Roll** with an ally — both roll and use the better result"
       />
       <HopeActionItem
-        label={hopeFeature ? `${hopeFeature.name} (3)` : "Class Hope Feature (3)"}
+        label={hopeFeature ? `${hopeFeature.name} (3)` : "Class Feature (3)"}
         description={hopeFeature ? hopeFeature.text : "Select a class to see its Hope feature"}
       />
     </div>
