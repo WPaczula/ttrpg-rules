@@ -319,7 +319,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
       {/* ── Sections ─────────────────────────────────────────────── */}
       <TraitsDefenseSection character={c} tier={tier} update={update} editing={editing} />
-      <HpStressHopeSection character={c} update={update} />
+      <HpStressHopeSection character={c} update={update} editing={editing} />
       <ExperiencesSection experiences={c.experiences} update={update} editing={editing} />
       <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} thresholdBonuses={c.thresholdBonuses ?? {}} proficiency={c.proficiency} update={update} editing={editing} />
       <FeaturesSection

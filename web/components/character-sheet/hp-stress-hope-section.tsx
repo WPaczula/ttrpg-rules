@@ -10,9 +10,10 @@ import { SrdMarkdown } from "./srd-markdown"
 interface HpStressHopeSectionProps {
   character: CharacterData
   update: (patch: Partial<CharacterData>) => void
+  editing?: boolean
 }
 
-export function HpStressHopeSection({ character: c, update }: HpStressHopeSectionProps) {
+export function HpStressHopeSection({ character: c, update, editing }: HpStressHopeSectionProps) {
   return (
     <Section icon={<Heart className="w-4 h-4" />} title="HP, Stress & Hope" defaultOpen>
       <div className="space-y-5">
@@ -25,13 +26,15 @@ export function HpStressHopeSection({ character: c, update }: HpStressHopeSectio
                 {c.hpMarked}/{c.hpTotal} marked
               </span>
             </span>
-            <NumberStepper
-              label="Total"
-              value={c.hpTotal}
-              onChange={(v) => update({ hpTotal: v, hpMarked: Math.min(c.hpMarked, v) })}
-              min={1}
-              max={12}
-            />
+            {editing && (
+              <NumberStepper
+                label="Total"
+                value={c.hpTotal}
+                onChange={(v) => update({ hpTotal: v, hpMarked: Math.min(c.hpMarked, v) })}
+                min={1}
+                max={12}
+              />
+            )}
           </div>
           <SlotTracker
             total={c.hpTotal}
@@ -52,13 +55,15 @@ export function HpStressHopeSection({ character: c, update }: HpStressHopeSectio
                 {c.stressMarked}/{c.stressTotal} marked
               </span>
             </span>
-            <NumberStepper
-              label="Total"
-              value={c.stressTotal}
-              onChange={(v) => update({ stressTotal: v, stressMarked: Math.min(c.stressMarked, v) })}
-              min={1}
-              max={12}
-            />
+            {editing && (
+              <NumberStepper
+                label="Total"
+                value={c.stressTotal}
+                onChange={(v) => update({ stressTotal: v, stressMarked: Math.min(c.stressMarked, v) })}
+                min={1}
+                max={12}
+              />
+            )}
           </div>
           <SlotTracker
             total={c.stressTotal}
