@@ -1,10 +1,154 @@
 "use client"
 
-import { Input } from "@/components/ui/input"
+import { useMemo } from "react"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import type { CharacterData } from "@/lib/character-types"
-import { formatModifier } from "@/lib/character-types"
-import { Shield } from "lucide-react"
+import { formatModifier, computeThresholds } from "@/lib/character-types"
+import { SRD_ARMOR, SRD_WEAPONS } from "@/lib/srd-data"
+import { Shield, Info } from "lucide-react"
 import { Section, StatBox, TraitStepper, NumberStepper, SlotTracker } from "./primitives"
+
+// ─── Modifier helpers ────────────────────────────────────────────────────────
+
+type TraitKey = "agility" | "strength" | "finesse" | "instinct" | "presence" | "knowledge"
+
+const TRAIT_NAMES: Record<string, TraitKey> = {
+  agility: "agility",
+  strength: "strength",
+  finesse: "finesse",
+  instinct: "instinct",
+  presence: "presence",
+  knowledge: "knowledge",
+}
+
+interface ModifierEntry {
+  source: string
+  modifier: number
+  label: string
+}
+
+/** Parse feature text for trait modifiers like "-1 to Agility", "decrease Agility by 1", "+1 bonus to Strength" */
+function parseTraitModifiers(featureText: string, sourceName: string): { trait: TraitKey; entry: ModifierEntry }[] {
+  const results: { trait: TraitKey; entry: ModifierEntry }[] = []
+
+  // Pattern: "+/-N to (your) Trait" or "+/-N bonus to (your) Trait"
+  const toPattern = /([+\u2212-]\d+)\s+(?:bonus\s+)?to\s+(?:your\s+)?(\w+)/gi
+  for (const match of featureText.matchAll(toPattern)) {
+    const modStr = match[1].replace("\u2212", "-")
+    const modifier = parseInt(modStr, 10)
+    const traitKey = TRAIT_NAMES[match[2].toLowerCase()]
+    if (traitKey && !isNaN(modifier)) {
+      const sign = modifier >= 0 ? "+" : ""
+      results.push({ trait: traitKey, entry: { source: sourceName, modifier, label: `${sourceName}: ${sign}${modifier} ${traitKey}` } })
+    }
+  }
+
+  // Pattern: "decrease (your) Trait by N"
+  const decreasePattern = /decrease\s+(?:your\s+)?(\w+)\s+by\s+(\d+)/gi
+  for (const match of featureText.matchAll(decreasePattern)) {
+    const traitKey = TRAIT_NAMES[match[1].toLowerCase()]
+    const value = parseInt(match[2], 10)
+    if (traitKey && !isNaN(value)) {
+      results.push({ trait: traitKey, entry: { source: sourceName, modifier: -value, label: `${sourceName}: -${value} ${traitKey}` } })
+    }
+  }
+
+  // Pattern: "increase (your) Trait by N"
+  const increasePattern = /increase\s+(?:your\s+)?(\w+)\s+by\s+(\d+)/gi
+  for (const match of featureText.matchAll(increasePattern)) {
+    const traitKey = TRAIT_NAMES[match[1].toLowerCase()]
+    const value = parseInt(match[2], 10)
+    if (traitKey && !isNaN(value)) {
+      results.push({ trait: traitKey, entry: { source: sourceName, modifier: value, label: `${sourceName}: +${value} ${traitKey}` } })
+    }
+  }
+
+  return results
+}
+
+function useEquipmentModifiers(c: CharacterData) {
+  return useMemo(() => {
+    const armor = SRD_ARMOR.find((a) => a.name === c.armorName)
+    const primary = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
+    const secondary = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
+
+    // Evasion modifiers
+    const evasionMods: ModifierEntry[] = []
+    if (armor?.evasionModifier) {
+      evasionMods.push({
+        source: armor.name,
+        modifier: armor.evasionModifier,
+        label: `${armor.name}: ${armor.evasionModifier} evasion`,
+      })
+    }
+
+    // Trait modifiers from feature text
+    const traitMods: Record<TraitKey, ModifierEntry[]> = {
+      agility: [], strength: [], finesse: [], instinct: [], presence: [], knowledge: [],
+    }
+
+    const featureSources: { name: string; feature: string }[] = []
+    if (armor?.feature) featureSources.push({ name: armor.name, feature: armor.feature })
+    if (primary?.feature) featureSources.push({ name: primary.name, feature: primary.feature })
+    if (secondary?.feature) featureSources.push({ name: secondary.name, feature: secondary.feature })
+
+    for (const src of featureSources) {
+      const parsed = parseTraitModifiers(src.feature, src.name)
+      for (const { trait, entry } of parsed) {
+        traitMods[trait].push(entry)
+      }
+    }
+
+    return { evasionMods, traitMods }
+  }, [c.armorName, c.primaryWeapon, c.secondaryWeapon])
+}
+
+// ─── Info Popover ────────────────────────────────────────────────────────────
+
+function ModifierInfo({ modifiers }: { modifiers: ModifierEntry[] }) {
+  if (modifiers.length === 0) return null
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-gold transition-colors"
+          aria-label="Show modifier breakdown"
+        >
+          <Info className="w-3.5 h-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto max-w-xs p-3">
+        <p className="text-xs font-medium text-foreground mb-1.5">Modifiers from equipment</p>
+        <ul className="space-y-0.5">
+          {modifiers.map((m, i) => (
+            <li key={i} className="text-xs text-muted-foreground">{m.label}</li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// ─── Stat Box with optional info icon ────────────────────────────────────────
+
+function StatBoxWithInfo({ label, value, modifiers }: { label: string; value: string | number; modifiers: ModifierEntry[] }) {
+  return (
+    <div className="relative">
+      <StatBox label={label} value={value} />
+      {modifiers.length > 0 && (
+        <div className="absolute top-1 right-1">
+          <ModifierInfo modifiers={modifiers} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
+
+const TRAIT_SHORT_TO_KEY: Record<string, TraitKey> = {
+  AGI: "agility", STR: "strength", FIN: "finesse", INS: "instinct", PRE: "presence", KNO: "knowledge",
+}
 
 interface TraitsDefenseSectionProps {
   character: CharacterData
@@ -14,6 +158,10 @@ interface TraitsDefenseSectionProps {
 }
 
 export function TraitsDefenseSection({ character: c, tier, update, editing = false }: TraitsDefenseSectionProps) {
+  const { evasionMods, traitMods } = useEquipmentModifiers(c)
+  const armor = SRD_ARMOR.find((a) => a.name === c.armorName)
+  const thresholds = computeThresholds(armor?.baseThresholds, c.level, c.proficiency, c.thresholdBonuses)
+
   return (
     <Section icon={<Shield className="w-4 h-4" />} title="Traits & Defense" defaultOpen>
       <div className="space-y-5">
@@ -29,12 +177,17 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
             </>
           ) : (
             <>
-              <StatBox label="AGI" value={formatModifier(c.agility)} />
-              <StatBox label="STR" value={formatModifier(c.strength)} />
-              <StatBox label="FIN" value={formatModifier(c.finesse)} />
-              <StatBox label="INS" value={formatModifier(c.instinct)} />
-              <StatBox label="PRE" value={formatModifier(c.presence)} />
-              <StatBox label="KNO" value={formatModifier(c.knowledge)} />
+              {(["AGI", "STR", "FIN", "INS", "PRE", "KNO"] as const).map((short) => {
+                const key = TRAIT_SHORT_TO_KEY[short]
+                return (
+                  <StatBoxWithInfo
+                    key={short}
+                    label={short}
+                    value={formatModifier(c[key])}
+                    modifiers={traitMods[key]}
+                  />
+                )
+              })}
             </>
           )}
         </div>
@@ -45,8 +198,8 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
         )}
 
         <div className="grid grid-cols-3 gap-3">
-          <StatBox label="Evasion" value={c.evasion} />
-          <StatBox label="Armor" value={`${c.armorMarked}/${c.armorScore}`} />
+          <StatBoxWithInfo label="Evasion" value={c.evasion} modifiers={evasionMods} />
+          <StatBox label="Prof." value={c.proficiency} />
           <StatBox label="Tier" value={tier} />
         </div>
 
@@ -83,46 +236,63 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">
-            Damage Thresholds
-          </span>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground block text-center">Minor</span>
-              <Input
-                type="number"
-                value={c.minorThreshold}
-                onChange={(e) => update({ minorThreshold: Number(e.target.value) })}
-                className="text-center text-gold font-bold bg-input border-border h-9"
-                min={0}
-                aria-label="Minor threshold"
-              />
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">
+              Damage Thresholds
+            </span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="inline-flex items-center justify-center w-4 h-4 text-muted-foreground hover:text-gold transition-colors"
+                  aria-label="Show threshold breakdown"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto max-w-xs p-3">
+                <p className="text-xs font-medium text-foreground mb-1.5">Threshold Breakdown</p>
+                <ul className="space-y-0.5">
+                  <li className="text-xs text-muted-foreground">
+                    Armor base: {thresholds.armorBaseMajor} / {thresholds.armorBaseSevere}
+                  </li>
+                  {thresholds.levelBonus > 0 && (
+                    <li className="text-xs text-muted-foreground">
+                      Level bonus: +{thresholds.levelBonus}
+                    </li>
+                  )}
+                  {thresholds.bonuses.map((b) => {
+                    // Strip prefix like "card:", "classFeature:", "subclassFeature:"
+                    const displayLabel = b.label.replace(/^(?:card|classFeature|subclassFeature):/, "")
+                    return (
+                    <li key={b.label} className="text-xs text-muted-foreground">
+                      {displayLabel}:{" "}
+                      {b.major > 0 ? `+${b.major} Major` : ""}
+                      {b.major > 0 && b.severe > 0 ? ", " : ""}
+                      {b.severe > 0 ? `+${b.severe} Severe` : ""}
+                    </li>
+                    )
+                  })}
+                  {!armor && (
+                    <li className="text-xs text-muted-foreground italic">
+                      No armor equipped — select armor to see base thresholds.
+                    </li>
+                  )}
+                </ul>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-input border border-border rounded-md px-3 py-2 text-center">
+              <span className="text-xs text-muted-foreground block">Major</span>
+              <span className="text-gold font-bold text-lg">{thresholds.totalMajor}</span>
             </div>
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground block text-center">Major</span>
-              <Input
-                type="number"
-                value={c.majorThreshold}
-                onChange={(e) => update({ majorThreshold: Number(e.target.value) })}
-                className="text-center text-gold font-bold bg-input border-border h-9"
-                min={0}
-                aria-label="Major threshold"
-              />
-            </div>
-            <div className="space-y-1">
-              <span className="text-xs text-muted-foreground block text-center">Severe</span>
-              <Input
-                type="number"
-                value={c.severeThreshold}
-                onChange={(e) => update({ severeThreshold: Number(e.target.value) })}
-                className="text-center text-gold font-bold bg-input border-border h-9"
-                min={0}
-                aria-label="Severe threshold"
-              />
+            <div className="bg-input border border-border rounded-md px-3 py-2 text-center">
+              <span className="text-xs text-muted-foreground block">Severe</span>
+              <span className="text-gold font-bold text-lg">{thresholds.totalSevere}</span>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Base (from armor) + level {c.level}. Adjust after leveling up.
+            Damage below Major ({thresholds.totalMajor}) = minor (1 HP).
           </p>
         </div>
       </div>

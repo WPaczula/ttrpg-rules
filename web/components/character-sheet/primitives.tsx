@@ -11,6 +11,7 @@ import { formatModifier } from "@/lib/character-types"
 import type { SrdFeature } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
 import { ChevronDown } from "lucide-react"
+import { SrdMarkdown } from "./srd-markdown"
 
 // ─── Slot Toggle ──────────────────────────────────────────────────────────────
 
@@ -228,7 +229,7 @@ export function FeatureList({ label, features }: { label: string; features: SrdF
       {features.map((f) => (
         <div key={f.name} className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
           <span className="text-xs font-medium text-gold">{f.name}</span>
-          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{f.text}</p>
+          <SrdMarkdown className="mt-0.5">{f.text}</SrdMarkdown>
         </div>
       ))}
     </div>

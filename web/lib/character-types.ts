@@ -44,10 +44,8 @@ export interface CharacterData {
   armorMarked: number
   evasion: number
 
-  // Damage thresholds (armor base + level)
-  minorThreshold: number
-  majorThreshold: number
-  severeThreshold: number
+  // Threshold bonuses from domain cards and class features (toggled on/off)
+  thresholdBonuses?: { [sourceId: string]: { major: number; severe: number } }
 
   // Resources
   hope: number
@@ -107,9 +105,7 @@ export const DEFAULT_CHARACTER: CharacterData = {
   armorScore: 2,
   armorMarked: 0,
   evasion: 10,
-  minorThreshold: 5,
-  majorThreshold: 11,
-  severeThreshold: 16,
+  thresholdBonuses: {},
   hope: 2,
   goldHandfuls: 0,
   goldBags: 0,
@@ -136,4 +132,90 @@ export function getTier(level: number): number {
 
 export function formatModifier(value: number): string {
   return value >= 0 ? `+${value}` : `${value}`
+}
+
+// ── Threshold bonus definitions ─────────────────────────────────────────────
+
+/** Domain cards that can provide threshold bonuses (keyed by card name). */
+export const DOMAIN_CARD_THRESHOLD_BONUSES: Record<string, { major: number | "proficiency"; severe: number | "proficiency" }> = {
+  "Fortified Armor": { major: 2, severe: 2 },
+  "Vitality": { major: 2, severe: 2 },
+  "Rise Up": { major: 0, severe: "proficiency" },
+  "Blade-Touched": { major: 0, severe: 4 },
+  "Splendor-Touched": { major: 0, severe: 3 },
+  "Frenzy": { major: 0, severe: 8 },
+}
+
+/**
+ * Subclass features that can provide threshold bonuses.
+ * Key format: "SubclassName:FeatureName"
+ */
+export const CLASS_FEATURE_THRESHOLD_BONUSES: Record<string, { major: number | "proficiency"; severe: number | "proficiency" }> = {
+  "Stalwart:Unwavering": { major: 1, severe: 1 },
+  "Stalwart:Unrelenting": { major: 2, severe: 2 },
+  "Stalwart:Undaunted": { major: 3, severe: 3 },
+  "Winged Sentinel:Ascendant": { major: 0, severe: 4 },
+  "Elemental Origin:Transcendence": { major: 0, severe: 4 },
+}
+
+/** Class-level features that provide threshold bonuses. Key: "ClassName:FeatureName" */
+export const CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES: Record<string, { major: number | "proficiency"; severe: number | "proficiency" }> = {
+  "Druid:Shell": { major: "proficiency", severe: "proficiency" },
+}
+
+export interface ThresholdBreakdown {
+  armorBaseMajor: number
+  armorBaseSevere: number
+  levelBonus: number
+  bonuses: { label: string; major: number; severe: number }[]
+  totalMajor: number
+  totalSevere: number
+}
+
+/**
+ * Compute damage thresholds from armor base, level, and active bonuses.
+ * @param armorBaseThresholds - "Major / Severe" string from SRD armor (e.g. "6 / 13")
+ * @param level - character level
+ * @param proficiency - character proficiency
+ * @param thresholdBonuses - active bonus toggles from CharacterData
+ */
+export function computeThresholds(
+  armorBaseThresholds: string | undefined,
+  level: number,
+  proficiency: number,
+  thresholdBonuses: { [sourceId: string]: { major: number; severe: number } } | undefined,
+): ThresholdBreakdown {
+  let armorBaseMajor = 0
+  let armorBaseSevere = 0
+
+  if (armorBaseThresholds) {
+    const parts = armorBaseThresholds.split("/").map((s) => parseInt(s.trim(), 10))
+    if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      armorBaseMajor = parts[0]
+      armorBaseSevere = parts[1]
+    }
+  }
+
+  const levelBonus = level - 1
+
+  const bonuses: { label: string; major: number; severe: number }[] = []
+  if (thresholdBonuses) {
+    for (const [sourceId, bonus] of Object.entries(thresholdBonuses)) {
+      if (bonus.major !== 0 || bonus.severe !== 0) {
+        bonuses.push({ label: sourceId, major: bonus.major, severe: bonus.severe })
+      }
+    }
+  }
+
+  const totalMajor = armorBaseMajor + levelBonus + bonuses.reduce((sum, b) => sum + b.major, 0)
+  const totalSevere = armorBaseSevere + levelBonus + bonuses.reduce((sum, b) => sum + b.severe, 0)
+
+  return {
+    armorBaseMajor,
+    armorBaseSevere,
+    levelBonus,
+    bonuses,
+    totalMajor,
+    totalSevere,
+  }
 }

@@ -154,9 +154,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
     setCharacter((prev) => {
       const patch: Partial<CharacterData> = {
         level: nextLevel,
-        minorThreshold: prev.minorThreshold + 1,
-        majorThreshold: prev.majorThreshold + 1,
-        severeThreshold: prev.severeThreshold + 1,
+        // Thresholds are now computed on the fly (armor base + level - 1 + bonuses)
       }
 
       // Tier achievement: +1 proficiency, new experience, clear marked traits
@@ -352,7 +350,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
             </li>
             <li className="flex items-center gap-2">
               <Shield className="w-3.5 h-3.5 text-gold shrink-0" />
-              +1 to all damage thresholds (automatic)
+              +1 to damage thresholds from level (automatic)
             </li>
             <li className="flex items-center gap-2">
               <BookOpen className="w-3.5 h-3.5 text-gold shrink-0" />
@@ -774,7 +772,7 @@ export function LevelUpTab({ character: c, setCharacter, isLoaded }: LevelUpTabP
             )}
             <SummaryRow
               label="Thresholds"
-              value={`Minor ${c.minorThreshold + 1} / Major ${c.majorThreshold + 1} / Severe ${c.severeThreshold + 1}`}
+              value="Level bonus increases by +1 (computed automatically)"
             />
             {advancements.map((adv, i) => {
               let desc = ""

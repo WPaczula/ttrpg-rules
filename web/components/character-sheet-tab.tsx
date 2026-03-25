@@ -7,6 +7,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { type ComboboxItem } from "@/components/ui/combobox"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { getTier } from "@/lib/character-types"
 import {
@@ -19,7 +29,7 @@ import {
   SRD_SUBCLASSES,
 } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
-import { NotebookPen, RotateCcw, Pencil, PencilOff } from "lucide-react"
+import { NotebookPen, RotateCcw, Pencil, Save, X } from "lucide-react"
 import { Section } from "@/components/character-sheet/primitives"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
 import { TraitsDefenseSection } from "@/components/character-sheet/traits-defense-section"
@@ -45,9 +55,34 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const setCharacter = props.setCharacter ?? internal.setCharacter
   const resetCharacter = props.resetCharacter ?? internal.resetCharacter
   const isLoaded = props.isLoaded ?? internal.isLoaded
+  const { pauseSave, resumeSave, takeSnapshot, restoreSnapshot, flushToStorage } = internal
   const [confirmReset, setConfirmReset] = useState(false)
   const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
+
+  const enterEditMode = () => {
+    takeSnapshot()
+    pauseSave()
+    setEditing(true)
+  }
+
+  const handleSave = () => {
+    resumeSave()
+    flushToStorage()
+    setEditing(false)
+  }
+
+  const handleDiscard = () => {
+    setDiscardDialogOpen(true)
+  }
+
+  const confirmDiscard = () => {
+    restoreSnapshot()
+    resumeSave()
+    setEditing(false)
+    setDiscardDialogOpen(false)
+  }
 
   const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
 
@@ -210,18 +245,17 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
               {c.name || <span className="text-muted-foreground/50 italic font-normal">Character name…</span>}
             </span>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setEditing(!editing)}
-            className={cn(
-              "shrink-0 transition-colors",
-              editing ? "text-gold hover:text-gold/80" : "text-muted-foreground hover:text-gold"
-            )}
-            aria-label={editing ? "Lock character sheet" : "Edit character sheet"}
-          >
-            {editing ? <PencilOff className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-          </Button>
+          {!editing && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={enterEditMode}
+              className="shrink-0 transition-colors text-muted-foreground hover:text-gold"
+              aria-label="Edit character sheet"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-sm">
@@ -253,7 +287,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         )}
         {!c.class && !c.ancestry && !c.community && (
           <button
-            onClick={() => { setEditing(true); setIdentityDialogOpen(true) }}
+            onClick={() => { enterEditMode(); setIdentityDialogOpen(true) }}
             className="text-xs text-muted-foreground/70 italic hover:text-gold transition-colors"
           >
             Tap the pencil icon to edit and set your class, ancestry, and community
@@ -287,7 +321,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       <TraitsDefenseSection character={c} tier={tier} update={update} editing={editing} />
       <HpStressHopeSection character={c} update={update} />
       <ExperiencesSection experiences={c.experiences} update={update} editing={editing} />
-      <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} update={update} editing={editing} />
+      <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} thresholdBonuses={c.thresholdBonuses ?? {}} proficiency={c.proficiency} update={update} editing={editing} />
       <FeaturesSection
         character={c}
         update={update}
@@ -320,7 +354,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
       {/* ── Reset ────────────────────────────────────────────────── */}
       {editing && (
-        <div className="pt-4">
+        <div className="pt-4 pb-20">
           <Button
             variant="outline"
             size="sm"
@@ -337,6 +371,52 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           </Button>
         </div>
       )}
+
+      {/* ── Floating Save / Discard bar (edit mode) ────────────── */}
+      {editing && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto mb-4 flex gap-3 rounded-lg border border-gold/30 bg-card/90 backdrop-blur-sm px-5 py-3 shadow-lg shadow-black/40">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDiscard}
+              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:border-destructive"
+            >
+              <X className="w-3.5 h-3.5 mr-1.5" />
+              Discard
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              className="bg-gold text-background hover:bg-gold/80 font-semibold"
+            >
+              <Save className="w-3.5 h-3.5 mr-1.5" />
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Discard confirmation dialog ────────────────────────── */}
+      <AlertDialog open={discardDialogOpen} onOpenChange={setDiscardDialogOpen}>
+        <AlertDialogContent className="border-gold/20 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-gold">Discard changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              All unsaved changes will be lost. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDiscard}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Discard changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

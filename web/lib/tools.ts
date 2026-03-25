@@ -128,9 +128,7 @@ export const characterChatTools = {
       stressTotal: z.number().optional().describe('Total stress (default 6)'),
       evasion: z.number().describe('Evasion score'),
       armorScore: z.number().optional().describe('Armor score from equipped armor'),
-      minorThreshold: z.number().optional().describe('Minor damage threshold'),
-      majorThreshold: z.number().optional().describe('Major damage threshold'),
-      severeThreshold: z.number().optional().describe('Severe damage threshold'),
+      // Thresholds are now computed on the fly from armor + level + bonuses
       primaryWeapon: z.string().optional().describe('Primary weapon name'),
       secondaryWeapon: z.string().optional().describe('Secondary weapon name'),
       armorName: z.string().optional().describe('Armor name'),

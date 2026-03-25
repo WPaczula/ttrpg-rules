@@ -1,8 +1,10 @@
 "use client"
 
 import type { CharacterData } from "@/lib/character-types"
-import { Heart } from "lucide-react"
+import { Heart, Info } from "lucide-react"
 import { Section, SlotTracker, NumberStepper, Counter } from "./primitives"
+import { SRD_CLASSES } from "@/lib/srd-data"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 
 interface HpStressHopeSectionProps {
   character: CharacterData
@@ -77,8 +79,53 @@ export function HpStressHopeSection({ character: c, update }: HpStressHopeSectio
             max={12}
             label="Hope"
           />
+          <HopeActions characterClass={c.class} />
         </div>
       </div>
     </Section>
+  )
+}
+
+function HopeActionItem({ label, description }: { label: string; description: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className="text-amber-500/70 hover:text-amber-400 transition-colors" aria-label={`Info about ${label}`}>
+            <Info className="w-3 h-3" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="text-sm">{description}</PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+function HopeActions({ characterClass }: { characterClass: string }) {
+  const srdClass = SRD_CLASSES.find(
+    (cls) => cls.name.toLowerCase() === characterClass?.toLowerCase()
+  )
+  const hopeFeature = srdClass?.hopeFeature
+
+  return (
+    <div className="flex flex-col items-center gap-1 mt-2 w-full">
+      <HopeActionItem
+        label="Help an Ally (1)"
+        description="Spend 1 Hope to add +1d6 to an ally's action roll"
+      />
+      <HopeActionItem
+        label="Use Experience (1)"
+        description="Spend 1 Hope to add +2 to your roll using one of your experiences"
+      />
+      <HopeActionItem
+        label="Tag Team (3)"
+        description="Spend 3 Hope to make a Tag Team Roll with an ally — both roll and use the better result"
+      />
+      <HopeActionItem
+        label={hopeFeature ? `${hopeFeature.name} (3)` : "Class Hope Feature (3)"}
+        description={hopeFeature ? hopeFeature.text : "Select a class to see its Hope feature"}
+      />
+    </div>
   )
 }

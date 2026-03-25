@@ -7,6 +7,7 @@ import type { CharacterData } from "@/lib/character-types"
 import { SRD_WEAPONS, SRD_ARMOR } from "@/lib/srd-data"
 import { Sword, Plus, Trash2 } from "lucide-react"
 import { Section } from "./primitives"
+import { SrdMarkdown } from "./srd-markdown"
 
 interface EquipmentSectionProps {
   character: CharacterData
@@ -59,13 +60,15 @@ export function EquipmentSection({
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
             return w ? (
-              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
-                <span>{w.damage}</span>
-                <span>· {w.trait}</span>
-                <span>· {w.range}</span>
-                <span>· {w.burden}</span>
-                {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
-              </div>
+              <>
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>{w.damage}</span>
+                  <span>· {w.trait}</span>
+                  <span>· {w.range}</span>
+                  <span>· {w.burden}</span>
+                </div>
+                {w.feature && <SrdMarkdown className="mt-1">{w.feature}</SrdMarkdown>}
+              </>
             ) : null
           })()}
         </div>
@@ -86,13 +89,15 @@ export function EquipmentSection({
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
             return w ? (
-              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
-                <span>{w.damage}</span>
-                <span>· {w.trait}</span>
-                <span>· {w.range}</span>
-                <span>· {w.burden}</span>
-                {w.feature && <span className="text-gold-muted">· {w.feature}</span>}
-              </div>
+              <>
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>{w.damage}</span>
+                  <span>· {w.trait}</span>
+                  <span>· {w.range}</span>
+                  <span>· {w.burden}</span>
+                </div>
+                {w.feature && <SrdMarkdown className="mt-1">{w.feature}</SrdMarkdown>}
+              </>
             ) : null
           })()}
         </div>
@@ -108,11 +113,7 @@ export function EquipmentSection({
                 const patch: Partial<CharacterData> = { armorName: v }
                 if (newArmor) {
                   patch.armorScore = newArmor.baseScore
-                  const parts = newArmor.baseThresholds.split("/").map((s) => parseInt(s.trim(), 10))
-                  if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                    patch.minorThreshold = parts[0]
-                    patch.majorThreshold = parts[1]
-                  }
+                  // Thresholds are now computed on the fly from armor base + level + bonuses
                   const oldMod = oldArmor?.evasionModifier ?? 0
                   const newMod = newArmor.evasionModifier ?? 0
                   if (oldMod !== newMod) {
@@ -131,14 +132,16 @@ export function EquipmentSection({
           {(() => {
             const a = SRD_ARMOR.find((a) => a.name === c.armorName)
             return a ? (
-              <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
-                <span>Score {a.baseScore}</span>
-                <span>· Thresholds {a.baseThresholds}</span>
-                {a.evasionModifier !== undefined && a.evasionModifier !== 0 && (
-                  <span className="text-amber-400">· Evasion {a.evasionModifier}</span>
-                )}
-                {a.feature && <span className="text-gold-muted">· {a.feature}</span>}
-              </div>
+              <>
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2 gap-y-0.5 mt-1">
+                  <span>Score {a.baseScore}</span>
+                  <span>· Thresholds {a.baseThresholds}</span>
+                  {a.evasionModifier !== undefined && a.evasionModifier !== 0 && (
+                    <span className="text-amber-400">· Evasion {a.evasionModifier}</span>
+                  )}
+                </div>
+                {a.feature && <SrdMarkdown className="mt-1">{a.feature}</SrdMarkdown>}
+              </>
             ) : null
           })()}
         </div>

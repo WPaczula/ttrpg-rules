@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
-import { type DomainCard, type CharacterData } from "@/lib/character-types"
+import { type DomainCard, type CharacterData, DOMAIN_CARD_THRESHOLD_BONUSES } from "@/lib/character-types"
 import { SRD_DOMAIN_CARDS } from "@/lib/srd-data"
-import { BookOpen, Plus, Trash2 } from "lucide-react"
+import { BookOpen, Plus, Trash2, Shield } from "lucide-react"
 import { Section } from "./primitives"
+import { SrdMarkdown } from "./srd-markdown"
 
 interface DomainCardsSectionProps {
   domainCards: DomainCard[]
   domainCardItems: ComboboxItem[]
+  thresholdBonuses: { [sourceId: string]: { major: number; severe: number } }
+  proficiency: number
   update: (patch: Partial<CharacterData>) => void
   editing?: boolean
 }
 
-export function DomainCardsSection({ domainCards, domainCardItems, update, editing = false }: DomainCardsSectionProps) {
+export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonuses, proficiency, update, editing = false }: DomainCardsSectionProps) {
   const addDomainCard = () => {
     if (domainCards.length >= 5) return
     const newCard: DomainCard = { id: crypto.randomUUID(), name: "", level: 1, domain: "" }
@@ -30,7 +33,18 @@ export function DomainCardsSection({ domainCards, domainCardItems, update, editi
   }
 
   const removeDomainCard = (id: string) => {
-    update({ domainCards: domainCards.filter((d) => d.id !== id) })
+    const removed = domainCards.find((d) => d.id === id)
+    const patch: Partial<CharacterData> = { domainCards: domainCards.filter((d) => d.id !== id) }
+    // Clean up threshold bonus if the removed card had one
+    if (removed) {
+      const sourceId = `card:${removed.name}`
+      if (thresholdBonuses[sourceId]) {
+        const next = { ...thresholdBonuses }
+        delete next[sourceId]
+        patch.thresholdBonuses = next
+      }
+    }
+    update(patch)
   }
 
   return (
@@ -86,9 +100,43 @@ export function DomainCardsSection({ domainCards, domainCardItems, update, editi
                     <span>Lvl {srdCard.level}</span>
                     <span>· Recall {srdCard.recallCost}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-3">
+                  <SrdMarkdown className="text-muted-foreground/80">
                     {srdCard.description}
-                  </p>
+                  </SrdMarkdown>
+                  {(() => {
+                    const bonusDef = DOMAIN_CARD_THRESHOLD_BONUSES[card.name]
+                    if (!bonusDef) return null
+                    const sourceId = `card:${card.name}`
+                    const isActive = !!thresholdBonuses[sourceId]
+                    const majorVal = bonusDef.major === "proficiency" ? proficiency : bonusDef.major
+                    const severeVal = bonusDef.severe === "proficiency" ? proficiency : bonusDef.severe
+                    const bonusLabel = [
+                      majorVal > 0 ? `+${majorVal} Major` : "",
+                      severeVal > 0 ? `+${severeVal} Severe` : "",
+                    ].filter(Boolean).join(", ")
+                    return (
+                      <button
+                        onClick={() => {
+                          const next = { ...thresholdBonuses }
+                          if (isActive) {
+                            delete next[sourceId]
+                          } else {
+                            next[sourceId] = { major: majorVal, severe: severeVal }
+                          }
+                          update({ thresholdBonuses: next })
+                        }}
+                        className={`flex items-center gap-1.5 mt-1 px-2 py-1 rounded text-[11px] border transition-colors ${
+                          isActive
+                            ? "bg-gold/20 border-gold/50 text-gold"
+                            : "bg-transparent border-border text-muted-foreground hover:border-gold/30"
+                        }`}
+                      >
+                        <Shield className="w-3 h-3" />
+                        Threshold: {bonusLabel}
+                        <span className="ml-1 text-[10px]">{isActive ? "ON" : "OFF"}</span>
+                      </button>
+                    )
+                  })()}
                 </div>
               )}
               {!srdCard && card.name && editing && (
