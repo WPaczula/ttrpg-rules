@@ -102,7 +102,7 @@ function HopeActionItem({ label, description }: { label: string; description: st
         </button>
       </PopoverTrigger>
       <PopoverContent className="text-sm max-w-xs">
-        <SrdMarkdown content={description} />
+        <SrdMarkdown>{description}</SrdMarkdown>
       </PopoverContent>
     </Popover>
   )
