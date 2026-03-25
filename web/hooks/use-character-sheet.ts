@@ -80,11 +80,19 @@ export function useCharacterSheet() {
     })
   }, [])
 
-  /** Restore the previously taken snapshot */
+  /** Restore the previously taken snapshot and flush to localStorage */
   const restoreSnapshot = useCallback(() => {
     if (snapshotRef.current) {
-      setCharacterState(snapshotRef.current)
+      const snapshot = snapshotRef.current
       snapshotRef.current = null
+      setCharacterState(snapshot)
+      // Flush restored state to localStorage so it persists on refresh
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
+      } catch {
+        // Storage full or unavailable
+      }
     }
   }, [])
 
