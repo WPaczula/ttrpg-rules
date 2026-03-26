@@ -1,11 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
-import { WeaponDto } from './weapon.dto';
-import { SRD_WEAPONS } from 'lib/srd-data';
+import { WeaponDto } from './dtos/weapon.dto';
+import { WeaponsService } from './weapons.service';
 
 @Controller('weapons')
 export class WeaponsController {
+  constructor(private weaponsService: WeaponsService) {}
+
   @Get()
   public fetchAll(): WeaponDto[] {
-    return SRD_WEAPONS;
+    return this.weaponsService.findAll();
   }
 }
