@@ -55,7 +55,6 @@ export function StatsTab({
         selectedAncestry={selectedAncestry}
         selectedSecondaryAncestry={selectedSecondaryAncestry}
         selectedCommunity={selectedCommunity}
-        editing={editing}
       />
     </>
   )

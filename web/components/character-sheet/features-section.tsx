@@ -1,6 +1,5 @@
 "use client"
 
-import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import type { CharacterData } from "@/lib/character-types"
 import { CLASS_FEATURE_THRESHOLD_BONUSES, CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES } from "@/lib/character-types"
@@ -61,7 +60,6 @@ interface FeaturesSectionProps {
   selectedAncestry: SrdAncestry | undefined
   selectedSecondaryAncestry: SrdAncestry | undefined
   selectedCommunity: SrdCommunity | undefined
-  editing?: boolean
 }
 
 export function FeaturesSection({
@@ -72,7 +70,6 @@ export function FeaturesSection({
   selectedAncestry,
   selectedSecondaryAncestry,
   selectedCommunity,
-  editing = false,
 }: FeaturesSectionProps) {
   const isMultiancestry = !!selectedSecondaryAncestry
 
@@ -212,16 +209,6 @@ export function FeaturesSection({
             )}
           </Tabs>
         )}
-        {editing ? (
-          <Textarea
-            value={c.features}
-            onChange={(e) => update({ features: e.target.value })}
-            placeholder="Additional custom features or notes…"
-            className="min-h-[80px] bg-input border-border text-sm resize-none"
-          />
-        ) : c.features ? (
-          <p className="text-xs text-muted-foreground whitespace-pre-wrap">{c.features}</p>
-        ) : null}
       </div>
     </Section>
   )
