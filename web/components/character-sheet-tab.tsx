@@ -398,10 +398,6 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             <Sword className="w-3.5 h-3.5" />
             Equipment
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
-            <Backpack className="w-3.5 h-3.5" />
-            Inventory
-          </TabsTrigger>
           <TabsTrigger value="background" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
             <BookOpen className="w-3.5 h-3.5" />
             Background
@@ -436,10 +432,6 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             armorItems={armorItems}
             editing={editing}
           />
-        </TabsContent>
-
-        {/* ── Inventory Tab ────────────────────────────────────── */}
-        <TabsContent value="inventory" className="mt-0">
           <GoldSection character={c} update={update} />
           <InventoryItemsSection character={c} update={update} editing={editing} />
         </TabsContent>
