@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { WeaponsController } from './weapons/weapons.controller';
-import { WeaponService } from './weapon/weapon.service';
-import { WeaponsService } from './weapons/weapons.service';
+import { SrdModule } from './srd/srd.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController, WeaponsController],
-  providers: [AppService, WeaponService, WeaponsService],
+  imports: [SrdModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
