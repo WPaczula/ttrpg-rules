@@ -389,7 +389,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
       {/* ── Inner Tabs ───────────────────────────────────────────── */}
       <Tabs defaultValue="stats" className="w-full">
-        <TabsList className="w-full rounded-none border-b border-border bg-card/60 h-9 justify-start gap-0.5 px-1 p-0.5 mb-1">
+        <TabsList className="sticky top-0 z-40 w-full rounded-none border-b border-border bg-card/95 backdrop-blur-sm h-9 justify-start gap-0.5 px-1 p-0.5 mb-1">
           <TabsTrigger value="stats" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
             <Activity className="w-3.5 h-3.5" />
             Stats
