@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -30,85 +29,11 @@ import {
   SRD_SUBCLASSES,
 } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
-import { NotebookPen, RotateCcw, Pencil, Save, X, Activity, Sword, Backpack, BookOpen, Plus, Trash2 } from "lucide-react"
-import { Section } from "@/components/character-sheet/primitives"
+import { RotateCcw, Pencil, Save, X, Activity, Backpack, BookOpen } from "lucide-react"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
-import { TraitsDefenseSection } from "@/components/character-sheet/traits-defense-section"
-import { HpStressHopeSection } from "@/components/character-sheet/hp-stress-hope-section"
-import { ExperiencesSection } from "@/components/character-sheet/experiences-section"
-import { DomainCardsSection } from "@/components/character-sheet/domain-cards-section"
-import { FeaturesSection } from "@/components/character-sheet/features-section"
-import { EquipmentSection } from "@/components/character-sheet/equipment-section"
-import { GoldSection } from "@/components/character-sheet/gold-section"
-
-// ─── Inventory Items (extracted from Equipment) ──────────────────────────────
-
-function InventoryItemsSection({
-  character: c,
-  update,
-  editing = false,
-}: {
-  character: import("@/lib/character-types").CharacterData
-  update: (patch: Partial<import("@/lib/character-types").CharacterData>) => void
-  editing?: boolean
-}) {
-  const addItem = () => {
-    update({ items: [...c.items, ""] })
-  }
-
-  const updateItem = (index: number, value: string) => {
-    const items = [...c.items]
-    items[index] = value
-    update({ items })
-  }
-
-  const removeItem = (index: number) => {
-    update({ items: c.items.filter((_, i) => i !== index) })
-  }
-
-  return (
-    <Section icon={<Backpack className="w-4 h-4" />} title="Items">
-      <div className="space-y-2">
-        {c.items.length === 0 && !editing && (
-          <p className="text-xs text-muted-foreground italic">No items.</p>
-        )}
-        {c.items.map((item, i) => (
-          <div key={i} className="flex gap-2">
-            {editing ? (
-              <Input
-                value={item}
-                onChange={(e) => updateItem(i, e.target.value)}
-                placeholder="Item…"
-                className="flex-1 h-8 bg-input border-border text-sm"
-              />
-            ) : (
-              <span className="flex-1 text-sm text-foreground">{item || <span className="text-muted-foreground italic">—</span>}</span>
-            )}
-            {editing && (
-              <button
-                onClick={() => removeItem(i)}
-                className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive active:scale-95"
-                aria-label="Remove item"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        ))}
-        {editing && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={addItem}
-            className="w-full border-dashed border-border text-muted-foreground hover:text-foreground hover:border-gold"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1" /> Add Item
-          </Button>
-        )}
-      </div>
-    </Section>
-  )
-}
+import { StatsTab } from "@/components/character-sheet/stats-tab"
+import { EquipmentTab } from "@/components/character-sheet/equipment-tab"
+import { BackgroundTab } from "@/components/character-sheet/background-tab"
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -395,7 +320,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             Stats
           </TabsTrigger>
           <TabsTrigger value="equipment" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
-            <Sword className="w-3.5 h-3.5" />
+            <Backpack className="w-3.5 h-3.5" />
             Equipment
           </TabsTrigger>
           <TabsTrigger value="background" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
@@ -404,27 +329,23 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           </TabsTrigger>
         </TabsList>
 
-        {/* ── Stats Tab ────────────────────────────────────────── */}
         <TabsContent value="stats" className="mt-0">
-          <TraitsDefenseSection character={c} tier={tier} update={update} editing={editing} />
-          <HpStressHopeSection character={c} update={update} editing={editing} />
-          <ExperiencesSection experiences={c.experiences} update={update} editing={editing} />
-          <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} thresholdBonuses={c.thresholdBonuses ?? {}} proficiency={c.proficiency} update={update} editing={editing} />
-          <FeaturesSection
+          <StatsTab
             character={c}
+            tier={tier}
             update={update}
+            editing={editing}
+            domainCardItems={domainCardItems}
             selectedClass={selectedClass}
             selectedSubclass={selectedSubclass}
             selectedAncestry={selectedAncestry}
             selectedSecondaryAncestry={selectedSecondaryAncestry}
             selectedCommunity={selectedCommunity}
-            editing={editing}
           />
         </TabsContent>
 
-        {/* ── Equipment Tab ────────────────────────────────────── */}
         <TabsContent value="equipment" className="mt-0">
-          <EquipmentSection
+          <EquipmentTab
             character={c}
             update={update}
             primaryWeaponItems={primaryWeaponItems}
@@ -432,20 +353,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             armorItems={armorItems}
             editing={editing}
           />
-          <GoldSection character={c} update={update} />
-          <InventoryItemsSection character={c} update={update} editing={editing} />
         </TabsContent>
 
-        {/* ── Background Tab ───────────────────────────────────── */}
         <TabsContent value="background" className="mt-0">
-          <Section icon={<NotebookPen className="w-4 h-4" />} title="Notes">
-            <Textarea
-              value={c.notes}
-              onChange={(e) => update({ notes: e.target.value })}
-              placeholder="Backstory, session notes, reminders…"
-              className="min-h-[120px] bg-input border-border text-sm resize-none"
-            />
-          </Section>
+          <BackgroundTab character={c} update={update} />
         </TabsContent>
       </Tabs>
 
