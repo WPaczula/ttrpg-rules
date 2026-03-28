@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { SrdController } from './srd.controller';
 import { SrdService } from './srd.service';
 import { WeaponRepository } from './repositories/weapon.repository';
@@ -9,8 +10,12 @@ import { AncestryRepository } from './repositories/ancestry.repository';
 import { CommunityRepository } from './repositories/community.repository';
 import { DomainRepository } from './repositories/domain.repository';
 import { DomainCardRepository } from './repositories/domain-card.repository';
+import { SrdCacheInterceptor } from './srd-cache.interceptor';
 
 @Module({
+  imports: [
+    CacheModule.register({ ttl: 3600 * 1000 }), // 1 hour in ms
+  ],
   controllers: [SrdController],
   providers: [
     SrdService,
@@ -22,6 +27,7 @@ import { DomainCardRepository } from './repositories/domain-card.repository';
     CommunityRepository,
     DomainRepository,
     DomainCardRepository,
+    SrdCacheInterceptor,
   ],
   exports: [SrdService],
 })

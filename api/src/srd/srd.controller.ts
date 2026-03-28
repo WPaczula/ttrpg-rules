@@ -1,10 +1,12 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseInterceptors } from '@nestjs/common';
 import { SrdService } from './srd.service';
 import { WeaponQueryDto } from './dto/weapon-query.dto';
 import { ArmorQueryDto } from './dto/armor-query.dto';
 import { DomainCardQueryDto } from './dto/domain-card-query.dto';
+import { SrdCacheInterceptor } from './srd-cache.interceptor';
 
 @Controller('srd')
+@UseInterceptors(SrdCacheInterceptor)
 export class SrdController {
   constructor(private readonly srd: SrdService) {}
 
