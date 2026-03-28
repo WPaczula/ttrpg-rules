@@ -3,9 +3,9 @@
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { type ComboboxItem } from "@/components/ui/combobox"
 import {
   AlertDialog,
@@ -29,16 +29,11 @@ import {
   SRD_SUBCLASSES,
 } from "@/lib/srd-data"
 import { cn } from "@/lib/utils"
-import { NotebookPen, RotateCcw, Pencil, Save, X } from "lucide-react"
-import { Section } from "@/components/character-sheet/primitives"
+import { RotateCcw, Pencil, Save, X, Activity, Backpack, BookOpen } from "lucide-react"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
-import { TraitsDefenseSection } from "@/components/character-sheet/traits-defense-section"
-import { HpStressHopeSection } from "@/components/character-sheet/hp-stress-hope-section"
-import { ExperiencesSection } from "@/components/character-sheet/experiences-section"
-import { DomainCardsSection } from "@/components/character-sheet/domain-cards-section"
-import { FeaturesSection } from "@/components/character-sheet/features-section"
-import { EquipmentSection } from "@/components/character-sheet/equipment-section"
-import { GoldSection } from "@/components/character-sheet/gold-section"
+import { StatsTab } from "@/components/character-sheet/stats-tab"
+import { EquipmentTab } from "@/components/character-sheet/equipment-tab"
+import { BackgroundTab } from "@/components/character-sheet/background-tab"
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -317,40 +312,53 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         </p>
       )}
 
-      {/* ── Sections ─────────────────────────────────────────────── */}
-      <TraitsDefenseSection character={c} tier={tier} update={update} editing={editing} />
-      <HpStressHopeSection character={c} update={update} editing={editing} />
-      <ExperiencesSection experiences={c.experiences} update={update} editing={editing} />
-      <DomainCardsSection domainCards={c.domainCards} domainCardItems={domainCardItems} thresholdBonuses={c.thresholdBonuses ?? {}} proficiency={c.proficiency} update={update} editing={editing} />
-      <FeaturesSection
-        character={c}
-        update={update}
-        selectedClass={selectedClass}
-        selectedSubclass={selectedSubclass}
-        selectedAncestry={selectedAncestry}
-        selectedSecondaryAncestry={selectedSecondaryAncestry}
-        selectedCommunity={selectedCommunity}
-        editing={editing}
-      />
-      <EquipmentSection
-        character={c}
-        update={update}
-        primaryWeaponItems={primaryWeaponItems}
-        secondaryWeaponItems={secondaryWeaponItems}
-        armorItems={armorItems}
-        editing={editing}
-      />
-      <GoldSection character={c} update={update} />
+      {/* ── Inner Tabs ───────────────────────────────────────────── */}
+      <Tabs defaultValue="stats" className="w-full">
+        <TabsList className="sticky top-0 z-40 w-full rounded-none border-b border-border bg-card/95 backdrop-blur-sm h-9 justify-start gap-0.5 px-1 p-0.5 mb-1">
+          <TabsTrigger value="stats" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+            <Activity className="w-3.5 h-3.5" />
+            Stats
+          </TabsTrigger>
+          <TabsTrigger value="equipment" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+            <Backpack className="w-3.5 h-3.5" />
+            Equipment
+          </TabsTrigger>
+          <TabsTrigger value="background" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+            <BookOpen className="w-3.5 h-3.5" />
+            Background
+          </TabsTrigger>
+        </TabsList>
 
-      {/* ── Notes ────────────────────────────────────────────────── */}
-      <Section icon={<NotebookPen className="w-4 h-4" />} title="Notes">
-        <Textarea
-          value={c.notes}
-          onChange={(e) => update({ notes: e.target.value })}
-          placeholder="Backstory, session notes, reminders…"
-          className="min-h-[120px] bg-input border-border text-sm resize-none"
-        />
-      </Section>
+        <TabsContent value="stats" className="mt-0">
+          <StatsTab
+            character={c}
+            tier={tier}
+            update={update}
+            editing={editing}
+            domainCardItems={domainCardItems}
+            selectedClass={selectedClass}
+            selectedSubclass={selectedSubclass}
+            selectedAncestry={selectedAncestry}
+            selectedSecondaryAncestry={selectedSecondaryAncestry}
+            selectedCommunity={selectedCommunity}
+          />
+        </TabsContent>
+
+        <TabsContent value="equipment" className="mt-0">
+          <EquipmentTab
+            character={c}
+            update={update}
+            primaryWeaponItems={primaryWeaponItems}
+            secondaryWeaponItems={secondaryWeaponItems}
+            armorItems={armorItems}
+            editing={editing}
+          />
+        </TabsContent>
+
+        <TabsContent value="background" className="mt-0">
+          <BackgroundTab character={c} update={update} />
+        </TabsContent>
+      </Tabs>
 
       {/* ── Reset ────────────────────────────────────────────────── */}
       {editing && (

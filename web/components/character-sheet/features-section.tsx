@@ -1,10 +1,10 @@
 "use client"
 
-import { Textarea } from "@/components/ui/textarea"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import type { CharacterData } from "@/lib/character-types"
 import { CLASS_FEATURE_THRESHOLD_BONUSES, CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES } from "@/lib/character-types"
 import type { SrdAncestry, SrdClass, SrdCommunity, SrdSubclass } from "@/lib/srd-data"
-import { Scroll, Shield } from "lucide-react"
+import { Scroll, Shield, Swords, Sparkles, TreePine } from "lucide-react"
 import { Section, FeatureList } from "./primitives"
 
 function ThresholdToggle({
@@ -60,7 +60,6 @@ interface FeaturesSectionProps {
   selectedAncestry: SrdAncestry | undefined
   selectedSecondaryAncestry: SrdAncestry | undefined
   selectedCommunity: SrdCommunity | undefined
-  editing?: boolean
 }
 
 export function FeaturesSection({
@@ -71,7 +70,6 @@ export function FeaturesSection({
   selectedAncestry,
   selectedSecondaryAncestry,
   selectedCommunity,
-  editing = false,
 }: FeaturesSectionProps) {
   const isMultiancestry = !!selectedSecondaryAncestry
 
@@ -92,97 +90,125 @@ export function FeaturesSection({
       ? `${selectedAncestry.name} — Ancestry Features`
       : ""
 
+  const defaultTab = selectedClass ? "class" : selectedSubclass ? "subclass" : "heritage"
+
   return (
     <Section icon={<Scroll className="w-4 h-4" />} title="Features & Abilities">
       <div className="space-y-4">
-        {selectedClass && (
-          <div className="space-y-2">
-            <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
-            <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
-            {selectedClass.features.map((f) => {
-              const key = `${selectedClass.name}:${f.name}`
-              const bonusDef = CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES[key]
-              if (!bonusDef) return null
-              const sourceId = `classFeature:${key}`
-              const majorVal = bonusDef.major === "proficiency" ? c.proficiency : bonusDef.major
-              const severeVal = bonusDef.severe === "proficiency" ? c.proficiency : bonusDef.severe
-              return (
-                <ThresholdToggle
-                  key={sourceId}
-                  sourceId={sourceId}
-                  label={f.name}
-                  majorVal={majorVal}
-                  severeVal={severeVal}
-                  thresholdBonuses={c.thresholdBonuses ?? {}}
-                  update={update}
-                />
-              )
-            })}
-          </div>
-        )}
-        {selectedSubclass && (
-          <div className="space-y-2">
-            <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
-            <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
-            <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
-            {[...selectedSubclass.foundation, ...selectedSubclass.specialization, ...selectedSubclass.mastery].map((f) => {
-              const key = `${selectedSubclass.name}:${f.name}`
-              const bonusDef = CLASS_FEATURE_THRESHOLD_BONUSES[key]
-              if (!bonusDef) return null
-              const sourceId = `subclassFeature:${key}`
-              const majorVal = bonusDef.major === "proficiency" ? c.proficiency : bonusDef.major
-              const severeVal = bonusDef.severe === "proficiency" ? c.proficiency : bonusDef.severe
-              return (
-                <ThresholdToggle
-                  key={sourceId}
-                  sourceId={sourceId}
-                  label={f.name}
-                  majorVal={majorVal}
-                  severeVal={severeVal}
-                  thresholdBonuses={c.thresholdBonuses ?? {}}
-                  update={update}
-                />
-              )
-            })}
-            {selectedSubclass.spellcastTrait && (
-              <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
-                <span className="text-xs text-muted-foreground">Spellcast Trait: </span>
-                <span className="text-xs font-medium text-gold">{selectedSubclass.spellcastTrait}</span>
-              </div>
-            )}
-          </div>
-        )}
-        {selectedAncestry && (
-          <div className="space-y-2">
-            <FeatureList
-              label={ancestryLabel}
-              features={[...primaryAncestryFeatures, ...secondaryAncestryFeatures]}
-            />
-            {isMultiancestry && primaryAncestryFeatures.length === 0 && (
-              <p className="text-xs text-muted-foreground italic">
-                Select your ancestry feature in the identity editor to see the paired features here.
-              </p>
-            )}
-          </div>
-        )}
-        {selectedCommunity && (
-          <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
-        )}
-        {!selectedClass && !selectedSubclass && !selectedAncestry && !selectedCommunity && (
+        {!selectedClass && !selectedSubclass && !selectedAncestry && !selectedCommunity ? (
           <p className="text-xs text-muted-foreground italic">
             Select a class, subclass, ancestry, or community to see their features here.
           </p>
+        ) : (
+          <Tabs defaultValue={defaultTab}>
+            <TabsList className="w-full rounded-none border-b border-border bg-card/95 h-9 justify-start gap-0.5 px-1 p-0.5">
+              {selectedClass && (
+                <TabsTrigger value="class" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+                  <Swords className="w-3.5 h-3.5" />
+                  Class
+                </TabsTrigger>
+              )}
+              {selectedSubclass && (
+                <TabsTrigger value="subclass" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Subclass
+                </TabsTrigger>
+              )}
+              {(selectedAncestry || selectedCommunity) && (
+                <TabsTrigger value="heritage" className="gap-1 text-xs data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30">
+                  <TreePine className="w-3.5 h-3.5" />
+                  Heritage
+                </TabsTrigger>
+              )}
+            </TabsList>
+
+            {selectedClass && (
+              <TabsContent value="class">
+                <div className="space-y-2">
+                  <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
+                  <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
+                  {selectedClass.features.map((f) => {
+                    const key = `${selectedClass.name}:${f.name}`
+                    const bonusDef = CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES[key]
+                    if (!bonusDef) return null
+                    const sourceId = `classFeature:${key}`
+                    const majorVal = bonusDef.major === "proficiency" ? c.proficiency : bonusDef.major
+                    const severeVal = bonusDef.severe === "proficiency" ? c.proficiency : bonusDef.severe
+                    return (
+                      <ThresholdToggle
+                        key={sourceId}
+                        sourceId={sourceId}
+                        label={f.name}
+                        majorVal={majorVal}
+                        severeVal={severeVal}
+                        thresholdBonuses={c.thresholdBonuses ?? {}}
+                        update={update}
+                      />
+                    )
+                  })}
+                </div>
+              </TabsContent>
+            )}
+
+            {selectedSubclass && (
+              <TabsContent value="subclass">
+                <div className="space-y-2">
+                  <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
+                  <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
+                  <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
+                  {[...selectedSubclass.foundation, ...selectedSubclass.specialization, ...selectedSubclass.mastery].map((f) => {
+                    const key = `${selectedSubclass.name}:${f.name}`
+                    const bonusDef = CLASS_FEATURE_THRESHOLD_BONUSES[key]
+                    if (!bonusDef) return null
+                    const sourceId = `subclassFeature:${key}`
+                    const majorVal = bonusDef.major === "proficiency" ? c.proficiency : bonusDef.major
+                    const severeVal = bonusDef.severe === "proficiency" ? c.proficiency : bonusDef.severe
+                    return (
+                      <ThresholdToggle
+                        key={sourceId}
+                        sourceId={sourceId}
+                        label={f.name}
+                        majorVal={majorVal}
+                        severeVal={severeVal}
+                        thresholdBonuses={c.thresholdBonuses ?? {}}
+                        update={update}
+                      />
+                    )
+                  })}
+                  {selectedSubclass.spellcastTrait && (
+                    <div className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
+                      <span className="text-xs text-muted-foreground">Spellcast Trait: </span>
+                      <span className="text-xs font-medium text-gold">{selectedSubclass.spellcastTrait}</span>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            )}
+
+            {(selectedAncestry || selectedCommunity) && (
+              <TabsContent value="heritage">
+                <div className="space-y-2">
+                  {selectedAncestry && (
+                    <>
+                      <FeatureList
+                        label={ancestryLabel}
+                        features={[...primaryAncestryFeatures, ...secondaryAncestryFeatures]}
+                      />
+                      {isMultiancestry && primaryAncestryFeatures.length === 0 && (
+                        <p className="text-xs text-muted-foreground italic">
+                          Select your ancestry feature in the identity editor to see the paired features here.
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {selectedCommunity && (
+                    <FeatureList label={`${selectedCommunity.name} — Community Feature`} features={selectedCommunity.features} />
+                  )}
+                </div>
+              </TabsContent>
+            )}
+          </Tabs>
         )}
-        {editing ? (
-          <Textarea
-            value={c.features}
-            onChange={(e) => update({ features: e.target.value })}
-            placeholder="Additional custom features or notes…"
-            className="min-h-[80px] bg-input border-border text-sm resize-none"
-          />
-        ) : c.features ? (
-          <p className="text-xs text-muted-foreground whitespace-pre-wrap">{c.features}</p>
-        ) : null}
       </div>
     </Section>
   )
