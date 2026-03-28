@@ -7,6 +7,8 @@ export enum ErrorCode {
   DUPLICATE_DOMAIN_CARD = 'DUPLICATE_DOMAIN_CARD',
   EXPERIENCE_NOT_FOUND = 'EXPERIENCE_NOT_FOUND',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
 }
 
 export class AppException extends Error {
@@ -34,5 +36,17 @@ export class BadRequestException extends AppException {
 export class ConflictException extends AppException {
   constructor(errorCode: ErrorCode, message: string) {
     super(errorCode, 409, message);
+  }
+}
+
+export class UnauthorizedException extends AppException {
+  constructor(message: string) {
+    super(ErrorCode.UNAUTHORIZED, 401, message);
+  }
+}
+
+export class ForbiddenException extends AppException {
+  constructor(message: string) {
+    super(ErrorCode.FORBIDDEN, 403, message);
   }
 }
