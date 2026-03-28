@@ -20,6 +20,12 @@ import { AddDomainCardDto } from './dto/add-domain-card.dto';
 import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
 import { ICharacterWithRelations } from './interfaces/character.interface';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
+import { ComputedStats } from '../game-logic/interfaces/computed-stats.interface';
+
+export interface CharacterResponse {
+  character: ICharacterWithRelations;
+  computed: ComputedStats;
+}
 
 @Injectable()
 export class CharactersService {
@@ -34,49 +40,72 @@ export class CharactersService {
     private readonly domainCards: DomainCardRepository,
   ) {}
 
-  async create(dto: CreateCharacterDto): Promise<ICharacterWithRelations> {
+  private buildResponse(character: ICharacterWithRelations): CharacterResponse {
+    const computed = this.gameLogic.computeAll({
+      level: character.level,
+      proficiency: character.proficiency,
+      baseEvasion: character.evasion,
+      armorBaseThresholds: character.armor?.baseThresholds ?? null,
+      armorEvasionModifier: character.armor?.evasionModifier ?? null,
+      primaryWeaponFeature: character.primaryWeapon?.feature ?? null,
+      secondaryWeaponFeature: character.secondaryWeapon?.feature ?? null,
+      armorFeature: character.armor?.feature ?? null,
+      thresholdBonuses: character.thresholdBonuses,
+    });
+    return { character, computed };
+  }
+
+  async create(dto: CreateCharacterDto): Promise<CharacterResponse> {
     const cls = await this.classes.findById(dto.classId);
-    if (!cls) throw new NotFoundException(ErrorCode.INVALID_SRD_REFERENCE, `Class ${dto.classId} not found`);
+    if (!cls) throw new BadRequestException(ErrorCode.INVALID_SRD_REFERENCE, `Class ${dto.classId} not found`);
 
     const armorData = dto.armorId ? await this.armor.findById(dto.armorId) : null;
     if (dto.armorId && !armorData) {
-      throw new NotFoundException(ErrorCode.INVALID_SRD_REFERENCE, `Armor ${dto.armorId} not found`);
+      throw new BadRequestException(ErrorCode.INVALID_SRD_REFERENCE, `Armor ${dto.armorId} not found`);
     }
 
-    return this.characters.create({
+    const character = await this.characters.create({
       ...dto,
       hpTotal: cls.hp,
       evasion: cls.evasion + (armorData?.evasionModifier ?? 0),
     });
+    return this.buildResponse(character);
   }
 
   findAll(): Promise<ICharacterWithRelations[]> {
     return this.characters.findAll();
   }
 
-  async findOne(id: string): Promise<ICharacterWithRelations> {
+  async findOne(id: string): Promise<CharacterResponse> {
+    const character = await this.characters.findById(id);
+    if (!character) throw new NotFoundException(ErrorCode.CHARACTER_NOT_FOUND, `Character ${id} not found`);
+    return this.buildResponse(character);
+  }
+
+  private async findCharacter(id: string): Promise<ICharacterWithRelations> {
     const character = await this.characters.findById(id);
     if (!character) throw new NotFoundException(ErrorCode.CHARACTER_NOT_FOUND, `Character ${id} not found`);
     return character;
   }
 
-  async update(id: string, dto: UpdateCharacterDto): Promise<ICharacterWithRelations> {
-    await this.findOne(id);
-    return this.characters.update(id, dto);
+  async update(id: string, dto: UpdateCharacterDto): Promise<CharacterResponse> {
+    await this.findCharacter(id);
+    const character = await this.characters.update(id, dto);
+    return this.buildResponse(character);
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
+    await this.findCharacter(id);
     await this.characters.delete(id);
   }
 
   async addExperience(characterId: string, dto: CreateExperienceDto) {
-    await this.findOne(characterId);
+    await this.findCharacter(characterId);
     return this.experiences.create(characterId, dto.name, dto.modifier);
   }
 
   async updateExperience(characterId: string, experienceId: string, dto: UpdateExperienceDto) {
-    await this.findOne(characterId);
+    await this.findCharacter(characterId);
     const exp = await this.experiences.findById(experienceId);
     if (!exp || exp.characterId !== characterId) {
       throw new NotFoundException(ErrorCode.EXPERIENCE_NOT_FOUND, `Experience ${experienceId} not found`);
@@ -85,7 +114,7 @@ export class CharactersService {
   }
 
   async removeExperience(characterId: string, experienceId: string): Promise<void> {
-    await this.findOne(characterId);
+    await this.findCharacter(characterId);
     const exp = await this.experiences.findById(experienceId);
     if (!exp || exp.characterId !== characterId) {
       throw new NotFoundException(ErrorCode.EXPERIENCE_NOT_FOUND, `Experience ${experienceId} not found`);
@@ -94,7 +123,7 @@ export class CharactersService {
   }
 
   async addDomainCard(characterId: string, dto: AddDomainCardDto) {
-    const character = await this.findOne(characterId);
+    const character = await this.findCharacter(characterId);
 
     const card = await this.domainCards.findById(dto.domainCardId);
     if (!card) {
@@ -120,12 +149,12 @@ export class CharactersService {
   }
 
   async removeDomainCard(characterId: string, domainCardId: string): Promise<void> {
-    await this.findOne(characterId);
+    await this.findCharacter(characterId);
     await this.characterDomainCards.remove(domainCardId);
   }
 
   async toggleThresholdBonus(characterId: string, bonusId: string, dto: ToggleThresholdBonusDto) {
-    const character = await this.findOne(characterId);
+    const character = await this.findCharacter(characterId);
     const bonus = character.thresholdBonuses.find(b => b.id === bonusId);
     if (!bonus) {
       throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Threshold bonus ${bonusId} not found`);
