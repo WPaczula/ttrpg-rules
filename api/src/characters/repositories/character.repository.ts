@@ -41,6 +41,7 @@ export class CharacterRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: {
+    userId: string;
     name: string;
     classId: string;
     subclassId: string;
@@ -64,6 +65,7 @@ export class CharacterRepository {
   }): Promise<ICharacterWithRelations> {
     const character = await this.prisma.character.create({
       data: {
+        userId: data.userId,
         name: data.name,
         classId: data.classId,
         subclassId: data.subclassId,

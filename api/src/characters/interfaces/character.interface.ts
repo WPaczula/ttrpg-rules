@@ -1,5 +1,6 @@
 export interface ICharacter {
   id: string;
+  userId: string;
   name: string;
   level: number;
   classId: string;

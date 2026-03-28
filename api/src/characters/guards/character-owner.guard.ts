@@ -20,7 +20,7 @@ export class CharacterOwnerGuard implements CanActivate {
     if (!character) {
       throw new NotFoundException(ErrorCode.CHARACTER_NOT_FOUND, `Character ${characterId} not found`);
     }
-    if ((character as any).userId !== user.id) {
+    if (character.userId !== user.id) {
       throw new ForbiddenException('You do not own this character');
     }
     return true;

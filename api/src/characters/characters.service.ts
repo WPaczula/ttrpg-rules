@@ -55,7 +55,7 @@ export class CharactersService {
     return { character, computed };
   }
 
-  async create(dto: CreateCharacterDto): Promise<CharacterResponse> {
+  async create(dto: CreateCharacterDto, userId: string): Promise<CharacterResponse> {
     const cls = await this.classes.findById(dto.classId);
     if (!cls) throw new BadRequestException(ErrorCode.INVALID_SRD_REFERENCE, `Class ${dto.classId} not found`);
 
@@ -66,6 +66,7 @@ export class CharactersService {
 
     const character = await this.characters.create({
       ...dto,
+      userId,
       hpTotal: cls.hp,
       evasion: cls.evasion + (armorData?.evasionModifier ?? 0),
     });
