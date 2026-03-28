@@ -193,11 +193,33 @@ model DomainCard {
   @@map("domain_cards")
 }
 
+// ── User Tables ─────────────────────────────────────────────────────────────
+
+enum Role {
+  GM
+  PC
+  DEMO
+}
+
+model User {
+  id         String      @id @default(uuid())
+  clerkId    String      @unique @map("clerk_id")
+  role       Role        @default(PC)
+  tokenLimit Int?        @map("token_limit")
+  tokensUsed Int         @default(0) @map("tokens_used")
+  characters Character[]
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
 // ── Character Tables ────────────────────────────────────────────────────────
 
 model Character {
-  id    String @id @default(uuid())
-  name  String
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  name   String
   level Int    @default(1)
 
   classId    String @map("class_id")
@@ -249,6 +271,7 @@ model Character {
   armor                  Armor?           @relation(fields: [armorId], references: [id])
   primaryWeapon          Weapon?          @relation("PrimaryWeapon", fields: [primaryWeaponId], references: [id])
   secondaryWeapon        Weapon?          @relation("SecondaryWeapon", fields: [secondaryWeaponId], references: [id])
+  user                   User             @relation(fields: [userId], references: [id])
 
   experiences      CharacterExperience[]
   domainCards      CharacterDomainCard[]
