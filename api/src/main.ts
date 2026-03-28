@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { AppExceptionFilter } from './common/filters/app-exception.filter';
+import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import helmet from 'helmet';
 
@@ -17,7 +18,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new AppExceptionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(new TimeoutInterceptor(), new LoggingInterceptor());
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
