@@ -1,55 +1,90 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SrdService } from './srd.service';
-import { WeaponDto } from './dtos/weapon.dto';
-import { ArmorDto } from './dtos/armor.dto';
-import { ClassDto } from './dtos/class.dto';
-import { AncestryDto } from './dtos/ancestry.dto';
-import { CommunityDto } from './dtos/community.dto';
-import { SubclassDto } from './dtos/subclass.dto';
-import { DomainDto } from './dtos/domain.dto';
-import { DomainCardDto } from './dtos/domain-card.dto';
+import { WeaponQueryDto } from './dto/weapon-query.dto';
+import { ArmorQueryDto } from './dto/armor-query.dto';
+import { DomainCardQueryDto } from './dto/domain-card-query.dto';
 
 @Controller('srd')
 export class SrdController {
-  constructor(private srdService: SrdService) {}
+  constructor(private readonly srd: SrdService) {}
 
   @Get('weapons')
-  public findAllWeapons(): WeaponDto[] {
-    return this.srdService.findAllWeapons();
+  getWeapons(@Query() query: WeaponQueryDto) {
+    return this.srd.getWeapons(query);
+  }
+
+  @Get('weapons/:id')
+  getWeapon(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getWeapon(id);
   }
 
   @Get('armor')
-  public findAllArmor(): ArmorDto[] {
-    return this.srdService.findAllArmor();
+  getArmor(@Query() query: ArmorQueryDto) {
+    return this.srd.getArmor(query);
+  }
+
+  @Get('armor/:id')
+  getArmorById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getArmorById(id);
   }
 
   @Get('classes')
-  public findAllClasses(): ClassDto[] {
-    return this.srdService.findAllClasses();
+  getClasses() {
+    return this.srd.getClasses();
   }
 
-  @Get('ancestries')
-  public findAllAncestries(): AncestryDto[] {
-    return this.srdService.findAllAncestries();
-  }
-
-  @Get('communities')
-  public findAllCommunities(): CommunityDto[] {
-    return this.srdService.findAllCommunities();
+  @Get('classes/:id')
+  getClass(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getClass(id);
   }
 
   @Get('subclasses')
-  public findAllSubclasses(): SubclassDto[] {
-    return this.srdService.findAllSubclasses();
+  getSubclasses() {
+    return this.srd.getSubclasses();
+  }
+
+  @Get('subclasses/:id')
+  getSubclass(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getSubclass(id);
+  }
+
+  @Get('ancestries')
+  getAncestries() {
+    return this.srd.getAncestries();
+  }
+
+  @Get('ancestries/:id')
+  getAncestry(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getAncestry(id);
+  }
+
+  @Get('communities')
+  getCommunities() {
+    return this.srd.getCommunities();
+  }
+
+  @Get('communities/:id')
+  getCommunity(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getCommunity(id);
   }
 
   @Get('domains')
-  public findAllDomains(): DomainDto[] {
-    return this.srdService.findAllDomains();
+  getDomains() {
+    return this.srd.getDomains();
+  }
+
+  @Get('domains/:id')
+  getDomain(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getDomain(id);
   }
 
   @Get('domain-cards')
-  public findAllDomainCards(): DomainCardDto[] {
-    return this.srdService.findAllDomainCards();
+  getDomainCards(@Query() query: DomainCardQueryDto) {
+    return this.srd.getDomainCards(query);
+  }
+
+  @Get('domain-cards/:id')
+  getDomainCard(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getDomainCard(id);
   }
 }

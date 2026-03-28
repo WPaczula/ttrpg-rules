@@ -1,54 +1,104 @@
 import { Injectable } from '@nestjs/common';
-import {
-  SRD_WEAPONS,
-  SRD_ARMOR,
-  SRD_CLASSES,
-  SRD_ANCESTRIES,
-  SRD_COMMUNITIES,
-  SRD_SUBCLASSES,
-  SRD_DOMAINS,
-  SRD_DOMAIN_CARDS,
-} from 'lib/srd-data';
-import { Weapon } from './interfaces/weapon.interface';
-import { Armor } from './interfaces/armor.interface';
-import { CharacterClass } from './interfaces/class.interface';
-import { Ancestry } from './interfaces/ancestry.interface';
-import { Community } from './interfaces/community.interface';
-import { Subclass } from './interfaces/subclass.interface';
-import { Domain } from './interfaces/domain.interface';
-import { DomainCard } from './interfaces/domain-card.interface';
+import { WeaponRepository } from './repositories/weapon.repository';
+import { ArmorRepository } from './repositories/armor.repository';
+import { ClassRepository } from './repositories/class.repository';
+import { SubclassRepository } from './repositories/subclass.repository';
+import { AncestryRepository } from './repositories/ancestry.repository';
+import { CommunityRepository } from './repositories/community.repository';
+import { DomainRepository } from './repositories/domain.repository';
+import { DomainCardRepository } from './repositories/domain-card.repository';
+import { NotFoundException, ErrorCode } from '../common/error-codes';
 
 @Injectable()
 export class SrdService {
-  findAllWeapons(): Weapon[] {
-    return SRD_WEAPONS;
+  constructor(
+    private readonly weapons: WeaponRepository,
+    private readonly armor: ArmorRepository,
+    private readonly classes: ClassRepository,
+    private readonly subclasses: SubclassRepository,
+    private readonly ancestries: AncestryRepository,
+    private readonly communities: CommunityRepository,
+    private readonly domains: DomainRepository,
+    private readonly domainCards: DomainCardRepository,
+  ) {}
+
+  getWeapons(filters?: { tier?: number; type?: string }) {
+    return this.weapons.findAll(filters);
   }
 
-  findAllArmor(): Armor[] {
-    return SRD_ARMOR;
+  async getWeapon(id: string) {
+    const weapon = await this.weapons.findById(id);
+    if (!weapon) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Weapon ${id} not found`);
+    return weapon;
   }
 
-  findAllClasses(): CharacterClass[] {
-    return SRD_CLASSES;
+  getArmor(filters?: { tier?: number }) {
+    return this.armor.findAll(filters);
   }
 
-  findAllAncestries(): Ancestry[] {
-    return SRD_ANCESTRIES;
+  async getArmorById(id: string) {
+    const armor = await this.armor.findById(id);
+    if (!armor) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Armor ${id} not found`);
+    return armor;
   }
 
-  findAllCommunities(): Community[] {
-    return SRD_COMMUNITIES;
+  getClasses() {
+    return this.classes.findAll();
   }
 
-  findAllSubclasses(): Subclass[] {
-    return SRD_SUBCLASSES;
+  async getClass(id: string) {
+    const cls = await this.classes.findById(id);
+    if (!cls) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Class ${id} not found`);
+    return cls;
   }
 
-  findAllDomains(): Domain[] {
-    return SRD_DOMAINS;
+  getSubclasses() {
+    return this.subclasses.findAll();
   }
 
-  findAllDomainCards(): DomainCard[] {
-    return SRD_DOMAIN_CARDS;
+  async getSubclass(id: string) {
+    const sub = await this.subclasses.findById(id);
+    if (!sub) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Subclass ${id} not found`);
+    return sub;
+  }
+
+  getAncestries() {
+    return this.ancestries.findAll();
+  }
+
+  async getAncestry(id: string) {
+    const ancestry = await this.ancestries.findById(id);
+    if (!ancestry) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Ancestry ${id} not found`);
+    return ancestry;
+  }
+
+  getCommunities() {
+    return this.communities.findAll();
+  }
+
+  async getCommunity(id: string) {
+    const community = await this.communities.findById(id);
+    if (!community) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Community ${id} not found`);
+    return community;
+  }
+
+  getDomains() {
+    return this.domains.findAll();
+  }
+
+  async getDomain(id: string) {
+    const domain = await this.domains.findById(id);
+    if (!domain) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Domain ${id} not found`);
+    return domain;
+  }
+
+  getDomainCards(filters?: { domain?: string; level?: number }) {
+    return this.domainCards.findAll(filters);
+  }
+
+  async getDomainCard(id: string) {
+    const card = await this.domainCards.findById(id);
+    if (!card) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Domain card ${id} not found`);
+    return card;
   }
 }
