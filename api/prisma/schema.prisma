@@ -1,14 +1,306 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+// ── SRD Reference Tables ────────────────────────────────────────────────────
+
+model Weapon {
+  id         String  @id @default(uuid())
+  name       String
+  tier       Int
+  type       String  // 'Primary' | 'Secondary'
+  damageType String  @map("damage_type") // 'Physical' | 'Magical'
+  trait      String
+  range      String
+  damage     String
+  burden     String
+  feature    String? // optional special feature text
+
+  // Reverse relations
+  charactersPrimary       Character[] @relation("PrimaryWeapon")
+  charactersSecondary     Character[] @relation("SecondaryWeapon")
+  classesSuggestedPrimary   SrdClass[] @relation("SuggestedPrimary")
+  classesSuggestedSecondary SrdClass[] @relation("SuggestedSecondary")
+
+  @@map("weapons")
+}
+
+model Armor {
+  id              String  @id @default(uuid())
+  name            String
+  tier            Int
+  baseScore       Int     @map("base_score")
+  baseThresholds  String  @map("base_thresholds") // "major / severe" e.g. "6 / 13"
+  evasionModifier Int?    @map("evasion_modifier")
+  feature         String? // optional special feature text
+
+  // Reverse relations
+  characters          Character[]
+  classesSuggestedArmor SrdClass[] @relation("SuggestedArmor")
+
+  @@map("armor")
+}
+
+model SrdClass {
+  id               String  @id @default(uuid())
+  name             String  @unique
+  description      String
+  evasion          Int
+  hp               Int
+  items            String
+  suggestedTraits  Int[]   @map("suggested_traits") // [agi, str, fin, ins, pre, kno]
+  hopeFeatureName  String  @map("hope_feature_name")
+  hopeFeatureText  String  @map("hope_feature_text")
+
+  suggestedPrimaryId   String? @map("suggested_primary_id")
+  suggestedSecondaryId String? @map("suggested_secondary_id")
+  suggestedArmorId     String? @map("suggested_armor_id")
+
+  suggestedPrimary   Weapon? @relation("SuggestedPrimary", fields: [suggestedPrimaryId], references: [id])
+  suggestedSecondary Weapon? @relation("SuggestedSecondary", fields: [suggestedSecondaryId], references: [id])
+  suggestedArmor     Armor?  @relation("SuggestedArmor", fields: [suggestedArmorId], references: [id])
+
+  features   ClassFeature[]
+  subclasses Subclass[]
+  domains    ClassDomain[]
+  characters Character[]
+
+  @@map("classes")
+}
+
+model ClassFeature {
+  id      String   @id @default(uuid())
+  classId String   @map("class_id")
+  name    String
+  text    String
+
+  class SrdClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@map("class_features")
+}
+
+model Subclass {
+  id            String @id @default(uuid())
+  classId       String @map("class_id")
+  name          String @unique
+  description   String
+  spellcastTrait String @map("spellcast_trait")
+
+  class    SrdClass          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  features SubclassFeature[]
+  characters Character[]
+
+  @@map("subclasses")
+}
+
+model SubclassFeature {
+  id         String @id @default(uuid())
+  subclassId String @map("subclass_id")
+  tier       String // 'foundation' | 'specialization' | 'mastery'
+  name       String
+  text       String
+
+  subclass Subclass @relation(fields: [subclassId], references: [id], onDelete: Cascade)
+
+  @@map("subclass_features")
+}
+
+model Ancestry {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+
+  features   AncestryFeature[]
+  characters Character[]       @relation("PrimaryAncestry")
+  charactersSecondary Character[] @relation("SecondaryAncestry")
+
+  @@map("ancestries")
+}
+
+model AncestryFeature {
+  id         String @id @default(uuid())
+  ancestryId String @map("ancestry_id")
+  name       String
+  text       String
+
+  ancestry Ancestry @relation(fields: [ancestryId], references: [id], onDelete: Cascade)
+  charactersPrimary   Character[] @relation("PrimaryAncestryFeature")
+  charactersSecondary Character[] @relation("SecondaryAncestryFeature")
+
+  @@map("ancestry_features")
+}
+
+model Community {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+  note        String
+
+  features   CommunityFeature[]
+  characters Character[]
+
+  @@map("communities")
+}
+
+model CommunityFeature {
+  id          String @id @default(uuid())
+  communityId String @map("community_id")
+  name        String
+  text        String
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@map("community_features")
+}
+
+model Domain {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+
+  cards   DomainCard[]
+  classes ClassDomain[]
+
+  @@map("domains")
+}
+
+model ClassDomain {
+  classId  String @map("class_id")
+  domainId String @map("domain_id")
+
+  class  SrdClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  domain Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@id([classId, domainId])
+  @@map("class_domains")
+}
+
+model DomainCard {
+  id          String @id @default(uuid())
+  domainId    String @map("domain_id")
+  name        String
+  level       Int
+  recallCost  Int    @map("recall_cost")
+  description String
+
+  domain     Domain               @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  characters CharacterDomainCard[]
+
+  @@map("domain_cards")
+}
+
+// ── Character Tables ────────────────────────────────────────────────────────
+
+model Character {
+  id    String @id @default(uuid())
+  name  String
+  level Int    @default(1)
+
+  classId    String @map("class_id")
+  subclassId String @map("subclass_id")
+  ancestryId String @map("ancestry_id")
+  secondaryAncestryId        String? @map("secondary_ancestry_id")
+  ancestryFeatureId          String  @map("ancestry_feature_id")
+  secondaryAncestryFeatureId String? @map("secondary_ancestry_feature_id")
+  communityId                String  @map("community_id")
+
+  agility   Int @default(0)
+  strength  Int @default(0)
+  finesse   Int @default(0)
+  instinct  Int @default(0)
+  presence  Int @default(0)
+  knowledge Int @default(0)
+
+  hpTotal     Int @default(6) @map("hp_total")
+  hpMarked    Int @default(0) @map("hp_marked")
+  stressTotal Int @default(6) @map("stress_total")
+  stressMarked Int @default(0) @map("stress_marked")
+
+  armorId     String? @map("armor_id")
+  armorMarked Int     @default(0) @map("armor_marked")
+  evasion     Int     @default(10)
+  proficiency Int     @default(1)
+
+  hope         Int @default(2)
+  goldHandfuls Int @default(0) @map("gold_handfuls")
+  goldBags     Int @default(0) @map("gold_bags")
+  goldChests   Int @default(0) @map("gold_chests")
+
+  primaryWeaponId   String? @map("primary_weapon_id")
+  secondaryWeaponId String? @map("secondary_weapon_id")
+
+  notes String @default("")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  class                  SrdClass         @relation(fields: [classId], references: [id])
+  subclass               Subclass         @relation(fields: [subclassId], references: [id])
+  ancestry               Ancestry         @relation("PrimaryAncestry", fields: [ancestryId], references: [id])
+  secondaryAncestry      Ancestry?        @relation("SecondaryAncestry", fields: [secondaryAncestryId], references: [id])
+  ancestryFeature        AncestryFeature  @relation("PrimaryAncestryFeature", fields: [ancestryFeatureId], references: [id])
+  secondaryAncestryFeature AncestryFeature? @relation("SecondaryAncestryFeature", fields: [secondaryAncestryFeatureId], references: [id])
+  community              Community        @relation(fields: [communityId], references: [id])
+  armor                  Armor?           @relation(fields: [armorId], references: [id])
+  primaryWeapon          Weapon?          @relation("PrimaryWeapon", fields: [primaryWeaponId], references: [id])
+  secondaryWeapon        Weapon?          @relation("SecondaryWeapon", fields: [secondaryWeaponId], references: [id])
+
+  experiences      CharacterExperience[]
+  domainCards      CharacterDomainCard[]
+  thresholdBonuses CharacterThresholdBonus[]
+  markedTraits     CharacterMarkedTrait[]
+
+  @@map("characters")
+}
+
+model CharacterExperience {
+  id          String @id @default(uuid())
+  characterId String @map("character_id")
+  name        String
+  modifier    Int
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("character_experiences")
+}
+
+model CharacterDomainCard {
+  id           String @id @default(uuid())
+  characterId  String @map("character_id")
+  domainCardId String @map("domain_card_id")
+
+  character  Character  @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  domainCard DomainCard @relation(fields: [domainCardId], references: [id])
+
+  @@unique([characterId, domainCardId])
+  @@map("character_domain_cards")
+}
+
+model CharacterThresholdBonus {
+  id          String  @id @default(uuid())
+  characterId String  @map("character_id")
+  sourceType  String  @map("source_type") // 'domainCard' | 'subclassFeature' | 'classFeature'
+  sourceId    String  @map("source_id")   // e.g. "Fortified Armor" or "Stalwart:Unwavering"
+  majorBonus  Int     @map("major_bonus")
+  severeBonus Int     @map("severe_bonus")
+  active      Boolean @default(false)
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("character_threshold_bonuses")
+}
+
+model CharacterMarkedTrait {
+  id          String @id @default(uuid())
+  characterId String @map("character_id")
+  trait       String
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("character_marked_traits")
 }
