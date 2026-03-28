@@ -1,0 +1,101 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { CharactersService } from './characters.service';
+import { CreateCharacterDto } from './dto/create-character.dto';
+import { UpdateCharacterDto } from './dto/update-character.dto';
+import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateExperienceDto } from './dto/update-experience.dto';
+import { AddDomainCardDto } from './dto/add-domain-card.dto';
+import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
+
+@Controller('characters')
+export class CharactersController {
+  constructor(private readonly service: CharactersService) {}
+
+  @Post()
+  create(@Body() dto: CreateCharacterDto) {
+    return this.service.create(dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.service.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCharacterDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.remove(id);
+  }
+
+  @Get(':id/computed-stats')
+  getComputedStats(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.getComputedStats(id);
+  }
+
+  @Post(':id/experiences')
+  addExperience(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateExperienceDto) {
+    return this.service.addExperience(id, dto);
+  }
+
+  @Patch(':id/experiences/:expId')
+  updateExperience(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('expId', ParseUUIDPipe) expId: string,
+    @Body() dto: UpdateExperienceDto,
+  ) {
+    return this.service.updateExperience(id, expId, dto);
+  }
+
+  @Delete(':id/experiences/:expId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeExperience(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('expId', ParseUUIDPipe) expId: string,
+  ) {
+    return this.service.removeExperience(id, expId);
+  }
+
+  @Post(':id/domain-cards')
+  addDomainCard(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AddDomainCardDto) {
+    return this.service.addDomainCard(id, dto);
+  }
+
+  @Delete(':id/domain-cards/:cardId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeDomainCard(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('cardId', ParseUUIDPipe) cardId: string,
+  ) {
+    return this.service.removeDomainCard(id, cardId);
+  }
+
+  @Patch(':id/threshold-bonuses/:bonusId')
+  toggleThresholdBonus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('bonusId', ParseUUIDPipe) bonusId: string,
+    @Body() dto: ToggleThresholdBonusDto,
+  ) {
+    return this.service.toggleThresholdBonus(id, bonusId, dto);
+  }
+}
