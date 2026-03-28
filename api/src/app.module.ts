@@ -2,10 +2,11 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './logger.middleware';
+import { PrismaModule } from './prisma/prisma.module';
 import { SrdModule } from './srd/srd.module';
 
 @Module({
-  imports: [SrdModule],
+  imports: [PrismaModule, SrdModule],
   controllers: [AppController],
   providers: [AppService],
 })
