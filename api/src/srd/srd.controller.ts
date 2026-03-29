@@ -5,6 +5,9 @@ import { ArmorQueryDto } from './dto/armor-query.dto';
 import { DomainCardQueryDto } from './dto/domain-card-query.dto';
 import { SrdCacheInterceptor } from './srd-cache.interceptor';
 import { AnyRole } from '../auth/decorators/any-role.decorator';
+import { AdversaryQueryDto } from './dto/adversary-query.dto';
+import { BeastformQueryDto } from './dto/beastform-query.dto';
+import { EnvironmentQueryDto } from './dto/environment-query.dto';
 
 @AnyRole()
 @Controller('srd')
@@ -90,5 +93,55 @@ export class SrdController {
   @Get('domain-cards/:id')
   getDomainCard(@Param('id', ParseUUIDPipe) id: string) {
     return this.srd.getDomainCard(id);
+  }
+
+  @Get('adversaries')
+  getAdversaries(@Query() query: AdversaryQueryDto) {
+    return this.srd.getAdversaries(query);
+  }
+
+  @Get('adversaries/:id')
+  getAdversary(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getAdversary(id);
+  }
+
+  @Get('beastforms')
+  getBeastforms(@Query() query: BeastformQueryDto) {
+    return this.srd.getBeastforms(query);
+  }
+
+  @Get('beastforms/:id')
+  getBeastform(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getBeastform(id);
+  }
+
+  @Get('consumables')
+  getConsumables() {
+    return this.srd.getConsumables();
+  }
+
+  @Get('consumables/:id')
+  getConsumable(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getConsumable(id);
+  }
+
+  @Get('environments')
+  getEnvironments(@Query() query: EnvironmentQueryDto) {
+    return this.srd.getEnvironments(query);
+  }
+
+  @Get('environments/:id')
+  getEnvironment(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getEnvironment(id);
+  }
+
+  @Get('items')
+  getItems() {
+    return this.srd.getItems();
+  }
+
+  @Get('items/:id')
+  getItem(@Param('id', ParseUUIDPipe) id: string) {
+    return this.srd.getItem(id);
   }
 }

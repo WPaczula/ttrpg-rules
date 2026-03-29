@@ -12,6 +12,11 @@ import { DomainRepository } from './repositories/domain.repository';
 import { DomainCardRepository } from './repositories/domain-card.repository';
 import { SrdCacheInterceptor } from './srd-cache.interceptor';
 import { AuthModule } from '../auth/auth.module';
+import { AdversaryRepository } from './repositories/adversary.repository';
+import { BeastformRepository } from './repositories/beastform.repository';
+import { ConsumableRepository } from './repositories/consumable.repository';
+import { EnvironmentRepository } from './repositories/environment.repository';
+import { ItemRepository } from './repositories/item.repository';
 
 @Module({
   imports: [
@@ -29,6 +34,11 @@ import { AuthModule } from '../auth/auth.module';
     CommunityRepository,
     DomainRepository,
     DomainCardRepository,
+    AdversaryRepository,
+    BeastformRepository,
+    ConsumableRepository,
+    EnvironmentRepository,
+    ItemRepository,
     SrdCacheInterceptor,
   ],
   exports: [SrdService],
