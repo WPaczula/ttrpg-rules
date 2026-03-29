@@ -73,10 +73,13 @@ function parseArmor({ name, content }) {
     /### FEATURE\s+\*\*\*(.+?):\*\*\*\s*(.+)/
   );
 
+  const threshParts = threshMatch ? threshMatch[1].trim().split("/").map(s => Number(s.trim())) : [0, 0];
+
   return {
     name,
     tier,
-    baseThresholds: threshMatch ? threshMatch[1].trim() : "",
+    majorThreshold: threshParts[0],
+    severeThreshold: threshParts[1],
     baseScore: scoreMatch ? Number(scoreMatch[1]) : 0,
     feature: featureMatch
       ? `${featureMatch[1].trim()}: ${featureMatch[2].trim()}`
@@ -315,7 +318,8 @@ export interface SrdWeapon {
 export interface SrdArmor {
   name: string
   tier: number
-  baseThresholds: string
+  majorThreshold: number
+  severeThreshold: number
   baseScore: number
   feature?: string
 }

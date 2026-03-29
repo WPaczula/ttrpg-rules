@@ -31,24 +31,24 @@ describe('GameLogicService', () => {
 
   describe('computeThresholds', () => {
     it('should return null when no armor base thresholds provided', () => {
-      expect(service.computeThresholds(null, 1, 1, [])).toBeNull();
+      expect(service.computeThresholds(null, 1, [])).toBeNull();
     });
 
-    it('should parse armor base thresholds correctly', () => {
-      const result = service.computeThresholds('6 / 13', 1, 1, []);
+    it('should use armor base thresholds correctly', () => {
+      const result = service.computeThresholds([6, 13], 1, []);
       expect(result!.armorBaseMajor).toBe(6);
       expect(result!.armorBaseSevere).toBe(13);
     });
 
     it('should add level - 1 as bonus', () => {
-      const result = service.computeThresholds('6 / 13', 5, 1, []);
+      const result = service.computeThresholds([6, 13], 5, []);
       expect(result!.levelBonus).toBe(4);
       expect(result!.totalMajor).toBe(10);
       expect(result!.totalSevere).toBe(17);
     });
 
     it('should add level bonus of 0 at level 1', () => {
-      const result = service.computeThresholds('6 / 13', 1, 1, []);
+      const result = service.computeThresholds([6, 13], 1, []);
       expect(result!.levelBonus).toBe(0);
       expect(result!.totalMajor).toBe(6);
       expect(result!.totalSevere).toBe(13);
@@ -59,7 +59,7 @@ describe('GameLogicService', () => {
         { sourceId: 'Fortified Armor', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: true },
         { sourceId: 'Vitality', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: true },
       ];
-      const result = service.computeThresholds('6 / 13', 1, 1, bonuses);
+      const result = service.computeThresholds([6, 13], 1, bonuses);
       expect(result!.totalMajor).toBe(10);
       expect(result!.totalSevere).toBe(17);
     });
@@ -68,7 +68,7 @@ describe('GameLogicService', () => {
       const bonuses = [
         { sourceId: 'Fortified Armor', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: false },
       ];
-      const result = service.computeThresholds('6 / 13', 1, 1, bonuses);
+      const result = service.computeThresholds([6, 13], 1, bonuses);
       expect(result!.totalMajor).toBe(6);
       expect(result!.totalSevere).toBe(13);
     });
@@ -79,7 +79,7 @@ describe('GameLogicService', () => {
         { sourceId: 'Frenzy', sourceType: 'domainCard' as const, majorBonus: 0, severeBonus: 8, active: true },
         { sourceId: 'Stalwart:Undaunted', sourceType: 'subclassFeature' as const, majorBonus: 3, severeBonus: 3, active: true },
       ];
-      const result = service.computeThresholds('8 / 17', 10, 1, bonuses);
+      const result = service.computeThresholds([8, 17], 10, bonuses);
       // base 8/17 + level 9 + bonuses (5/13) = 22/39
       expect(result!.totalMajor).toBe(22);
       expect(result!.totalSevere).toBe(39);

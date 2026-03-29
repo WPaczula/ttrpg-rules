@@ -43,9 +43,8 @@ export class CharactersService {
   private buildResponse(character: ICharacterWithRelations): CharacterResponse {
     const computed = this.gameLogic.computeAll({
       level: character.level,
-      proficiency: character.proficiency,
       baseEvasion: character.evasion,
-      armorBaseThresholds: character.armor?.baseThresholds ?? null,
+      armorBaseThresholds: character.armor ? [character.armor.majorThreshold, character.armor.severeThreshold] : null,
       armorEvasionModifier: character.armor?.evasionModifier ?? null,
       primaryWeaponFeature: character.primaryWeapon?.feature ?? null,
       secondaryWeaponFeature: character.secondaryWeapon?.feature ?? null,
@@ -166,15 +165,14 @@ export class CharactersService {
   async getComputedStats(characterId: string) {
     const character = await this.findOne(characterId);
     return this.gameLogic.computeAll({
-      level: character.level,
-      proficiency: character.proficiency,
-      baseEvasion: character.evasion,
-      armorBaseThresholds: character.armor?.baseThresholds ?? null,
-      armorEvasionModifier: character.armor?.evasionModifier ?? null,
-      primaryWeaponFeature: character.primaryWeapon?.feature ?? null,
-      secondaryWeaponFeature: character.secondaryWeapon?.feature ?? null,
-      armorFeature: character.armor?.feature ?? null,
-      thresholdBonuses: character.thresholdBonuses,
+      level: character.character.level,
+      baseEvasion: character.character.evasion,
+      armorBaseThresholds: character.character.armor ? [character.character.armor.majorThreshold, character.character.armor.severeThreshold] : null,
+      armorEvasionModifier: character.character.armor?.evasionModifier ?? null,
+      primaryWeaponFeature: character.character.primaryWeapon?.feature ?? null,
+      secondaryWeaponFeature: character.character.secondaryWeapon?.feature ?? null,
+      armorFeature: character.character.armor?.feature ?? null,
+      thresholdBonuses: character.character.thresholdBonuses,
     });
   }
 }

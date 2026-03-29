@@ -204,12 +204,14 @@ async function seed() {
   for (const a of rawArmor) {
     const featureText = a.feature?.map(f => `${f.name}: ${f.text}`).join('; ') || null;
     const evasionModifier = parseEvasionModifier(featureText ?? undefined);
+    const [major, severe] = a.base_thresholds.split('/').map(s => parseInt(s.trim(), 10));
     await prisma.armor.create({
       data: {
         name: a.name,
         tier: parseInt(a.tier, 10),
         baseScore: parseInt(a.base_score, 10),
-        baseThresholds: a.base_thresholds,
+        majorThreshold: major,
+        severeThreshold: severe,
         evasionModifier,
         feature: featureText,
       },

@@ -35,6 +35,15 @@ export interface ICharacter {
   updatedAt: Date;
 }
 
+export type ICharacterUpdate = Partial<Pick<ICharacter,
+  | 'hpMarked' | 'stressMarked' | 'hope'
+  | 'goldHandfuls' | 'goldBags' | 'goldChests'
+  | 'armorMarked'
+  | 'agility' | 'strength' | 'finesse' | 'instinct' | 'presence' | 'knowledge'
+  | 'primaryWeaponId' | 'secondaryWeaponId' | 'armorId'
+  | 'notes'
+>>;
+
 export interface ICharacterWithRelations extends ICharacter {
   class: { id: string; name: string };
   subclass: { id: string; name: string };
@@ -43,7 +52,7 @@ export interface ICharacterWithRelations extends ICharacter {
   ancestryFeature: { id: string; name: string; text: string };
   secondaryAncestryFeature: { id: string; name: string; text: string } | null;
   community: { id: string; name: string };
-  armor: { id: string; name: string; baseThresholds: string; evasionModifier: number | null; feature: string | null } | null;
+  armor: { id: string; name: string; majorThreshold: number; severeThreshold: number; evasionModifier: number | null; feature: string | null } | null;
   primaryWeapon: { id: string; name: string; feature: string | null } | null;
   secondaryWeapon: { id: string; name: string; feature: string | null } | null;
   experiences: { id: string; name: string; modifier: number }[];

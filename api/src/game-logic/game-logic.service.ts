@@ -23,18 +23,13 @@ export class GameLogicService {
   }
 
   computeThresholds(
-    armorBaseThresholds: string | null,
+    armorBaseThresholds: [number, number] | null,
     level: number,
-    proficiency: number,
     bonuses: ThresholdBonusInput[],
   ): ThresholdBreakdown | null {
     if (!armorBaseThresholds) return null;
 
-    const parts = armorBaseThresholds.split('/').map(s => parseInt(s.trim(), 10));
-    if (parts.length < 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
-
-    const armorBaseMajor = parts[0];
-    const armorBaseSevere = parts[1];
+    const [armorBaseMajor, armorBaseSevere] = armorBaseThresholds;
     const levelBonus = level - 1;
 
     const activeBonuses = bonuses
@@ -118,9 +113,8 @@ export class GameLogicService {
 
   computeAll(params: {
     level: number;
-    proficiency: number;
     baseEvasion: number;
-    armorBaseThresholds: string | null;
+    armorBaseThresholds: [number, number] | null;
     armorEvasionModifier: number | null;
     primaryWeaponFeature: string | null;
     secondaryWeaponFeature: string | null;
@@ -132,7 +126,6 @@ export class GameLogicService {
       thresholds: this.computeThresholds(
         params.armorBaseThresholds,
         params.level,
-        params.proficiency,
         params.thresholdBonuses,
       ),
       effectiveEvasion: this.computeEffectiveEvasion(

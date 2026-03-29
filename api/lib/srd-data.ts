@@ -21,7 +21,8 @@ export interface SrdWeapon {
 export interface SrdArmor {
   name: string
   tier: number
-  baseThresholds: string
+  majorThreshold: number
+  severeThreshold: number
   baseScore: number
   feature?: string
 }
@@ -2006,205 +2007,239 @@ export const SRD_ARMOR: SrdArmor[] = [
   {
     "name": "Chainmail Armor",
     "tier": 1,
-    "baseThresholds": "7 / 15",
+    "majorThreshold": 7,
+    "severeThreshold": 15,
     "baseScore": 4
   },
   {
     "name": "Full Plate Armor",
     "tier": 1,
-    "baseThresholds": "8 / 17",
+    "majorThreshold": 8,
+    "severeThreshold": 17,
     "baseScore": 4
   },
   {
     "name": "Gambeson Armor",
     "tier": 1,
-    "baseThresholds": "5 / 11",
+    "majorThreshold": 5,
+    "severeThreshold": 11,
     "baseScore": 3
   },
   {
     "name": "Leather Armor",
     "tier": 1,
-    "baseThresholds": "6 / 13",
+    "majorThreshold": 6,
+    "severeThreshold": 13,
     "baseScore": 3
   },
   {
     "name": "Elundrian Chain Armor",
     "tier": 2,
-    "baseThresholds": "9 / 21",
+    "majorThreshold": 9,
+    "severeThreshold": 21,
     "baseScore": 4
   },
   {
     "name": "Harrowbone Armor",
     "tier": 2,
-    "baseThresholds": "9 / 21",
+    "majorThreshold": 9,
+    "severeThreshold": 21,
     "baseScore": 4
   },
   {
     "name": "Improved Chainmail Armor",
     "tier": 2,
-    "baseThresholds": "11 / 24",
+    "majorThreshold": 11,
+    "severeThreshold": 24,
     "baseScore": 5
   },
   {
     "name": "Improved Full Plate Armor",
     "tier": 2,
-    "baseThresholds": "13 / 28",
+    "majorThreshold": 13,
+    "severeThreshold": 28,
     "baseScore": 5
   },
   {
     "name": "Improved Gambeson Armor",
     "tier": 2,
-    "baseThresholds": "7 / 16",
+    "majorThreshold": 7,
+    "severeThreshold": 16,
     "baseScore": 4
   },
   {
     "name": "Improved Leather Armor",
     "tier": 2,
-    "baseThresholds": "9 / 20",
+    "majorThreshold": 9,
+    "severeThreshold": 20,
     "baseScore": 4
   },
   {
     "name": "Irontree Breastplate Armor",
     "tier": 2,
-    "baseThresholds": "9 / 20",
+    "majorThreshold": 9,
+    "severeThreshold": 20,
     "baseScore": 4
   },
   {
     "name": "Rosewild Armor",
     "tier": 2,
-    "baseThresholds": "11 / 23",
+    "majorThreshold": 11,
+    "severeThreshold": 23,
     "baseScore": 5
   },
   {
     "name": "Runetan Floating Armor",
     "tier": 2,
-    "baseThresholds": "9 / 20",
+    "majorThreshold": 9,
+    "severeThreshold": 20,
     "baseScore": 4
   },
   {
     "name": "Tyris Soft Armor",
     "tier": 2,
-    "baseThresholds": "8 / 18",
+    "majorThreshold": 8,
+    "severeThreshold": 18,
     "baseScore": 5
   },
   {
     "name": "Advanced Chainmail Armor",
     "tier": 3,
-    "baseThresholds": "13 / 31",
+    "majorThreshold": 13,
+    "severeThreshold": 31,
     "baseScore": 6
   },
   {
     "name": "Advanced Full Plate Armor",
     "tier": 3,
-    "baseThresholds": "15 / 35",
+    "majorThreshold": 15,
+    "severeThreshold": 35,
     "baseScore": 6
   },
   {
     "name": "Advanced Gambeson Armor",
     "tier": 3,
-    "baseThresholds": "9 / 23",
+    "majorThreshold": 9,
+    "severeThreshold": 23,
     "baseScore": 5
   },
   {
     "name": "Advanced Leather Armor",
     "tier": 3,
-    "baseThresholds": "11 / 27",
+    "majorThreshold": 11,
+    "severeThreshold": 27,
     "baseScore": 5
   },
   {
     "name": "Bellamoi Fine Armor",
     "tier": 3,
-    "baseThresholds": "11 / 27",
+    "majorThreshold": 11,
+    "severeThreshold": 27,
     "baseScore": 5
   },
   {
     "name": "Bladefare Armor",
     "tier": 3,
-    "baseThresholds": "16 / 39",
+    "majorThreshold": 16,
+    "severeThreshold": 39,
     "baseScore": 6
   },
   {
     "name": "Dragonscale Armor",
     "tier": 3,
-    "baseThresholds": "11 / 27",
+    "majorThreshold": 11,
+    "severeThreshold": 27,
     "baseScore": 5
   },
   {
     "name": "Monetts Cloak",
     "tier": 3,
-    "baseThresholds": "16 / 39",
+    "majorThreshold": 16,
+    "severeThreshold": 39,
     "baseScore": 6
   },
   {
     "name": "Runes of Fortification",
     "tier": 3,
-    "baseThresholds": "17 / 43",
+    "majorThreshold": 17,
+    "severeThreshold": 43,
     "baseScore": 6
   },
   {
     "name": "Spiked Plate Armor",
     "tier": 3,
-    "baseThresholds": "10 / 25",
+    "majorThreshold": 10,
+    "severeThreshold": 25,
     "baseScore": 5
   },
   {
     "name": "Channeling Armor",
     "tier": 4,
-    "baseThresholds": "13 / 36",
+    "majorThreshold": 13,
+    "severeThreshold": 36,
     "baseScore": 5
   },
   {
     "name": "Dunamis Silkchain",
     "tier": 4,
-    "baseThresholds": "13 / 36",
+    "majorThreshold": 13,
+    "severeThreshold": 36,
     "baseScore": 7
   },
   {
     "name": "Emberwoven Armor",
     "tier": 4,
-    "baseThresholds": "13 / 36",
+    "majorThreshold": 13,
+    "severeThreshold": 36,
     "baseScore": 6
   },
   {
     "name": "Full Fortified Armor",
     "tier": 4,
-    "baseThresholds": "15 / 40",
+    "majorThreshold": 15,
+    "severeThreshold": 40,
     "baseScore": 4
   },
   {
     "name": "Legendary Chainmail Armor",
     "tier": 4,
-    "baseThresholds": "15 / 40",
+    "majorThreshold": 15,
+    "severeThreshold": 40,
     "baseScore": 7
   },
   {
     "name": "Legendary Full Plate Armor",
     "tier": 4,
-    "baseThresholds": "17 / 44",
+    "majorThreshold": 17,
+    "severeThreshold": 44,
     "baseScore": 7
   },
   {
     "name": "Legendary Gambeson Armor",
     "tier": 4,
-    "baseThresholds": "11 / 32",
+    "majorThreshold": 11,
+    "severeThreshold": 32,
     "baseScore": 6
   },
   {
     "name": "Legendary Leather Armor",
     "tier": 4,
-    "baseThresholds": "13 / 36",
+    "majorThreshold": 13,
+    "severeThreshold": 36,
     "baseScore": 6
   },
   {
     "name": "Savior Chainmail",
     "tier": 4,
-    "baseThresholds": "18 / 48",
+    "majorThreshold": 18,
+    "severeThreshold": 48,
     "baseScore": 8
   },
   {
     "name": "Veritas Opal Armor",
     "tier": 4,
-    "baseThresholds": "13 / 36",
+    "majorThreshold": 13,
+    "severeThreshold": 36,
     "baseScore": 6
   }
 ] as const

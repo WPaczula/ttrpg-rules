@@ -34,7 +34,8 @@ model Armor {
   name            String
   tier            Int
   baseScore       Int     @map("base_score")
-  baseThresholds  String  @map("base_thresholds") // "major / severe" e.g. "6 / 13"
+  majorThreshold  Int     @map("major_threshold")
+  severeThreshold Int     @map("severe_threshold")
   evasionModifier Int?    @map("evasion_modifier")
   feature         String? // optional special feature text
 

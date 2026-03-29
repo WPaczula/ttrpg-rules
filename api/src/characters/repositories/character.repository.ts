@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ICharacterWithRelations } from '../interfaces/character.interface';
+import { ICharacterWithRelations, ICharacterUpdate } from '../interfaces/character.interface';
 
 const CHARACTER_INCLUDE = {
   class: { select: { id: true, name: true } },
@@ -10,7 +10,7 @@ const CHARACTER_INCLUDE = {
   ancestryFeature: { select: { id: true, name: true, text: true } },
   secondaryAncestryFeature: { select: { id: true, name: true, text: true } },
   community: { select: { id: true, name: true } },
-  armor: { select: { id: true, name: true, baseThresholds: true, evasionModifier: true, feature: true } },
+  armor: { select: { id: true, name: true, majorThreshold: true, severeThreshold: true, evasionModifier: true, feature: true } },
   primaryWeapon: { select: { id: true, name: true, feature: true } },
   secondaryWeapon: { select: { id: true, name: true, feature: true } },
   experiences: { select: { id: true, name: true, modifier: true } },
@@ -109,7 +109,7 @@ export class CharacterRepository {
     return this.mapCharacter(character);
   }
 
-  async update(id: string, data: Record<string, unknown>): Promise<ICharacterWithRelations> {
+  async update(id: string, data: ICharacterUpdate): Promise<ICharacterWithRelations> {
     const character = await this.prisma.character.update({
       where: { id },
       data,
