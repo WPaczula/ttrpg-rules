@@ -1,22 +1,31 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, seedTestDatabase } from '../src/common/test/test-helpers';
+import { createTestApp, seedTestDatabase, cleanUserTables, makeTestUser } from '../src/common/test/test-helpers';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { Role, User } from '@prisma/client';
 import { execSync } from 'child_process';
 
 describe('SRD Endpoints (e2e)', () => {
   let app: INestApplication;
+  let prisma: PrismaService;
+  let testUser: User;
 
   beforeAll(async () => {
-    // Apply migrations and seed test DB
     execSync('npx prisma migrate deploy', {
       env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
       stdio: 'pipe',
     });
+    const tempApp = await createTestApp(undefined);
+    prisma = tempApp.get(PrismaService);
     await seedTestDatabase();
-    app = await createTestApp();
+    await prisma.user.deleteMany();
+    testUser = await makeTestUser(prisma, Role.PC, 'srd-test-user');
+    await tempApp.close();
+    app = await createTestApp(testUser);
   });
 
   afterAll(async () => {
+    await cleanUserTables(prisma);
     await app.close();
   });
 

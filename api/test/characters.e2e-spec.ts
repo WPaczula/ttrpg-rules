@@ -1,11 +1,19 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, cleanCharacterTables } from '../src/common/test/test-helpers';
+import {
+  createTestApp,
+  cleanCharacterTables,
+  cleanUserTables,
+  makeTestUser,
+} from '../src/common/test/test-helpers';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { Role, User } from '@prisma/client';
 
 describe('Characters Endpoints (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let pcUser: User;
+  let gmUser: User;
 
   // SRD IDs populated in beforeAll
   let classId: string;
@@ -18,11 +26,16 @@ describe('Characters Endpoints (e2e)', () => {
   let domainCardId: string;
 
   beforeAll(async () => {
-    app = await createTestApp();
-    prisma = app.get(PrismaService);
+    const tempApp = await createTestApp(undefined);
+    prisma = tempApp.get(PrismaService);
+    await cleanUserTables(prisma);
 
-    // Fetch SRD IDs for test data
-    const srdClass = await prisma.srdClass.findFirst({ include: { subclasses: true, domains: { include: { domain: { include: { cards: true } } } } } });
+    pcUser = await makeTestUser(prisma, Role.PC, 'test-pc-user');
+    gmUser = await makeTestUser(prisma, Role.GM, 'test-gm-user');
+
+    const srdClass = await prisma.srdClass.findFirst({
+      include: { subclasses: true, domains: { include: { domain: { include: { cards: true } } } } },
+    });
     classId = srdClass!.id;
     subclassId = srdClass!.subclasses[0].id;
 
@@ -41,6 +54,9 @@ describe('Characters Endpoints (e2e)', () => {
 
     const domainCard = srdClass!.domains[0].domain.cards[0];
     domainCardId = domainCard!.id;
+
+    await tempApp.close();
+    app = await createTestApp(pcUser);
   });
 
   beforeEach(async () => {
@@ -48,7 +64,7 @@ describe('Characters Endpoints (e2e)', () => {
   });
 
   afterAll(async () => {
-    await cleanCharacterTables(prisma);
+    await cleanUserTables(prisma);
     await app.close();
   });
 
@@ -108,21 +124,6 @@ describe('Characters Endpoints (e2e)', () => {
 
       expect(res.body.character.hpTotal).toBeGreaterThan(0);
       expect(res.body.character.evasion).toBeGreaterThan(0);
-    });
-  });
-
-  describe('GET /characters', () => {
-    it('should return empty array when no characters', async () => {
-      const res = await request(app.getHttpServer()).get('/characters').expect(200);
-      expect(res.body).toEqual([]);
-    });
-
-    it('should return all characters', async () => {
-      await request(app.getHttpServer()).post('/characters').send(validCreateBody());
-      await request(app.getHttpServer()).post('/characters').send({ ...validCreateBody(), name: 'Second' });
-
-      const res = await request(app.getHttpServer()).get('/characters').expect(200);
-      expect(res.body.length).toBe(2);
     });
   });
 
@@ -254,6 +255,22 @@ describe('Characters Endpoints (e2e)', () => {
         .expect(409);
 
       expect(res.body.error).toBe('DUPLICATE_DOMAIN_CARD');
+    });
+  });
+
+  describe('GM access', () => {
+    it('GM can list all characters', async () => {
+      await request(app.getHttpServer()).post('/characters').send(validCreateBody()).expect(201);
+
+      const gmApp = await createTestApp(gmUser);
+      const res = await request(gmApp.getHttpServer()).get('/characters').expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(0);
+      await gmApp.close();
+    });
+
+    it('PC cannot list all characters (403)', async () => {
+      await request(app.getHttpServer()).get('/characters').expect(403);
     });
   });
 });
