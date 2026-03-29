@@ -10,9 +10,11 @@ import { SrdModule } from '../srd/srd.module';
 import { ClassRepository } from '../srd/repositories/class.repository';
 import { ArmorRepository } from '../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
+import { AuthModule } from '../auth/auth.module';
+import { CharacterOwnerGuard } from './guards/character-owner.guard';
 
 @Module({
-  imports: [GameLogicModule, SrdModule],
+  imports: [GameLogicModule, SrdModule, AuthModule],
   controllers: [CharactersController],
   providers: [
     CharactersService,
@@ -23,6 +25,7 @@ import { DomainCardRepository } from '../srd/repositories/domain-card.repository
     ClassRepository,
     ArmorRepository,
     DomainCardRepository,
+    CharacterOwnerGuard,
   ],
 })
 export class CharactersModule {}

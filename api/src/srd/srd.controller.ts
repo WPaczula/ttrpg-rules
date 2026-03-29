@@ -4,7 +4,9 @@ import { WeaponQueryDto } from './dto/weapon-query.dto';
 import { ArmorQueryDto } from './dto/armor-query.dto';
 import { DomainCardQueryDto } from './dto/domain-card-query.dto';
 import { SrdCacheInterceptor } from './srd-cache.interceptor';
+import { AnyRole } from '../auth/decorators/any-role.decorator';
 
+@AnyRole()
 @Controller('srd')
 @UseInterceptors(SrdCacheInterceptor)
 export class SrdController {
