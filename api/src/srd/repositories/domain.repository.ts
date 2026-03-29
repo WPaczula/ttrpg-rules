@@ -9,14 +9,20 @@ export class DomainRepository {
   async findAll(): Promise<ISrdDomain[]> {
     const domains = await this.prisma.domain.findMany({
       include: {
-        cards: { select: { id: true, name: true, level: true }, orderBy: { level: 'asc' } },
+        cards: {
+          select: { id: true, name: true, level: true },
+          orderBy: { level: 'asc' },
+        },
         classes: { include: { class: { select: { name: true } } } },
       },
       orderBy: { name: 'asc' },
     });
-    return domains.map(d => ({
-      id: d.id, name: d.name, description: d.description,
-      classes: d.classes.map(cd => cd.class.name), cards: d.cards,
+    return domains.map((d) => ({
+      id: d.id,
+      name: d.name,
+      description: d.description,
+      classes: d.classes.map((cd) => cd.class.name),
+      cards: d.cards,
     }));
   }
 
@@ -24,14 +30,20 @@ export class DomainRepository {
     const d = await this.prisma.domain.findUnique({
       where: { id },
       include: {
-        cards: { select: { id: true, name: true, level: true }, orderBy: { level: 'asc' } },
+        cards: {
+          select: { id: true, name: true, level: true },
+          orderBy: { level: 'asc' },
+        },
         classes: { include: { class: { select: { name: true } } } },
       },
     });
     if (!d) return null;
     return {
-      id: d.id, name: d.name, description: d.description,
-      classes: d.classes.map(cd => cd.class.name), cards: d.cards,
+      id: d.id,
+      name: d.name,
+      description: d.description,
+      classes: d.classes.map((cd) => cd.class.name),
+      cards: d.cards,
     };
   }
 }

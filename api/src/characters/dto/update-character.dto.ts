@@ -1,6 +1,4 @@
-import {
-  IsString, IsInt, IsUUID, IsOptional, Min, Max,
-} from 'class-validator';
+import { IsString, IsInt, IsUUID, IsOptional, Min, Max } from 'class-validator';
 
 export class UpdateCharacterDto {
   @IsInt()

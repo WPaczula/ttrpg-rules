@@ -18,15 +18,22 @@ export class ClassRepository {
       },
       orderBy: { name: 'asc' },
     });
-    return classes.map(c => ({
-      id: c.id, name: c.name, description: c.description,
-      evasion: c.evasion, hp: c.hp, items: c.items,
+    return classes.map((c) => ({
+      id: c.id,
+      name: c.name,
+      description: c.description,
+      evasion: c.evasion,
+      hp: c.hp,
+      items: c.items,
       suggestedTraits: c.suggestedTraits,
-      hopeFeatureName: c.hopeFeatureName, hopeFeatureText: c.hopeFeatureText,
-      suggestedPrimary: c.suggestedPrimary, suggestedSecondary: c.suggestedSecondary,
+      hopeFeatureName: c.hopeFeatureName,
+      hopeFeatureText: c.hopeFeatureText,
+      suggestedPrimary: c.suggestedPrimary,
+      suggestedSecondary: c.suggestedSecondary,
       suggestedArmor: c.suggestedArmor,
-      features: c.features, subclasses: c.subclasses,
-      domains: c.domains.map(cd => cd.domain),
+      features: c.features,
+      subclasses: c.subclasses,
+      domains: c.domains.map((cd) => cd.domain),
     }));
   }
 
@@ -44,14 +51,21 @@ export class ClassRepository {
     });
     if (!c) return null;
     return {
-      id: c.id, name: c.name, description: c.description,
-      evasion: c.evasion, hp: c.hp, items: c.items,
+      id: c.id,
+      name: c.name,
+      description: c.description,
+      evasion: c.evasion,
+      hp: c.hp,
+      items: c.items,
       suggestedTraits: c.suggestedTraits,
-      hopeFeatureName: c.hopeFeatureName, hopeFeatureText: c.hopeFeatureText,
-      suggestedPrimary: c.suggestedPrimary, suggestedSecondary: c.suggestedSecondary,
+      hopeFeatureName: c.hopeFeatureName,
+      hopeFeatureText: c.hopeFeatureText,
+      suggestedPrimary: c.suggestedPrimary,
+      suggestedSecondary: c.suggestedSecondary,
       suggestedArmor: c.suggestedArmor,
-      features: c.features, subclasses: c.subclasses,
-      domains: c.domains.map(cd => cd.domain),
+      features: c.features,
+      subclasses: c.subclasses,
+      domains: c.domains.map((cd) => cd.domain),
     };
   }
 }

@@ -5,14 +5,25 @@ import { CharacterRepository } from '../repositories/character.repository';
 import { Role, User } from '@prisma/client';
 
 function makeUser(role: Role, id = 'user-1'): User {
-  return { id, clerkId: 'c1', role, tokenLimit: null, tokensUsed: 0, createdAt: new Date(), updatedAt: new Date() };
+  return {
+    id,
+    clerkId: 'c1',
+    role,
+    tokenLimit: null,
+    tokensUsed: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 }
 
 function makeCharacter(userId: string) {
   return { id: 'char-1', userId };
 }
 
-function createContext(user: User, params: Record<string, string> = {}): ExecutionContext {
+function createContext(
+  user: User,
+  params: Record<string, string> = {},
+): ExecutionContext {
   return {
     switchToHttp: () => ({ getRequest: () => ({ user, params }) }),
   } as unknown as ExecutionContext;
@@ -55,12 +66,18 @@ describe('CharacterOwnerGuard', () => {
   it("throws ForbiddenException when PC tries to access another user's character", async () => {
     mockCharacters.findById.mockResolvedValue(makeCharacter('other-user'));
     const ctx = createContext(makeUser(Role.PC, 'user-1'), { id: 'char-1' });
-    await expect(guard.canActivate(ctx)).rejects.toThrow('You do not own this character');
+    await expect(guard.canActivate(ctx)).rejects.toThrow(
+      'You do not own this character',
+    );
   });
 
   it('throws NotFoundException when character does not exist', async () => {
     mockCharacters.findById.mockResolvedValue(null);
-    const ctx = createContext(makeUser(Role.PC, 'user-1'), { id: 'nonexistent' });
-    await expect(guard.canActivate(ctx)).rejects.toThrow('Character nonexistent not found');
+    const ctx = createContext(makeUser(Role.PC, 'user-1'), {
+      id: 'nonexistent',
+    });
+    await expect(guard.canActivate(ctx)).rejects.toThrow(
+      'Character nonexistent not found',
+    );
   });
 });

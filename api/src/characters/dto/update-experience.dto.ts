@@ -1,4 +1,11 @@
-import { IsString, IsInt, IsOptional, IsNotEmpty, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsOptional,
+  IsNotEmpty,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class UpdateExperienceDto {
   @IsString()

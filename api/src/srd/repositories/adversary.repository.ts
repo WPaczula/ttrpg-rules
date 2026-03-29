@@ -6,7 +6,10 @@ import { ISrdAdversary } from '../interfaces/srd-adversary.interface';
 export class AdversaryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters?: { tier?: number; type?: string }): Promise<ISrdAdversary[]> {
+  async findAll(filters?: {
+    tier?: number;
+    type?: string;
+  }): Promise<ISrdAdversary[]> {
     const where: Record<string, unknown> = {};
     if (filters?.tier !== undefined) where.tier = filters.tier;
     if (filters?.type !== undefined) where.type = filters.type;
@@ -18,6 +21,9 @@ export class AdversaryRepository {
   }
 
   async findById(id: string): Promise<ISrdAdversary | null> {
-    return this.prisma.adversary.findUnique({ where: { id }, include: { features: true } });
+    return this.prisma.adversary.findUnique({
+      where: { id },
+      include: { features: true },
+    });
   }
 }

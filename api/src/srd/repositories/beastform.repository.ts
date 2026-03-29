@@ -17,6 +17,9 @@ export class BeastformRepository {
   }
 
   async findById(id: string): Promise<ISrdBeastform | null> {
-    return this.prisma.beastform.findUnique({ where: { id }, include: { features: true } });
+    return this.prisma.beastform.findUnique({
+      where: { id },
+      include: { features: true },
+    });
   }
 }

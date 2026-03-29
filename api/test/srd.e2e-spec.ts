@@ -1,6 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, seedTestDatabase, cleanUserTables, makeTestUser } from '../src/common/test/test-helpers';
+import {
+  createTestApp,
+  seedTestDatabase,
+  cleanUserTables,
+  makeTestUser,
+} from '../src/common/test/test-helpers';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { Role, User } from '@prisma/client';
 import { execSync } from 'child_process';
@@ -31,12 +36,16 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/classes', () => {
     it('should return all classes', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/classes').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/classes')
+        .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBeGreaterThan(0);
 
-      const warrior = res.body.find((c: { name: string }) => c.name === 'Warrior');
+      const warrior = res.body.find(
+        (c: { name: string }) => c.name === 'Warrior',
+      );
       expect(warrior).toBeDefined();
       expect(warrior.evasion).toBeDefined();
       expect(warrior.hp).toBeDefined();
@@ -51,7 +60,9 @@ describe('SRD Endpoints (e2e)', () => {
       const listRes = await request(app.getHttpServer()).get('/srd/classes');
       const classId = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/classes/${classId}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/classes/${classId}`)
+        .expect(200);
 
       expect(res.body.id).toBe(classId);
       expect(res.body.name).toBeDefined();
@@ -69,7 +80,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/subclasses', () => {
     it('should return all subclasses with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/subclasses').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/subclasses')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].features).toBeDefined();
@@ -79,7 +92,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/ancestries', () => {
     it('should return all ancestries with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/ancestries').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/ancestries')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].features).toBeDefined();
@@ -88,7 +103,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/communities', () => {
     it('should return all communities with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/communities').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/communities')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].note).toBeDefined();
@@ -97,7 +114,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/domains', () => {
     it('should return all domains with cards and classes', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/domains').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/domains')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].cards).toBeDefined();
@@ -107,7 +126,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/domain-cards', () => {
     it('should return all domain cards', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/domain-cards').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/domain-cards')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].domainName).toBeDefined();
@@ -119,7 +140,11 @@ describe('SRD Endpoints (e2e)', () => {
         .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
-      expect(res.body.every((c: { domainName: string }) => c.domainName === 'Arcana')).toBe(true);
+      expect(
+        res.body.every(
+          (c: { domainName: string }) => c.domainName === 'Arcana',
+        ),
+      ).toBe(true);
     });
 
     it('should filter by level', async () => {
@@ -128,13 +153,17 @@ describe('SRD Endpoints (e2e)', () => {
         .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
-      expect(res.body.every((c: { level: number }) => c.level === 1)).toBe(true);
+      expect(res.body.every((c: { level: number }) => c.level === 1)).toBe(
+        true,
+      );
     });
   });
 
   describe('GET /srd/weapons', () => {
     it('should return all weapons', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/weapons').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/weapons')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
     });
@@ -152,7 +181,9 @@ describe('SRD Endpoints (e2e)', () => {
         .get('/srd/weapons?type=Primary')
         .expect(200);
 
-      expect(res.body.every((w: { type: string }) => w.type === 'Primary')).toBe(true);
+      expect(
+        res.body.every((w: { type: string }) => w.type === 'Primary'),
+      ).toBe(true);
     });
 
     it('should reject invalid tier', async () => {
@@ -166,7 +197,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/armor', () => {
     it('should return all armor', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/armor').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/armor')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
     });
@@ -182,7 +215,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/adversaries', () => {
     it('should return all adversaries with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/adversaries').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/adversaries')
+        .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBeGreaterThan(0);
@@ -207,16 +242,22 @@ describe('SRD Endpoints (e2e)', () => {
         .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
-      expect(res.body.every((a: { type: string }) => a.type === 'Solo')).toBe(true);
+      expect(res.body.every((a: { type: string }) => a.type === 'Solo')).toBe(
+        true,
+      );
     });
   });
 
   describe('GET /srd/adversaries/:id', () => {
     it('should return a single adversary', async () => {
-      const listRes = await request(app.getHttpServer()).get('/srd/adversaries');
+      const listRes = await request(app.getHttpServer()).get(
+        '/srd/adversaries',
+      );
       const id = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/adversaries/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/adversaries/${id}`)
+        .expect(200);
 
       expect(res.body.id).toBe(id);
       expect(res.body.features).toBeDefined();
@@ -233,7 +274,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/beastforms', () => {
     it('should return all beastforms with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/beastforms').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/beastforms')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].name).toBeDefined();
@@ -256,7 +299,9 @@ describe('SRD Endpoints (e2e)', () => {
       const listRes = await request(app.getHttpServer()).get('/srd/beastforms');
       const id = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/beastforms/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/beastforms/${id}`)
+        .expect(200);
 
       expect(res.body.id).toBe(id);
       expect(res.body.features).toBeDefined();
@@ -273,7 +318,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/consumables', () => {
     it('should return all consumables ordered by roll', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/consumables').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/consumables')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].name).toBeDefined();
@@ -284,10 +331,14 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/consumables/:id', () => {
     it('should return a single consumable', async () => {
-      const listRes = await request(app.getHttpServer()).get('/srd/consumables');
+      const listRes = await request(app.getHttpServer()).get(
+        '/srd/consumables',
+      );
       const id = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/consumables/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/consumables/${id}`)
+        .expect(200);
 
       expect(res.body.id).toBe(id);
     });
@@ -303,7 +354,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/environments', () => {
     it('should return all environments with features', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/environments').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/environments')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].name).toBeDefined();
@@ -326,16 +379,22 @@ describe('SRD Endpoints (e2e)', () => {
         .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
-      expect(res.body.every((e: { type: string }) => e.type === 'Exploration')).toBe(true);
+      expect(
+        res.body.every((e: { type: string }) => e.type === 'Exploration'),
+      ).toBe(true);
     });
   });
 
   describe('GET /srd/environments/:id', () => {
     it('should return a single environment with feature questions', async () => {
-      const listRes = await request(app.getHttpServer()).get('/srd/environments');
+      const listRes = await request(app.getHttpServer()).get(
+        '/srd/environments',
+      );
       const id = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/environments/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/environments/${id}`)
+        .expect(200);
 
       expect(res.body.id).toBe(id);
       expect(res.body.features).toBeDefined();
@@ -352,7 +411,9 @@ describe('SRD Endpoints (e2e)', () => {
 
   describe('GET /srd/items', () => {
     it('should return all items ordered by roll', async () => {
-      const res = await request(app.getHttpServer()).get('/srd/items').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/srd/items')
+        .expect(200);
 
       expect(res.body.length).toBeGreaterThan(0);
       expect(res.body[0].name).toBeDefined();
@@ -366,7 +427,9 @@ describe('SRD Endpoints (e2e)', () => {
       const listRes = await request(app.getHttpServer()).get('/srd/items');
       const id = listRes.body[0].id;
 
-      const res = await request(app.getHttpServer()).get(`/srd/items/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/srd/items/${id}`)
+        .expect(200);
 
       expect(res.body.id).toBe(id);
     });

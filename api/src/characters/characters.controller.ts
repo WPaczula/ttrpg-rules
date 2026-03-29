@@ -47,7 +47,10 @@ export class CharactersController {
 
   @OwnerOnly()
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCharacterDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCharacterDto,
+  ) {
     return this.service.update(id, dto);
   }
 
@@ -66,7 +69,10 @@ export class CharactersController {
 
   @OwnerOnly()
   @Post(':id/experiences')
-  addExperience(@Param('id', ParseUUIDPipe) id: string, @Body() dto: CreateExperienceDto) {
+  addExperience(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateExperienceDto,
+  ) {
     return this.service.addExperience(id, dto);
   }
 
@@ -92,7 +98,10 @@ export class CharactersController {
 
   @OwnerOnly()
   @Post(':id/domain-cards')
-  addDomainCard(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AddDomainCardDto) {
+  addDomainCard(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AddDomainCardDto,
+  ) {
     return this.service.addDomainCard(id, dto);
   }
 

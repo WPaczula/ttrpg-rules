@@ -1,5 +1,11 @@
 import {
-  IsString, IsInt, IsUUID, IsOptional, Min, Max, IsNotEmpty,
+  IsString,
+  IsInt,
+  IsUUID,
+  IsOptional,
+  Min,
+  Max,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class CreateCharacterDto {

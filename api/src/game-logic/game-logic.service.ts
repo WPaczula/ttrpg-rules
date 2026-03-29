@@ -33,15 +33,21 @@ export class GameLogicService {
     const levelBonus = level - 1;
 
     const activeBonuses = bonuses
-      .filter(b => b.active)
-      .map(b => ({
+      .filter((b) => b.active)
+      .map((b) => ({
         label: b.sourceId,
         major: b.majorBonus,
         severe: b.severeBonus,
       }));
 
-    const totalMajor = armorBaseMajor + levelBonus + activeBonuses.reduce((sum, b) => sum + b.major, 0);
-    const totalSevere = armorBaseSevere + levelBonus + activeBonuses.reduce((sum, b) => sum + b.severe, 0);
+    const totalMajor =
+      armorBaseMajor +
+      levelBonus +
+      activeBonuses.reduce((sum, b) => sum + b.major, 0);
+    const totalSevere =
+      armorBaseSevere +
+      levelBonus +
+      activeBonuses.reduce((sum, b) => sum + b.severe, 0);
 
     return {
       armorBaseMajor,
@@ -53,7 +59,10 @@ export class GameLogicService {
     };
   }
 
-  computeEffectiveEvasion(baseEvasion: number, armorEvasionModifier: number | null): number {
+  computeEffectiveEvasion(
+    baseEvasion: number,
+    armorEvasionModifier: number | null,
+  ): number {
     return baseEvasion + (armorEvasionModifier ?? 0);
   }
 
@@ -63,11 +72,19 @@ export class GameLogicService {
     armorFeature: string | null,
   ): TraitModifiers {
     const modifiers: TraitModifiers = {
-      agility: 0, strength: 0, finesse: 0,
-      instinct: 0, presence: 0, knowledge: 0,
+      agility: 0,
+      strength: 0,
+      finesse: 0,
+      instinct: 0,
+      presence: 0,
+      knowledge: 0,
     };
 
-    const sources = [primaryWeaponFeature, secondaryWeaponFeature, armorFeature];
+    const sources = [
+      primaryWeaponFeature,
+      secondaryWeaponFeature,
+      armorFeature,
+    ];
 
     for (const source of sources) {
       if (!source) continue;

@@ -6,7 +6,10 @@ import { ICharacterThresholdBonus } from '../interfaces/character-threshold-bonu
 export class ThresholdBonusRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async toggleActive(id: string, active: boolean): Promise<ICharacterThresholdBonus> {
+  async toggleActive(
+    id: string,
+    active: boolean,
+  ): Promise<ICharacterThresholdBonus> {
     return this.prisma.characterThresholdBonus.update({
       where: { id },
       data: { active },

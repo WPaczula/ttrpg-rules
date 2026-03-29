@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  CanActivate,
+  ExecutionContext,
+} from '@nestjs/common';
 import { AppModule } from '../../app.module';
 import { AppExceptionFilter } from '../filters/app-exception.filter';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -7,7 +12,9 @@ import { execSync } from 'child_process';
 import { ClerkAuthGuard } from '../../auth/guards/clerk-auth.guard';
 import { Role, User } from '@prisma/client';
 
-export async function createTestApp(activeUser?: User): Promise<INestApplication> {
+export async function createTestApp(
+  activeUser?: User,
+): Promise<INestApplication> {
   const mockGuard: CanActivate = {
     canActivate: (context: ExecutionContext) => {
       if (activeUser) {
@@ -44,7 +51,9 @@ export async function seedTestDatabase(): Promise<void> {
   });
 }
 
-export async function cleanCharacterTables(prisma: PrismaService): Promise<void> {
+export async function cleanCharacterTables(
+  prisma: PrismaService,
+): Promise<void> {
   await prisma.characterMarkedTrait.deleteMany();
   await prisma.characterThresholdBonus.deleteMany();
   await prisma.characterDomainCard.deleteMany();
@@ -57,6 +66,10 @@ export async function cleanUserTables(prisma: PrismaService): Promise<void> {
   await prisma.user.deleteMany();
 }
 
-export function makeTestUser(prisma: PrismaService, role: Role, clerkId: string): Promise<User> {
+export function makeTestUser(
+  prisma: PrismaService,
+  role: Role,
+  clerkId: string,
+): Promise<User> {
   return prisma.user.create({ data: { clerkId, role } });
 }

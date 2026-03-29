@@ -58,12 +58,16 @@ describe('ClerkAuthGuard', () => {
 
   it('throws UnauthorizedException when Authorization header is missing', async () => {
     const ctx = createContext({});
-    await expect(guard.canActivate(ctx)).rejects.toThrow('Authentication required');
+    await expect(guard.canActivate(ctx)).rejects.toThrow(
+      'Authentication required',
+    );
   });
 
   it('throws UnauthorizedException when token is invalid', async () => {
     mockClerkClient.verifyToken.mockRejectedValue(new Error('bad token'));
     const ctx = createContext({ authorization: 'Bearer bad-token' });
-    await expect(guard.canActivate(ctx)).rejects.toThrow('Invalid or expired token');
+    await expect(guard.canActivate(ctx)).rejects.toThrow(
+      'Invalid or expired token',
+    );
   });
 });

@@ -11,9 +11,13 @@ export class SubclassRepository {
       include: { features: true, class: { select: { name: true } } },
       orderBy: { name: 'asc' },
     });
-    return subclasses.map(s => ({
-      id: s.id, name: s.name, description: s.description,
-      spellcastTrait: s.spellcastTrait, className: s.class.name, features: s.features,
+    return subclasses.map((s) => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      spellcastTrait: s.spellcastTrait,
+      className: s.class.name,
+      features: s.features,
     }));
   }
 
@@ -24,8 +28,12 @@ export class SubclassRepository {
     });
     if (!s) return null;
     return {
-      id: s.id, name: s.name, description: s.description,
-      spellcastTrait: s.spellcastTrait, className: s.class.name, features: s.features,
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      spellcastTrait: s.spellcastTrait,
+      className: s.class.name,
+      features: s.features,
     };
   }
 }

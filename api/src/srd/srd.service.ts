@@ -38,7 +38,11 @@ export class SrdService {
 
   async getWeapon(id: string) {
     const weapon = await this.weapons.findById(id);
-    if (!weapon) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Weapon ${id} not found`);
+    if (!weapon)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Weapon ${id} not found`,
+      );
     return weapon;
   }
 
@@ -48,7 +52,11 @@ export class SrdService {
 
   async getArmorById(id: string) {
     const armor = await this.armor.findById(id);
-    if (!armor) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Armor ${id} not found`);
+    if (!armor)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Armor ${id} not found`,
+      );
     return armor;
   }
 
@@ -58,7 +66,11 @@ export class SrdService {
 
   async getClass(id: string) {
     const cls = await this.classes.findById(id);
-    if (!cls) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Class ${id} not found`);
+    if (!cls)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Class ${id} not found`,
+      );
     return cls;
   }
 
@@ -68,7 +80,11 @@ export class SrdService {
 
   async getSubclass(id: string) {
     const sub = await this.subclasses.findById(id);
-    if (!sub) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Subclass ${id} not found`);
+    if (!sub)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Subclass ${id} not found`,
+      );
     return sub;
   }
 
@@ -78,7 +94,11 @@ export class SrdService {
 
   async getAncestry(id: string) {
     const ancestry = await this.ancestries.findById(id);
-    if (!ancestry) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Ancestry ${id} not found`);
+    if (!ancestry)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Ancestry ${id} not found`,
+      );
     return ancestry;
   }
 
@@ -88,7 +108,11 @@ export class SrdService {
 
   async getCommunity(id: string) {
     const community = await this.communities.findById(id);
-    if (!community) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Community ${id} not found`);
+    if (!community)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Community ${id} not found`,
+      );
     return community;
   }
 
@@ -98,7 +122,11 @@ export class SrdService {
 
   async getDomain(id: string) {
     const domain = await this.domains.findById(id);
-    if (!domain) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Domain ${id} not found`);
+    if (!domain)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Domain ${id} not found`,
+      );
     return domain;
   }
 
@@ -108,7 +136,11 @@ export class SrdService {
 
   async getDomainCard(id: string) {
     const card = await this.domainCards.findById(id);
-    if (!card) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Domain card ${id} not found`);
+    if (!card)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Domain card ${id} not found`,
+      );
     return card;
   }
 
@@ -118,7 +150,11 @@ export class SrdService {
 
   async getAdversary(id: string) {
     const adversary = await this.adversaries.findById(id);
-    if (!adversary) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Adversary ${id} not found`);
+    if (!adversary)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Adversary ${id} not found`,
+      );
     return adversary;
   }
 
@@ -128,7 +164,11 @@ export class SrdService {
 
   async getBeastform(id: string) {
     const beastform = await this.beastforms.findById(id);
-    if (!beastform) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Beastform ${id} not found`);
+    if (!beastform)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Beastform ${id} not found`,
+      );
     return beastform;
   }
 
@@ -138,7 +178,11 @@ export class SrdService {
 
   async getConsumable(id: string) {
     const consumable = await this.consumables.findById(id);
-    if (!consumable) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Consumable ${id} not found`);
+    if (!consumable)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Consumable ${id} not found`,
+      );
     return consumable;
   }
 
@@ -148,7 +192,11 @@ export class SrdService {
 
   async getEnvironment(id: string) {
     const environment = await this.environments.findById(id);
-    if (!environment) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Environment ${id} not found`);
+    if (!environment)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Environment ${id} not found`,
+      );
     return environment;
   }
 
@@ -158,7 +206,11 @@ export class SrdService {
 
   async getItem(id: string) {
     const item = await this.items.findById(id);
-    if (!item) throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Item ${id} not found`);
+    if (!item)
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Item ${id} not found`,
+      );
     return item;
   }
 }

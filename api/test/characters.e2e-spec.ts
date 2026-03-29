@@ -34,19 +34,26 @@ describe('Characters Endpoints (e2e)', () => {
     gmUser = await makeTestUser(prisma, Role.GM, 'test-gm-user');
 
     const srdClass = await prisma.srdClass.findFirst({
-      include: { subclasses: true, domains: { include: { domain: { include: { cards: true } } } } },
+      include: {
+        subclasses: true,
+        domains: { include: { domain: { include: { cards: true } } } },
+      },
     });
     classId = srdClass!.id;
     subclassId = srdClass!.subclasses[0].id;
 
-    const ancestry = await prisma.ancestry.findFirst({ include: { features: true } });
+    const ancestry = await prisma.ancestry.findFirst({
+      include: { features: true },
+    });
     ancestryId = ancestry!.id;
     ancestryFeatureId = ancestry!.features[0].id;
 
     const community = await prisma.community.findFirst();
     communityId = community!.id;
 
-    const weapon = await prisma.weapon.findFirst({ where: { type: 'Primary' } });
+    const weapon = await prisma.weapon.findFirst({
+      where: { type: 'Primary' },
+    });
     weaponId = weapon!.id;
 
     const armor = await prisma.armor.findFirst();
@@ -101,7 +108,10 @@ describe('Characters Endpoints (e2e)', () => {
     it('should reject invalid SRD classId', async () => {
       const res = await request(app.getHttpServer())
         .post('/characters')
-        .send({ ...validCreateBody(), classId: '00000000-0000-0000-0000-000000000000' })
+        .send({
+          ...validCreateBody(),
+          classId: '00000000-0000-0000-0000-000000000000',
+        })
         .expect(400);
 
       expect(res.body.error).toBe('INVALID_SRD_REFERENCE');
@@ -129,14 +139,18 @@ describe('Characters Endpoints (e2e)', () => {
 
   describe('GET /characters/:id', () => {
     it('should return character with computed stats', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send({
-        ...validCreateBody(),
-        armorId,
-        primaryWeaponId: weaponId,
-      });
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send({
+          ...validCreateBody(),
+          armorId,
+          primaryWeaponId: weaponId,
+        });
       const id = createRes.body.character.id;
 
-      const res = await request(app.getHttpServer()).get(`/characters/${id}`).expect(200);
+      const res = await request(app.getHttpServer())
+        .get(`/characters/${id}`)
+        .expect(200);
 
       expect(res.body.character.id).toBe(id);
       expect(res.body.computed.tier).toBe(1);
@@ -154,7 +168,9 @@ describe('Characters Endpoints (e2e)', () => {
 
   describe('PATCH /characters/:id', () => {
     it('should update mutable state', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const id = createRes.body.character.id;
 
       const res = await request(app.getHttpServer())
@@ -168,7 +184,9 @@ describe('Characters Endpoints (e2e)', () => {
     });
 
     it('should reject unknown fields', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const id = createRes.body.character.id;
 
       await request(app.getHttpServer())
@@ -180,17 +198,23 @@ describe('Characters Endpoints (e2e)', () => {
 
   describe('DELETE /characters/:id', () => {
     it('should delete character', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const id = createRes.body.character.id;
 
-      await request(app.getHttpServer()).delete(`/characters/${id}`).expect(204);
+      await request(app.getHttpServer())
+        .delete(`/characters/${id}`)
+        .expect(204);
       await request(app.getHttpServer()).get(`/characters/${id}`).expect(404);
     });
   });
 
   describe('Experiences sub-resource', () => {
     it('should add, update, and remove experiences', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const charId = createRes.body.character.id;
 
       // Add
@@ -213,14 +237,18 @@ describe('Characters Endpoints (e2e)', () => {
         .expect(204);
 
       // Verify removed
-      const charRes = await request(app.getHttpServer()).get(`/characters/${charId}`).expect(200);
+      const charRes = await request(app.getHttpServer())
+        .get(`/characters/${charId}`)
+        .expect(200);
       expect(charRes.body.character.experiences).toHaveLength(0);
     });
   });
 
   describe('Domain cards sub-resource', () => {
     it('should add and remove domain cards', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const charId = createRes.body.character.id;
 
       // Add
@@ -230,7 +258,9 @@ describe('Characters Endpoints (e2e)', () => {
         .expect(201);
 
       // Verify in character
-      const charRes = await request(app.getHttpServer()).get(`/characters/${charId}`).expect(200);
+      const charRes = await request(app.getHttpServer())
+        .get(`/characters/${charId}`)
+        .expect(200);
       expect(charRes.body.character.domainCards).toHaveLength(1);
 
       // Remove
@@ -241,7 +271,9 @@ describe('Characters Endpoints (e2e)', () => {
     });
 
     it('should reject duplicate domain card', async () => {
-      const createRes = await request(app.getHttpServer()).post('/characters').send(validCreateBody());
+      const createRes = await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody());
       const charId = createRes.body.character.id;
 
       await request(app.getHttpServer())
@@ -260,10 +292,15 @@ describe('Characters Endpoints (e2e)', () => {
 
   describe('GM access', () => {
     it('GM can list all characters', async () => {
-      await request(app.getHttpServer()).post('/characters').send(validCreateBody()).expect(201);
+      await request(app.getHttpServer())
+        .post('/characters')
+        .send(validCreateBody())
+        .expect(201);
 
       const gmApp = await createTestApp(gmUser);
-      const res = await request(gmApp.getHttpServer()).get('/characters').expect(200);
+      const res = await request(gmApp.getHttpServer())
+        .get('/characters')
+        .expect(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBeGreaterThan(0);
       await gmApp.close();

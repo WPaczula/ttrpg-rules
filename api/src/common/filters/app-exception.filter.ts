@@ -31,12 +31,20 @@ export class AppExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const body = exception.getResponse();
-      if (statusCode === 400 && typeof body === 'object' && body !== null && 'message' in body) {
+      if (
+        statusCode === 400 &&
+        typeof body === 'object' &&
+        body !== null &&
+        'message' in body
+      ) {
         errorCode = ErrorCode.VALIDATION_ERROR;
         message = (body as { message: string | string[] }).message;
       } else {
         errorCode = ErrorCode.INTERNAL_ERROR;
-        message = typeof body === 'string' ? body : (body as { message?: string }).message ?? 'Unknown error';
+        message =
+          typeof body === 'string'
+            ? body
+            : ((body as { message?: string }).message ?? 'Unknown error');
       }
       this.logger.warn(
         `${request.method} ${request.url} → ${statusCode} ${errorCode}: ${JSON.stringify(message)}`,

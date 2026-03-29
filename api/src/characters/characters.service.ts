@@ -44,7 +44,9 @@ export class CharactersService {
     const computed = this.gameLogic.computeAll({
       level: character.level,
       baseEvasion: character.evasion,
-      armorBaseThresholds: character.armor ? [character.armor.majorThreshold, character.armor.severeThreshold] : null,
+      armorBaseThresholds: character.armor
+        ? [character.armor.majorThreshold, character.armor.severeThreshold]
+        : null,
       armorEvasionModifier: character.armor?.evasionModifier ?? null,
       primaryWeaponFeature: character.primaryWeapon?.feature ?? null,
       secondaryWeaponFeature: character.secondaryWeapon?.feature ?? null,
@@ -54,13 +56,25 @@ export class CharactersService {
     return { character, computed };
   }
 
-  async create(dto: CreateCharacterDto, userId: string): Promise<CharacterResponse> {
+  async create(
+    dto: CreateCharacterDto,
+    userId: string,
+  ): Promise<CharacterResponse> {
     const cls = await this.classes.findById(dto.classId);
-    if (!cls) throw new BadRequestException(ErrorCode.INVALID_SRD_REFERENCE, `Class ${dto.classId} not found`);
+    if (!cls)
+      throw new BadRequestException(
+        ErrorCode.INVALID_SRD_REFERENCE,
+        `Class ${dto.classId} not found`,
+      );
 
-    const armorData = dto.armorId ? await this.armor.findById(dto.armorId) : null;
+    const armorData = dto.armorId
+      ? await this.armor.findById(dto.armorId)
+      : null;
     if (dto.armorId && !armorData) {
-      throw new BadRequestException(ErrorCode.INVALID_SRD_REFERENCE, `Armor ${dto.armorId} not found`);
+      throw new BadRequestException(
+        ErrorCode.INVALID_SRD_REFERENCE,
+        `Armor ${dto.armorId} not found`,
+      );
     }
 
     const character = await this.characters.create({
@@ -78,17 +92,28 @@ export class CharactersService {
 
   async findOne(id: string): Promise<CharacterResponse> {
     const character = await this.characters.findById(id);
-    if (!character) throw new NotFoundException(ErrorCode.CHARACTER_NOT_FOUND, `Character ${id} not found`);
+    if (!character)
+      throw new NotFoundException(
+        ErrorCode.CHARACTER_NOT_FOUND,
+        `Character ${id} not found`,
+      );
     return this.buildResponse(character);
   }
 
   private async findCharacter(id: string): Promise<ICharacterWithRelations> {
     const character = await this.characters.findById(id);
-    if (!character) throw new NotFoundException(ErrorCode.CHARACTER_NOT_FOUND, `Character ${id} not found`);
+    if (!character)
+      throw new NotFoundException(
+        ErrorCode.CHARACTER_NOT_FOUND,
+        `Character ${id} not found`,
+      );
     return character;
   }
 
-  async update(id: string, dto: UpdateCharacterDto): Promise<CharacterResponse> {
+  async update(
+    id: string,
+    dto: UpdateCharacterDto,
+  ): Promise<CharacterResponse> {
     await this.findCharacter(id);
     const character = await this.characters.update(id, dto);
     return this.buildResponse(character);
@@ -104,20 +129,33 @@ export class CharactersService {
     return this.experiences.create(characterId, dto.name, dto.modifier);
   }
 
-  async updateExperience(characterId: string, experienceId: string, dto: UpdateExperienceDto) {
+  async updateExperience(
+    characterId: string,
+    experienceId: string,
+    dto: UpdateExperienceDto,
+  ) {
     await this.findCharacter(characterId);
     const exp = await this.experiences.findById(experienceId);
     if (!exp || exp.characterId !== characterId) {
-      throw new NotFoundException(ErrorCode.EXPERIENCE_NOT_FOUND, `Experience ${experienceId} not found`);
+      throw new NotFoundException(
+        ErrorCode.EXPERIENCE_NOT_FOUND,
+        `Experience ${experienceId} not found`,
+      );
     }
     return this.experiences.update(experienceId, dto);
   }
 
-  async removeExperience(characterId: string, experienceId: string): Promise<void> {
+  async removeExperience(
+    characterId: string,
+    experienceId: string,
+  ): Promise<void> {
     await this.findCharacter(characterId);
     const exp = await this.experiences.findById(experienceId);
     if (!exp || exp.characterId !== characterId) {
-      throw new NotFoundException(ErrorCode.EXPERIENCE_NOT_FOUND, `Experience ${experienceId} not found`);
+      throw new NotFoundException(
+        ErrorCode.EXPERIENCE_NOT_FOUND,
+        `Experience ${experienceId} not found`,
+      );
     }
     await this.experiences.delete(experienceId);
   }
@@ -127,7 +165,10 @@ export class CharactersService {
 
     const card = await this.domainCards.findById(dto.domainCardId);
     if (!card) {
-      throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Domain card ${dto.domainCardId} not found`);
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Domain card ${dto.domainCardId} not found`,
+      );
     }
 
     // Check tier eligibility: card level must be <= character tier * 2
@@ -140,24 +181,40 @@ export class CharactersService {
       );
     }
 
-    const alreadyAdded = await this.characterDomainCards.exists(characterId, dto.domainCardId);
+    const alreadyAdded = await this.characterDomainCards.exists(
+      characterId,
+      dto.domainCardId,
+    );
     if (alreadyAdded) {
-      throw new ConflictException(ErrorCode.DUPLICATE_DOMAIN_CARD, `Domain card already added to this character`);
+      throw new ConflictException(
+        ErrorCode.DUPLICATE_DOMAIN_CARD,
+        `Domain card already added to this character`,
+      );
     }
 
     return this.characterDomainCards.add(characterId, dto.domainCardId);
   }
 
-  async removeDomainCard(characterId: string, domainCardId: string): Promise<void> {
+  async removeDomainCard(
+    characterId: string,
+    domainCardId: string,
+  ): Promise<void> {
     await this.findCharacter(characterId);
     await this.characterDomainCards.remove(domainCardId);
   }
 
-  async toggleThresholdBonus(characterId: string, bonusId: string, dto: ToggleThresholdBonusDto) {
+  async toggleThresholdBonus(
+    characterId: string,
+    bonusId: string,
+    dto: ToggleThresholdBonusDto,
+  ) {
     const character = await this.findCharacter(characterId);
-    const bonus = character.thresholdBonuses.find(b => b.id === bonusId);
+    const bonus = character.thresholdBonuses.find((b) => b.id === bonusId);
     if (!bonus) {
-      throw new NotFoundException(ErrorCode.SRD_RESOURCE_NOT_FOUND, `Threshold bonus ${bonusId} not found`);
+      throw new NotFoundException(
+        ErrorCode.SRD_RESOURCE_NOT_FOUND,
+        `Threshold bonus ${bonusId} not found`,
+      );
     }
     return this.thresholdBonuses.toggleActive(bonusId, dto.active);
   }
@@ -167,10 +224,16 @@ export class CharactersService {
     return this.gameLogic.computeAll({
       level: character.character.level,
       baseEvasion: character.character.evasion,
-      armorBaseThresholds: character.character.armor ? [character.character.armor.majorThreshold, character.character.armor.severeThreshold] : null,
+      armorBaseThresholds: character.character.armor
+        ? [
+            character.character.armor.majorThreshold,
+            character.character.armor.severeThreshold,
+          ]
+        : null,
       armorEvasionModifier: character.character.armor?.evasionModifier ?? null,
       primaryWeaponFeature: character.character.primaryWeapon?.feature ?? null,
-      secondaryWeaponFeature: character.character.secondaryWeapon?.feature ?? null,
+      secondaryWeaponFeature:
+        character.character.secondaryWeapon?.feature ?? null,
       armorFeature: character.character.armor?.feature ?? null,
       thresholdBonuses: character.character.thresholdBonuses,
     });

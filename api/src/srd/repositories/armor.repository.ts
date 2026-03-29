@@ -9,7 +9,10 @@ export class ArmorRepository {
   async findAll(filters?: { tier?: number }): Promise<ISrdArmor[]> {
     const where: Record<string, unknown> = {};
     if (filters?.tier !== undefined) where.tier = filters.tier;
-    return this.prisma.armor.findMany({ where, orderBy: [{ tier: 'asc' }, { name: 'asc' }] });
+    return this.prisma.armor.findMany({
+      where,
+      orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+    });
   }
 
   async findById(id: string): Promise<ISrdArmor | null> {

@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Inject,
+} from '@nestjs/common';
 import { UsersService } from '../../users/users.service';
 import { UnauthorizedException } from '../../common/error-codes';
 import { RequestWithUser } from '../interfaces/request-with-user.interface';
@@ -6,7 +11,10 @@ import { RequestWithUser } from '../interfaces/request-with-user.interface';
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
   constructor(
-    @Inject('CLERK_CLIENT') private readonly clerk: { verifyToken(token: string): Promise<{ sub: string }> },
+    @Inject('CLERK_CLIENT')
+    private readonly clerk: {
+      verifyToken(token: string): Promise<{ sub: string }>;
+    },
     private readonly users: UsersService,
   ) {}
 

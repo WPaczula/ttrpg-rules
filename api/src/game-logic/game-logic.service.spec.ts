@@ -56,8 +56,20 @@ describe('GameLogicService', () => {
 
     it('should sum active threshold bonuses', () => {
       const bonuses = [
-        { sourceId: 'Fortified Armor', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: true },
-        { sourceId: 'Vitality', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: true },
+        {
+          sourceId: 'Fortified Armor',
+          sourceType: 'domainCard' as const,
+          majorBonus: 2,
+          severeBonus: 2,
+          active: true,
+        },
+        {
+          sourceId: 'Vitality',
+          sourceType: 'domainCard' as const,
+          majorBonus: 2,
+          severeBonus: 2,
+          active: true,
+        },
       ];
       const result = service.computeThresholds([6, 13], 1, bonuses);
       expect(result!.totalMajor).toBe(10);
@@ -66,7 +78,13 @@ describe('GameLogicService', () => {
 
     it('should ignore inactive bonuses', () => {
       const bonuses = [
-        { sourceId: 'Fortified Armor', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: false },
+        {
+          sourceId: 'Fortified Armor',
+          sourceType: 'domainCard' as const,
+          majorBonus: 2,
+          severeBonus: 2,
+          active: false,
+        },
       ];
       const result = service.computeThresholds([6, 13], 1, bonuses);
       expect(result!.totalMajor).toBe(6);
@@ -75,9 +93,27 @@ describe('GameLogicService', () => {
 
     it('should handle all bonuses active at max level', () => {
       const bonuses = [
-        { sourceId: 'Fortified Armor', sourceType: 'domainCard' as const, majorBonus: 2, severeBonus: 2, active: true },
-        { sourceId: 'Frenzy', sourceType: 'domainCard' as const, majorBonus: 0, severeBonus: 8, active: true },
-        { sourceId: 'Stalwart:Undaunted', sourceType: 'subclassFeature' as const, majorBonus: 3, severeBonus: 3, active: true },
+        {
+          sourceId: 'Fortified Armor',
+          sourceType: 'domainCard' as const,
+          majorBonus: 2,
+          severeBonus: 2,
+          active: true,
+        },
+        {
+          sourceId: 'Frenzy',
+          sourceType: 'domainCard' as const,
+          majorBonus: 0,
+          severeBonus: 8,
+          active: true,
+        },
+        {
+          sourceId: 'Stalwart:Undaunted',
+          sourceType: 'subclassFeature' as const,
+          majorBonus: 3,
+          severeBonus: 3,
+          active: true,
+        },
       ];
       const result = service.computeThresholds([8, 17], 10, bonuses);
       // base 8/17 + level 9 + bonuses (5/13) = 22/39
@@ -104,13 +140,21 @@ describe('GameLogicService', () => {
     it('should return all zeros when no equipment features', () => {
       const result = service.parseTraitModifiers(null, null, null);
       expect(result).toEqual({
-        agility: 0, strength: 0, finesse: 0,
-        instinct: 0, presence: 0, knowledge: 0,
+        agility: 0,
+        strength: 0,
+        finesse: 0,
+        instinct: 0,
+        presence: 0,
+        knowledge: 0,
       });
     });
 
     it('should parse "+N to Trait" from armor feature', () => {
-      const result = service.parseTraitModifiers(null, null, 'Very Heavy: -2 to Evasion; -1 to Agility');
+      const result = service.parseTraitModifiers(
+        null,
+        null,
+        'Very Heavy: -2 to Evasion; -1 to Agility',
+      );
       expect(result.agility).toBe(-1);
     });
 
@@ -131,12 +175,20 @@ describe('GameLogicService', () => {
     });
 
     it('should parse "increase Trait by N"', () => {
-      const result = service.parseTraitModifiers('increase Strength by 2', null, null);
+      const result = service.parseTraitModifiers(
+        'increase Strength by 2',
+        null,
+        null,
+      );
       expect(result.strength).toBe(2);
     });
 
     it('should parse "decrease Trait by N"', () => {
-      const result = service.parseTraitModifiers('decrease Agility by 1', null, null);
+      const result = service.parseTraitModifiers(
+        'decrease Agility by 1',
+        null,
+        null,
+      );
       expect(result.agility).toBe(-1);
     });
   });

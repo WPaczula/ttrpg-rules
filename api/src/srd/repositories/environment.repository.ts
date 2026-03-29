@@ -15,7 +15,13 @@ export class EnvironmentRepository {
     difficulty: string;
     impulses: string;
     potentialAdversaries: string | null;
-    features: { id: string; name: string; text: string; question: string | null; environmentId: string }[];
+    features: {
+      id: string;
+      name: string;
+      text: string;
+      question: string | null;
+      environmentId: string;
+    }[];
   }): ISrdEnvironment {
     return {
       ...raw,
@@ -28,7 +34,10 @@ export class EnvironmentRepository {
     };
   }
 
-  async findAll(filters?: { tier?: number; type?: string }): Promise<ISrdEnvironment[]> {
+  async findAll(filters?: {
+    tier?: number;
+    type?: string;
+  }): Promise<ISrdEnvironment[]> {
     const where: Record<string, unknown> = {};
     if (filters?.tier !== undefined) where.tier = filters.tier;
     if (filters?.type !== undefined) where.type = filters.type;
@@ -41,7 +50,10 @@ export class EnvironmentRepository {
   }
 
   async findById(id: string): Promise<ISrdEnvironment | null> {
-    const row = await this.prisma.environment.findUnique({ where: { id }, include: { features: true } });
+    const row = await this.prisma.environment.findUnique({
+      where: { id },
+      include: { features: true },
+    });
     return row ? this.map(row) : null;
   }
 }

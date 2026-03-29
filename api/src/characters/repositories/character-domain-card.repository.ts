@@ -5,7 +5,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class CharacterDomainCardRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async add(characterId: string, domainCardId: string): Promise<{ id: string }> {
+  async add(
+    characterId: string,
+    domainCardId: string,
+  ): Promise<{ id: string }> {
     return this.prisma.characterDomainCard.create({
       data: { characterId, domainCardId },
       select: { id: true },

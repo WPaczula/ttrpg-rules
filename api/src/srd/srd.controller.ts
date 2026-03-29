@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SrdService } from './srd.service';
 import { WeaponQueryDto } from './dto/weapon-query.dto';
 import { ArmorQueryDto } from './dto/armor-query.dto';

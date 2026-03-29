@@ -6,7 +6,10 @@ import { ISrdDomainCard } from '../interfaces/srd-domain-card.interface';
 export class DomainCardRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters?: { domain?: string; level?: number }): Promise<ISrdDomainCard[]> {
+  async findAll(filters?: {
+    domain?: string;
+    level?: number;
+  }): Promise<ISrdDomainCard[]> {
     const where: Record<string, unknown> = {};
     if (filters?.level !== undefined) where.level = filters.level;
     if (filters?.domain !== undefined) where.domain = { name: filters.domain };
@@ -16,9 +19,12 @@ export class DomainCardRepository {
       include: { domain: { select: { name: true } } },
       orderBy: [{ level: 'asc' }, { name: 'asc' }],
     });
-    return cards.map(c => ({
-      id: c.id, name: c.name, level: c.level,
-      recallCost: c.recallCost, description: c.description,
+    return cards.map((c) => ({
+      id: c.id,
+      name: c.name,
+      level: c.level,
+      recallCost: c.recallCost,
+      description: c.description,
       domainName: c.domain.name,
     }));
   }
@@ -30,8 +36,11 @@ export class DomainCardRepository {
     });
     if (!c) return null;
     return {
-      id: c.id, name: c.name, level: c.level,
-      recallCost: c.recallCost, description: c.description,
+      id: c.id,
+      name: c.name,
+      level: c.level,
+      recallCost: c.recallCost,
+      description: c.description,
       domainName: c.domain.name,
     };
   }
