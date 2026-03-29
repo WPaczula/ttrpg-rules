@@ -179,4 +179,204 @@ describe('SRD Endpoints (e2e)', () => {
       expect(res.body.every((a: { tier: number }) => a.tier === 1)).toBe(true);
     });
   });
+
+  describe('GET /srd/adversaries', () => {
+    it('should return all adversaries with features', async () => {
+      const res = await request(app.getHttpServer()).get('/srd/adversaries').expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].name).toBeDefined();
+      expect(res.body[0].tier).toBeDefined();
+      expect(res.body[0].type).toBeDefined();
+      expect(res.body[0].features).toBeDefined();
+    });
+
+    it('should filter by tier', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/adversaries?tier=1')
+        .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.every((a: { tier: number }) => a.tier === 1)).toBe(true);
+    });
+
+    it('should filter by type', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/adversaries?type=Solo')
+        .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.every((a: { type: string }) => a.type === 'Solo')).toBe(true);
+    });
+  });
+
+  describe('GET /srd/adversaries/:id', () => {
+    it('should return a single adversary', async () => {
+      const listRes = await request(app.getHttpServer()).get('/srd/adversaries');
+      const id = listRes.body[0].id;
+
+      const res = await request(app.getHttpServer()).get(`/srd/adversaries/${id}`).expect(200);
+
+      expect(res.body.id).toBe(id);
+      expect(res.body.features).toBeDefined();
+    });
+
+    it('should return 404 for unknown id', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/adversaries/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(res.body.error).toBe('SRD_RESOURCE_NOT_FOUND');
+    });
+  });
+
+  describe('GET /srd/beastforms', () => {
+    it('should return all beastforms with features', async () => {
+      const res = await request(app.getHttpServer()).get('/srd/beastforms').expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].name).toBeDefined();
+      expect(res.body[0].traitBonus).toBeDefined();
+      expect(res.body[0].features).toBeDefined();
+    });
+
+    it('should filter by tier', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/beastforms?tier=1')
+        .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.every((b: { tier: number }) => b.tier === 1)).toBe(true);
+    });
+  });
+
+  describe('GET /srd/beastforms/:id', () => {
+    it('should return a single beastform', async () => {
+      const listRes = await request(app.getHttpServer()).get('/srd/beastforms');
+      const id = listRes.body[0].id;
+
+      const res = await request(app.getHttpServer()).get(`/srd/beastforms/${id}`).expect(200);
+
+      expect(res.body.id).toBe(id);
+      expect(res.body.features).toBeDefined();
+    });
+
+    it('should return 404 for unknown id', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/beastforms/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(res.body.error).toBe('SRD_RESOURCE_NOT_FOUND');
+    });
+  });
+
+  describe('GET /srd/consumables', () => {
+    it('should return all consumables ordered by roll', async () => {
+      const res = await request(app.getHttpServer()).get('/srd/consumables').expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].name).toBeDefined();
+      expect(res.body[0].roll).toBeDefined();
+      expect(res.body[0].description).toBeDefined();
+    });
+  });
+
+  describe('GET /srd/consumables/:id', () => {
+    it('should return a single consumable', async () => {
+      const listRes = await request(app.getHttpServer()).get('/srd/consumables');
+      const id = listRes.body[0].id;
+
+      const res = await request(app.getHttpServer()).get(`/srd/consumables/${id}`).expect(200);
+
+      expect(res.body.id).toBe(id);
+    });
+
+    it('should return 404 for unknown id', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/consumables/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(res.body.error).toBe('SRD_RESOURCE_NOT_FOUND');
+    });
+  });
+
+  describe('GET /srd/environments', () => {
+    it('should return all environments with features', async () => {
+      const res = await request(app.getHttpServer()).get('/srd/environments').expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].name).toBeDefined();
+      expect(res.body[0].impulses).toBeDefined();
+      expect(res.body[0].features).toBeDefined();
+    });
+
+    it('should filter by tier', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/environments?tier=1')
+        .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.every((e: { tier: number }) => e.tier === 1)).toBe(true);
+    });
+
+    it('should filter by type', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/environments?type=Exploration')
+        .expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body.every((e: { type: string }) => e.type === 'Exploration')).toBe(true);
+    });
+  });
+
+  describe('GET /srd/environments/:id', () => {
+    it('should return a single environment with feature questions', async () => {
+      const listRes = await request(app.getHttpServer()).get('/srd/environments');
+      const id = listRes.body[0].id;
+
+      const res = await request(app.getHttpServer()).get(`/srd/environments/${id}`).expect(200);
+
+      expect(res.body.id).toBe(id);
+      expect(res.body.features).toBeDefined();
+    });
+
+    it('should return 404 for unknown id', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/environments/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(res.body.error).toBe('SRD_RESOURCE_NOT_FOUND');
+    });
+  });
+
+  describe('GET /srd/items', () => {
+    it('should return all items ordered by roll', async () => {
+      const res = await request(app.getHttpServer()).get('/srd/items').expect(200);
+
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].name).toBeDefined();
+      expect(res.body[0].roll).toBeDefined();
+      expect(res.body[0].description).toBeDefined();
+    });
+  });
+
+  describe('GET /srd/items/:id', () => {
+    it('should return a single item', async () => {
+      const listRes = await request(app.getHttpServer()).get('/srd/items');
+      const id = listRes.body[0].id;
+
+      const res = await request(app.getHttpServer()).get(`/srd/items/${id}`).expect(200);
+
+      expect(res.body.id).toBe(id);
+    });
+
+    it('should return 404 for unknown id', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/srd/items/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      expect(res.body.error).toBe('SRD_RESOURCE_NOT_FOUND');
+    });
+  });
 });
