@@ -1,13 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as fs from 'fs';
 import * as path from 'path';
+import 'dotenv/config';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const JSON_DIR = path.join(__dirname, '..', 'daggerheart-srd', '.build', '03_json');
 
 function readJson<T>(filename: string): T {
-  const content = fs.readFileSync(path.join(JSON_DIR, filename), 'utf-8');
+  const content = fs.readFileSync(path.join(JSON_DIR, filename), 'utf-8').replace(/^\uFEFF/, '');
   return JSON.parse(content);
 }
 
@@ -93,11 +96,71 @@ interface RawAbility {
   type: string;
 }
 
+interface RawAdversary {
+  name: string;
+  tier: string;
+  type: string;
+  hp: string;
+  stress: string;
+  difficulty: string;
+  thresholds: string;
+  atk: string;
+  attack: string;
+  range: string;
+  damage: string;
+  description?: string;
+  motives_and_tactics?: string;
+  experience?: string;
+  feature?: { name: string; text: string }[];
+}
+
+interface RawBeastform {
+  name: string;
+  tier: string;
+  examples: string;
+  trait_bonus: string;
+  evasion_bonus: string;
+  attack: string;
+  advantages: string;
+  feature?: { name: string; text: string }[];
+}
+
+interface RawConsumable {
+  name: string;
+  roll: string;
+  description: string;
+}
+
+interface RawEnvironment {
+  name: string;
+  tier: string;
+  type: string;
+  description: string;
+  difficulty: string;
+  impulses: string;
+  potential_adversaries?: string;
+  feature?: { name: string; text: string; question?: string }[];
+}
+
+interface RawItem {
+  name: string;
+  roll: string;
+  description: string;
+}
+
 async function seed() {
   console.log('Seeding SRD data...');
 
   // Clear existing SRD data (in dependency order)
   await prisma.characterMarkedTrait.deleteMany();
+  await prisma.environmentFeature.deleteMany();
+  await prisma.environment.deleteMany();
+  await prisma.beastformFeature.deleteMany();
+  await prisma.beastform.deleteMany();
+  await prisma.adversaryFeature.deleteMany();
+  await prisma.adversary.deleteMany();
+  await prisma.consumable.deleteMany();
+  await prisma.item.deleteMany();
   await prisma.characterThresholdBonus.deleteMany();
   await prisma.characterDomainCard.deleteMany();
   await prisma.characterExperience.deleteMany();
@@ -140,7 +203,7 @@ async function seed() {
   const rawArmor = readJson<RawArmor[]>('armor.json');
   for (const a of rawArmor) {
     const featureText = a.feature?.map(f => `${f.name}: ${f.text}`).join('; ') || null;
-    const evasionModifier = parseEvasionModifier(featureText);
+    const evasionModifier = parseEvasionModifier(featureText ?? undefined);
     await prisma.armor.create({
       data: {
         name: a.name,
@@ -272,7 +335,7 @@ async function seed() {
           classId: createdClass.id,
           name: subData.name,
           description: subData.description,
-          spellcastTrait: subData.spellcast_trait,
+          spellcastTrait: subData.spellcast_trait || '',
           features: {
             create: features.map(f => ({ tier: f.tier, name: f.name, text: f.text })),
           },
@@ -281,6 +344,103 @@ async function seed() {
     }
   }
   console.log(`  Seeded ${rawClasses.length} classes with subclasses and features`);
+
+  // 8. Seed adversaries
+  const rawAdversaries = readJson<RawAdversary[]>('adversaries.json');
+  for (const a of rawAdversaries) {
+    await prisma.adversary.create({
+      data: {
+        name: a.name,
+        tier: parseInt(a.tier, 10),
+        type: a.type,
+        hp: parseInt(a.hp, 10),
+        stress: parseInt(a.stress, 10),
+        difficulty: a.difficulty,
+        thresholds: a.thresholds,
+        atk: a.atk,
+        attack: a.attack,
+        range: a.range,
+        damage: a.damage,
+        description: a.description || null,
+        motivesAndTactics: a.motives_and_tactics || null,
+        experience: a.experience || null,
+        features: {
+          create: (a.feature || []).map(f => ({ name: f.name, text: f.text })),
+        },
+      },
+    });
+  }
+  console.log(`  Seeded ${rawAdversaries.length} adversaries`);
+
+  // 9. Seed beastforms
+  const rawBeastforms = readJson<RawBeastform[]>('beastforms.json');
+  for (const b of rawBeastforms) {
+    await prisma.beastform.create({
+      data: {
+        name: b.name,
+        tier: parseInt(b.tier, 10),
+        examples: b.examples,
+        traitBonus: b.trait_bonus || '',
+        evasionBonus: b.evasion_bonus || '',
+        attack: b.attack || '',
+        advantages: b.advantages || '',
+        features: {
+          create: (b.feature || []).map(f => ({ name: f.name, text: f.text })),
+        },
+      },
+    });
+  }
+  console.log(`  Seeded ${rawBeastforms.length} beastforms`);
+
+  // 10. Seed consumables
+  const rawConsumables = readJson<RawConsumable[]>('consumables.json');
+  for (const c of rawConsumables) {
+    await prisma.consumable.create({
+      data: {
+        name: c.name,
+        roll: parseInt(c.roll, 10),
+        description: c.description,
+      },
+    });
+  }
+  console.log(`  Seeded ${rawConsumables.length} consumables`);
+
+  // 11. Seed environments
+  const rawEnvironments = readJson<RawEnvironment[]>('environments.json');
+  for (const e of rawEnvironments) {
+    await prisma.environment.create({
+      data: {
+        name: e.name,
+        tier: parseInt(e.tier, 10),
+        type: e.type,
+        description: e.description,
+        difficulty: e.difficulty,
+        impulses: e.impulses,
+        potentialAdversaries: e.potential_adversaries || null,
+        features: {
+          create: (e.feature || []).map(f => ({
+            name: f.name,
+            text: f.text,
+            question: f.question || null,
+          })),
+        },
+      },
+    });
+  }
+  console.log(`  Seeded ${rawEnvironments.length} environments`);
+
+  // 12. Seed items
+  const rawItems = readJson<RawItem[]>('items.json');
+  for (const i of rawItems) {
+    await prisma.item.create({
+      data: {
+        name: i.name,
+        roll: parseInt(i.roll, 10),
+        description: i.description,
+      },
+    });
+  }
+  console.log(`  Seeded ${rawItems.length} items`);
 
   console.log('Seeding complete!');
 }
