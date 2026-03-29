@@ -193,6 +193,110 @@ model DomainCard {
   @@map("domain_cards")
 }
 
+model Adversary {
+  id                String  @id @default(uuid())
+  name              String  @unique
+  tier              Int
+  type              String  // 'Solo' | 'Bruiser' | 'Leader' | 'Standard' | 'Ranged' | 'Skulk' | 'Horde' | 'Minion' | 'Support' | 'Social'
+  hp                Int
+  stress            Int
+  difficulty        String  // usually int, but can be "Special (...)"
+  thresholds        String  // "major/severe" e.g. "8/15"
+  atk               String  // e.g. "+3"
+  attack            String  // weapon/attack name
+  range             String  // "Very Close", "Close", "Far"
+  damage            String  // "1d12+2 phy"
+  description       String?
+  motivesAndTactics String? @map("motives_and_tactics")
+  experience        String?
+
+  features AdversaryFeature[]
+
+  @@map("adversaries")
+}
+
+model AdversaryFeature {
+  id          String @id @default(uuid())
+  adversaryId String @map("adversary_id")
+  name        String
+  text        String
+
+  adversary Adversary @relation(fields: [adversaryId], references: [id], onDelete: Cascade)
+
+  @@map("adversary_features")
+}
+
+model Beastform {
+  id           String @id @default(uuid())
+  name         String @unique
+  tier         Int
+  examples     String // "(Fox, Mouse, Weasel, etc.)"
+  traitBonus   String @map("trait_bonus")   // "Agility +1"
+  evasionBonus String @map("evasion_bonus") // "Evasion +2"
+  attack       String // "Melee Agility d4 phy"
+  advantages   String // "deceive, locate, sneak"
+
+  features BeastformFeature[]
+
+  @@map("beastforms")
+}
+
+model BeastformFeature {
+  id          String @id @default(uuid())
+  beastformId String @map("beastform_id")
+  name        String
+  text        String
+
+  beastform Beastform @relation(fields: [beastformId], references: [id], onDelete: Cascade)
+
+  @@map("beastform_features")
+}
+
+model Consumable {
+  id          String @id @default(uuid())
+  name        String @unique
+  roll        Int    // loot table position (1-60)
+  description String
+
+  @@map("consumables")
+}
+
+model Environment {
+  id                   String  @id @default(uuid())
+  name                 String  @unique
+  tier                 Int
+  type                 String  // 'Exploration' | 'Social' | etc.
+  description          String
+  difficulty           String  // usually int, but can be "Special (...)"
+  impulses             String
+  potentialAdversaries String? @map("potential_adversaries")
+
+  features EnvironmentFeature[]
+
+  @@map("environments")
+}
+
+model EnvironmentFeature {
+  id            String  @id @default(uuid())
+  environmentId String  @map("environment_id")
+  name          String
+  text          String
+  question      String?
+
+  environment Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@map("environment_features")
+}
+
+model Item {
+  id          String @id @default(uuid())
+  name        String @unique
+  roll        Int    // loot table position (1-60)
+  description String
+
+  @@map("items")
+}
+
 // ── User Tables ─────────────────────────────────────────────────────────────
 
 enum Role {
