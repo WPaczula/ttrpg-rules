@@ -1,6 +1,3 @@
-export interface StatUpdateDto {
-  characterId: string;
-  characterName: string;
-  stat: 'hpMarked' | 'stressMarked' | 'hope' | 'armorMarked';
-  value: number;
-}
+import { IStatUpdate } from '../interfaces/stat-update.interface';
+
+export type StatUpdateDto = IStatUpdate;
