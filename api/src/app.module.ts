@@ -7,6 +7,7 @@ import { CharactersModule } from './characters/characters.module';
 import { ConfigModule } from './config/config.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     SrdModule,
     CharactersModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
