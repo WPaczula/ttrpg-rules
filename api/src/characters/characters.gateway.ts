@@ -6,13 +6,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-
-export interface StatUpdate {
-  characterId: string;
-  characterName: string;
-  stat: 'hpMarked' | 'stressMarked' | 'hope' | 'armorMarked';
-  value: number;
-}
+import { StatUpdateDto } from './dto/stat-update.dto';
 
 @WebSocketGateway({ cors: true })
 export class CharactersGateway {
@@ -35,11 +29,11 @@ export class CharactersGateway {
     client.leave(gameId);
   }
 
-  broadcastStatUpdate(gameId: string, update: StatUpdate) {
+  broadcastStatUpdate(gameId: string, update: StatUpdateDto) {
     this.server.to(gameId).emit('statUpdate', update);
   }
 
-  broadcastStatUpdates(gameId: string, updates: StatUpdate[]) {
+  broadcastStatUpdates(gameId: string, updates: StatUpdateDto[]) {
     for (const update of updates) {
       this.server.to(gameId).emit('statUpdate', update);
     }

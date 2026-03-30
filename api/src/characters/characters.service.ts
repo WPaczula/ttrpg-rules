@@ -21,7 +21,8 @@ import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
 import { ICharacterWithRelations } from './interfaces/character.interface';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
 import { ComputedStats } from '../game-logic/interfaces/computed-stats.interface';
-import { CharactersGateway, StatUpdate } from './characters.gateway';
+import { CharactersGateway } from './characters.gateway';
+import { StatUpdateDto } from './dto/stat-update.dto';
 
 export interface CharacterResponse {
   character: ICharacterWithRelations;
@@ -127,7 +128,7 @@ export class CharactersService {
     const character = await this.characters.update(id, dto);
     const response = this.buildResponse(character);
 
-    const updates: StatUpdate[] = CharactersService.TRACKED_STATS.filter(
+    const updates: StatUpdateDto[] = CharactersService.TRACKED_STATS.filter(
       (stat) => dto[stat] !== undefined,
     ).map((stat) => ({
       characterId: character.id,
