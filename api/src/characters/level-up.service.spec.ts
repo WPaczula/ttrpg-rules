@@ -12,6 +12,7 @@ import { DomainCardRepository } from '../srd/repositories/domain-card.repository
 import { ExperienceRepository } from './repositories/experience.repository';
 import { CharacterDomainCardRepository } from './repositories/character-domain-card.repository';
 import { PrismaService } from '../prisma/prisma.service';
+import { CharactersGateway } from './characters.gateway';
 import { ICharacterWithRelations } from './interfaces/character.interface';
 import { AdvancementType } from '@prisma/client';
 
@@ -101,6 +102,10 @@ const mockPrisma = {
   },
 };
 
+const mockGateway = {
+  broadcastStatUpdates: jest.fn(),
+};
+
 describe('LevelUpService', () => {
   let service: LevelUpService;
 
@@ -119,6 +124,7 @@ describe('LevelUpService', () => {
           useValue: mockCharacterDomainCardRepo,
         },
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: CharactersGateway, useValue: mockGateway },
       ],
     }).compile();
     service = module.get(LevelUpService);

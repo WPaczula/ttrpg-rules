@@ -3,6 +3,7 @@ export interface ITrackedStats {
   stressMarked: number;
   hope: number;
   armorMarked: number;
+  level: number;
 }
 
 export interface IStatUpdate {

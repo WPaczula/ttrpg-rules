@@ -129,7 +129,7 @@ export class CharactersService {
     const response = this.buildResponse(character);
 
     const updates: IStatUpdate[] = CharactersService.TRACKED_STATS.filter(
-      (stat) => dto[stat] !== undefined,
+      (stat) => (dto as Record<string, unknown>)[stat] !== undefined,
     ).map((stat) => ({
       characterId: character.id,
       characterName: character.name,

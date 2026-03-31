@@ -15,6 +15,7 @@ import {
 import { ILevelUpOptions } from './interfaces/level-up-options.interface';
 import { ApplyLevelUpDto } from './dto/apply-level-up.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { CharactersGateway } from './characters.gateway';
 import { CharacterResponse } from './characters.service';
 
 const SLOT_LIMITS: Record<AdvancementType, number> = {
@@ -43,6 +44,7 @@ export class LevelUpService {
     private readonly gameLogic: GameLogicService,
     private readonly domainCards: DomainCardRepository,
     private readonly prisma: PrismaService,
+    private readonly gateway: CharactersGateway,
   ) {}
 
   async getLevelUpOptions(characterId: string): Promise<ILevelUpOptions> {
@@ -324,6 +326,15 @@ export class LevelUpService {
       armorFeature: finalCharacter.armor?.feature ?? null,
       thresholdBonuses: finalCharacter.thresholdBonuses,
     });
+
+    this.gateway.broadcastStatUpdates(finalCharacter.userId, [
+      {
+        characterId,
+        characterName: finalCharacter.name,
+        stat: 'level',
+        value: finalCharacter.level,
+      },
+    ]);
 
     return { character: finalCharacter, computed };
   }
