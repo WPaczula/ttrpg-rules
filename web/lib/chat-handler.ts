@@ -1,8 +1,7 @@
 import { streamText, convertToModelMessages, stepCountIs, ToolLoopAgent, Output } from 'ai';
 import { anthropic } from '@/lib/anthropic';
-import { validateSessionToken } from '@/lib/auth';
+import { auth } from '@clerk/nextjs/server';
 import { ROUTING_INSTRUCTIONS } from '@/lib/prompts';
-import { cookies } from 'next/headers';
 import z from 'zod';
 
 const routingSchema = z.object({
@@ -48,9 +47,8 @@ export interface ChatHandlerConfig {
 export function createChatHandler(config: ChatHandlerConfig) {
   return async function POST(req: Request) {
     try {
-      const cookieStore = await cookies();
-      const token = cookieStore.get('auth_session')?.value;
-      if (!validateSessionToken(token)) {
+      const { userId } = await auth();
+      if (!userId) {
         return Response.json({ error: 'Unauthorized' }, { status: 401 });
       }
 

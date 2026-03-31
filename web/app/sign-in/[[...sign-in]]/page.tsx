@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useSignIn } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -9,39 +8,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Swords, Lock, User } from "lucide-react"
 
 export default function SignInPage() {
-  const { isLoaded, signIn, setActive } = useSignIn()
+  const { signIn, errors, fetchStatus } = useSignIn()
   const router = useRouter()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isLoaded) return
+    const formData = new FormData(e.target as HTMLFormElement)
+    const emailAddress = formData.get("username") as string
+    const password = formData.get("password") as string
 
-    setIsLoading(true)
-    setError("")
+    const { error } = await signIn.password({
+      emailAddress,
+      password,
+    })
 
-    try {
-      const result = await signIn.create({
-        identifier: username,
-        password,
+    if (error) return
+
+    if (signIn.status === "complete") {
+      await signIn.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) return
+          const url = decorateUrl("/")
+          if (url.startsWith("http")) {
+            window.location.href = url
+          } else {
+            router.push(url)
+          }
+        },
       })
-
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId })
-        router.push("/")
-      } else {
-        setError("Sign-in could not be completed. Please try again.")
-      }
-    } catch (err: unknown) {
-      const clerkError = err as { errors?: Array<{ longMessage?: string }> }
-      const message = clerkError.errors?.[0]?.longMessage || "Invalid credentials. Please try again."
-      setError(message)
     }
-
-    setIsLoading(false)
   }
 
   return (
@@ -51,7 +46,7 @@ export default function SignInPage() {
           <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
             <Swords className="w-8 h-8 text-gold" />
           </div>
-          <CardTitle className="text-2xl font-sans text-gold">Character Creator</CardTitle>
+          <CardTitle className="text-2xl font-sans text-gold">DH helper</CardTitle>
           <CardDescription className="text-muted-foreground">
             This tool is invite-only
           </CardDescription>
@@ -65,10 +60,9 @@ export default function SignInPage() {
               </label>
               <Input
                 id="username"
+                name="username"
                 type="text"
                 placeholder="Enter username..."
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
               />
             </div>
@@ -79,20 +73,24 @@ export default function SignInPage() {
               </label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="Enter password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
               />
-              {error && <p className="text-destructive text-sm">{error}</p>}
+              {errors?.fields?.password && (
+                <p className="text-destructive text-sm">{errors.fields.password.message}</p>
+              )}
+              {errors?.fields?.identifier && (
+                <p className="text-destructive text-sm">{errors.fields.identifier.message}</p>
+              )}
             </div>
             <Button
               type="submit"
-              disabled={isLoading || !username || !password}
+              disabled={fetchStatus === "fetching"}
               className="w-full bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {fetchStatus === "fetching" ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </CardContent>
