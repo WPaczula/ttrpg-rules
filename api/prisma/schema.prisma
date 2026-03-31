@@ -382,6 +382,7 @@ model Character {
   domainCards      CharacterDomainCard[]
   thresholdBonuses CharacterThresholdBonus[]
   markedTraits     CharacterMarkedTrait[]
+  levelUpRecords   LevelUpRecord[]
 
   @@map("characters")
 }
@@ -431,4 +432,40 @@ model CharacterMarkedTrait {
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@map("character_marked_traits")
+}
+
+enum AdvancementType {
+  INCREASE_TRAITS
+  ADD_HP
+  ADD_STRESS
+  BOOST_EXPERIENCES
+  EXTRA_DOMAIN_CARD
+  INCREASE_EVASION
+}
+
+model LevelUpRecord {
+  id                String   @id @default(uuid())
+  characterId       String   @map("character_id")
+  fromLevel         Int      @map("from_level")
+  toLevel           Int      @map("to_level")
+  fromTier          Int      @map("from_tier")
+  toTier            Int      @map("to_tier")
+  newExperienceName String?  @map("new_experience_name")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  character    Character            @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  advancements LevelUpAdvancement[]
+
+  @@map("level_up_records")
+}
+
+model LevelUpAdvancement {
+  id              String          @id @default(uuid())
+  levelUpRecordId String          @map("level_up_record_id")
+  type            AdvancementType
+  metadata        Json?
+
+  levelUpRecord LevelUpRecord @relation(fields: [levelUpRecordId], references: [id], onDelete: Cascade)
+
+  @@map("level_up_advancements")
 }

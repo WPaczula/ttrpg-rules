@@ -38,6 +38,8 @@ export interface ICharacter {
 export type ICharacterUpdate = Partial<
   Pick<
     ICharacter,
+    | 'level'
+    | 'proficiency'
     | 'hpMarked'
     | 'stressMarked'
     | 'hope'
@@ -55,6 +57,9 @@ export type ICharacterUpdate = Partial<
     | 'secondaryWeaponId'
     | 'armorId'
     | 'notes'
+    | 'hpTotal'
+    | 'stressTotal'
+    | 'evasion'
   >
 >;
 

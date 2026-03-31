@@ -12,6 +12,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { CharactersService } from './characters.service';
+import { LevelUpService } from './level-up.service';
+import { ApplyLevelUpDto } from './dto/apply-level-up.dto';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
@@ -25,7 +27,10 @@ import type { RequestWithUser } from '../auth/interfaces/request-with-user.inter
 
 @Controller('characters')
 export class CharactersController {
-  constructor(private readonly service: CharactersService) {}
+  constructor(
+    private readonly service: CharactersService,
+    private readonly levelUpService: LevelUpService,
+  ) {}
 
   @GM()
   @Get()
@@ -123,5 +128,20 @@ export class CharactersController {
     @Body() dto: ToggleThresholdBonusDto,
   ) {
     return this.service.toggleThresholdBonus(id, bonusId, dto);
+  }
+
+  @OwnerOnly()
+  @Get(':id/level-up/options')
+  getLevelUpOptions(@Param('id', ParseUUIDPipe) id: string) {
+    return this.levelUpService.getLevelUpOptions(id);
+  }
+
+  @OwnerOnly()
+  @Post(':id/level-up')
+  applyLevelUp(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ApplyLevelUpDto,
+  ) {
+    return this.levelUpService.applyLevelUp(id, dto);
   }
 }

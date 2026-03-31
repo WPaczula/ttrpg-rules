@@ -13,6 +13,8 @@ import { ArmorRepository } from '../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
 import { AuthModule } from '../auth/auth.module';
 import { CharacterOwnerGuard } from './guards/character-owner.guard';
+import { LevelUpService } from './level-up.service';
+import { LevelUpRepository } from './repositories/level-up.repository';
 
 @Module({
   imports: [GameLogicModule, SrdModule, AuthModule],
@@ -20,7 +22,9 @@ import { CharacterOwnerGuard } from './guards/character-owner.guard';
   providers: [
     CharactersGateway,
     CharactersService,
+    LevelUpService,
     CharacterRepository,
+    LevelUpRepository,
     ExperienceRepository,
     CharacterDomainCardRepository,
     ThresholdBonusRepository,
