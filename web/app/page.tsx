@@ -9,6 +9,7 @@ import { LevelUpTab } from "@/components/level-up-tab"
 import { LootTab } from "@/components/loot-tab"
 import { RulesChat } from "@/components/rules-chat"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
+import { useIsMobile } from "@/components/ui/use-mobile"
 import type { CharacterData } from "@/lib/character-types"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices, ArrowUpCircle } from "lucide-react"
@@ -22,11 +23,24 @@ function loadRole(): Role {
   return (localStorage.getItem(ROLE_KEY) as Role) || "pc"
 }
 
+const pcTabs = [
+  { value: "chat", icon: MessageSquare, label: "Creator" },
+  { value: "sheet", icon: Scroll, label: "Sheet" },
+  { value: "levelup", icon: ArrowUpCircle, label: "Lvl Up" },
+] as const
+
+const gmTabs = [
+  { value: "rules", icon: BookOpen, label: "Rules" },
+  { value: "adversaries", icon: Swords, label: "Adversaries" },
+  { value: "loot", icon: Dices, label: "Loot" },
+] as const
+
 export default function Home() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
   const [role, setRole] = useState<Role>(loadRole)
   const [activeTab, setActiveTab] = useState(() => (loadRole() === "gm" ? "rules" : "chat"))
   const { character, setCharacter, resetCharacter, isLoaded } = useCharacterSheet()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     fetch('/api/auth')
@@ -51,7 +65,9 @@ export default function Home() {
     return <AccessGate onValidPassword={() => setAuthenticated(true)} />
   }
 
-  const triggerClass = "gap-1.5 data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30"
+  const tabs = role === "pc" ? pcTabs : gmTabs
+
+  const desktopTriggerClass = "gap-1.5 px-3 py-1 text-xs font-medium rounded-md border border-transparent transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 data-[state=active]:bg-gold/10 data-[state=active]:text-gold data-[state=active]:border-gold/30"
 
   return (
     <Tabs
@@ -59,9 +75,20 @@ export default function Home() {
       onValueChange={setActiveTab}
       className="flex flex-col h-dvh bg-background gap-0"
     >
-      {/* Row 1: role switcher */}
-      <div className="shrink-0 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-3 h-10">
+      {/* Header */}
+      <div className="shrink-0 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-3 h-11">
         <span className="text-xs text-muted-foreground font-medium">Daggerheart</span>
+
+        {/* Desktop: nav links in header */}
+        <TabsList className="hidden md:inline-flex h-auto bg-transparent rounded-none border-none p-0 gap-1">
+          {tabs.map(({ value, icon: Icon, label }) => (
+            <TabsTrigger key={value} value={value} className={desktopTriggerClass}>
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
         <div className="flex items-center">
           <button
             onClick={() => handleRoleChange("pc")}
@@ -87,41 +114,6 @@ export default function Home() {
           </button>
         </div>
       </div>
-
-      {/* Row 2: tabs */}
-      <TabsList className="shrink-0 w-full rounded-none border-b border-border bg-card/60 h-10 justify-start gap-1 px-2 p-1">
-        {role === "pc" ? (
-          <>
-            <TabsTrigger value="chat" className={triggerClass}>
-              <MessageSquare className="w-4 h-4" />
-              Creator
-            </TabsTrigger>
-            <TabsTrigger value="sheet" className={triggerClass}>
-              <Scroll className="w-4 h-4" />
-              Character Sheet
-            </TabsTrigger>
-            <TabsTrigger value="levelup" className={triggerClass}>
-              <ArrowUpCircle className="w-4 h-4" />
-              Lvl Up
-            </TabsTrigger>
-          </>
-        ) : (
-          <>
-            <TabsTrigger value="rules" className={triggerClass}>
-              <BookOpen className="w-4 h-4" />
-              Rules Chat
-            </TabsTrigger>
-            <TabsTrigger value="adversaries" className={triggerClass}>
-              <Swords className="w-4 h-4" />
-              Adversaries
-            </TabsTrigger>
-            <TabsTrigger value="loot" className={triggerClass}>
-              <Dices className="w-4 h-4" />
-              Loot
-            </TabsTrigger>
-          </>
-        )}
-      </TabsList>
 
       {/* PC tabs */}
       <TabsContent value="chat" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
@@ -157,6 +149,28 @@ export default function Home() {
       <TabsContent value="loot" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden">
         <LootTab />
       </TabsContent>
+
+      {/* Mobile: bottom navigation */}
+      {isMobile && (
+        <nav className="shrink-0 border-t border-border bg-card/80 backdrop-blur-sm">
+          <div className="flex items-stretch justify-around">
+            {tabs.map(({ value, icon: Icon, label }) => (
+              <button
+                key={value}
+                onClick={() => setActiveTab(value)}
+                className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
+                  activeTab === value
+                    ? "text-gold"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
     </Tabs>
   )
 }

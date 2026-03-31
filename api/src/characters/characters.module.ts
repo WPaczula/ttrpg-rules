@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CharactersController } from './characters.controller';
 import { CharactersService } from './characters.service';
+import { CharactersGateway } from './characters.gateway';
 import { CharacterRepository } from './repositories/character.repository';
 import { ExperienceRepository } from './repositories/experience.repository';
 import { CharacterDomainCardRepository } from './repositories/character-domain-card.repository';
@@ -17,6 +18,7 @@ import { CharacterOwnerGuard } from './guards/character-owner.guard';
   imports: [GameLogicModule, SrdModule, AuthModule],
   controllers: [CharactersController],
   providers: [
+    CharactersGateway,
     CharactersService,
     CharacterRepository,
     ExperienceRepository,

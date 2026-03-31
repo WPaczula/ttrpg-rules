@@ -21,6 +21,8 @@ import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
 import { ICharacterWithRelations } from './interfaces/character.interface';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
 import { ComputedStats } from '../game-logic/interfaces/computed-stats.interface';
+import { CharactersGateway } from './characters.gateway';
+import { IStatUpdate, ITrackedStats } from './interfaces/stat-update.interface';
 
 export interface CharacterResponse {
   character: ICharacterWithRelations;
@@ -29,6 +31,13 @@ export interface CharacterResponse {
 
 @Injectable()
 export class CharactersService {
+  private static readonly TRACKED_STATS: (keyof ITrackedStats)[] = [
+    'hpMarked',
+    'stressMarked',
+    'hope',
+    'armorMarked',
+  ];
+
   constructor(
     private readonly characters: CharacterRepository,
     private readonly experiences: ExperienceRepository,
@@ -38,6 +47,7 @@ export class CharactersService {
     private readonly classes: ClassRepository,
     private readonly armor: ArmorRepository,
     private readonly domainCards: DomainCardRepository,
+    private readonly gateway: CharactersGateway,
   ) {}
 
   private buildResponse(character: ICharacterWithRelations): CharacterResponse {
@@ -116,7 +126,22 @@ export class CharactersService {
   ): Promise<CharacterResponse> {
     await this.findCharacter(id);
     const character = await this.characters.update(id, dto);
-    return this.buildResponse(character);
+    const response = this.buildResponse(character);
+
+    const updates: IStatUpdate[] = CharactersService.TRACKED_STATS.filter(
+      (stat) => dto[stat] !== undefined,
+    ).map((stat) => ({
+      characterId: character.id,
+      characterName: character.name,
+      stat,
+      value: character[stat],
+    }));
+
+    if (updates.length > 0) {
+      this.gateway.broadcastStatUpdates(character.userId, updates);
+    }
+
+    return response;
   }
 
   async remove(id: string): Promise<void> {
