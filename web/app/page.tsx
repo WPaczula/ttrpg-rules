@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { AccessGate } from "@/components/access-gate"
+import { useState, useCallback } from "react"
+import { useClerk } from "@clerk/nextjs"
 import { ChatInterface } from "@/components/chat-interface"
 import { CharacterSheetTab } from "@/components/character-sheet-tab"
 import { EncounterTab } from "@/components/encounter-tab"
@@ -12,7 +12,7 @@ import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { useIsMobile } from "@/components/ui/use-mobile"
 import type { CharacterData } from "@/lib/character-types"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices, ArrowUpCircle } from "lucide-react"
+import { MessageSquare, Scroll, Swords, BookOpen, User, Shield, Dices, ArrowUpCircle, LogOut } from "lucide-react"
 
 type Role = "pc" | "gm"
 
@@ -36,17 +36,11 @@ const gmTabs = [
 ] as const
 
 export default function Home() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null)
+  const { signOut } = useClerk()
   const [role, setRole] = useState<Role>(loadRole)
   const [activeTab, setActiveTab] = useState(() => (loadRole() === "gm" ? "rules" : "chat"))
   const { character, setCharacter, resetCharacter, isLoaded } = useCharacterSheet()
   const isMobile = useIsMobile()
-
-  useEffect(() => {
-    fetch('/api/auth')
-      .then(res => setAuthenticated(res.ok))
-      .catch(() => setAuthenticated(false))
-  }, [])
 
   const handleRoleChange = useCallback((newRole: Role) => {
     setRole(newRole)
@@ -58,12 +52,6 @@ export default function Home() {
     setCharacter(data)
     setActiveTab("sheet")
   }, [setCharacter])
-
-  if (authenticated === null) return null
-
-  if (!authenticated) {
-    return <AccessGate onValidPassword={() => setAuthenticated(true)} />
-  }
 
   const tabs = role === "pc" ? pcTabs : gmTabs
 
@@ -89,7 +77,7 @@ export default function Home() {
           ))}
         </TabsList>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => handleRoleChange("pc")}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-l-md text-xs font-medium border transition-colors ${
@@ -111,6 +99,13 @@ export default function Home() {
           >
             <Shield className="w-3.5 h-3.5" />
             GM
+          </button>
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors ml-1"
+            title="Sign out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
