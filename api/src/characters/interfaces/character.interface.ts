@@ -31,6 +31,7 @@ export interface ICharacter {
   primaryWeaponId: string | null;
   secondaryWeaponId: string | null;
   notes: string;
+  items: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,6 +61,7 @@ export type ICharacterUpdate = Partial<
     | 'hpTotal'
     | 'stressTotal'
     | 'evasion'
+    | 'items'
   >
 >;
 

@@ -361,6 +361,7 @@ model Character {
   secondaryWeaponId String? @map("secondary_weapon_id")
 
   notes String @default("")
+  items Json   @default("[]")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
