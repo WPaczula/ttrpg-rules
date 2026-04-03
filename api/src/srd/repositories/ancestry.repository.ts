@@ -19,4 +19,11 @@ export class AncestryRepository {
       include: { features: true },
     });
   }
+
+  async findByName(name: string): Promise<ISrdAncestry | null> {
+    return this.prisma.ancestry.findFirst({
+      where: { name },
+      include: { features: true },
+    });
+  }
 }

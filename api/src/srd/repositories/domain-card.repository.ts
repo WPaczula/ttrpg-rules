@@ -44,4 +44,20 @@ export class DomainCardRepository {
       domainName: c.domain.name,
     };
   }
+
+  async findByName(name: string): Promise<ISrdDomainCard | null> {
+    const c = await this.prisma.domainCard.findFirst({
+      where: { name },
+      include: { domain: { select: { name: true } } },
+    });
+    if (!c) return null;
+    return {
+      id: c.id,
+      name: c.name,
+      level: c.level,
+      recallCost: c.recallCost,
+      description: c.description,
+      domainName: c.domain.name,
+    };
+  }
 }

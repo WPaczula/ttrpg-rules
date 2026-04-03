@@ -36,4 +36,20 @@ export class SubclassRepository {
       features: s.features,
     };
   }
+
+  async findByName(name: string): Promise<ISrdSubclass | null> {
+    const s = await this.prisma.subclass.findFirst({
+      where: { name },
+      include: { features: true, class: { select: { name: true } } },
+    });
+    if (!s) return null;
+    return {
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      spellcastTrait: s.spellcastTrait,
+      className: s.class.name,
+      features: s.features,
+    };
+  }
 }

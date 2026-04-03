@@ -19,4 +19,11 @@ export class CommunityRepository {
       include: { features: true },
     });
   }
+
+  async findByName(name: string): Promise<ISrdCommunity | null> {
+    return this.prisma.community.findFirst({
+      where: { name },
+      include: { features: true },
+    });
+  }
 }

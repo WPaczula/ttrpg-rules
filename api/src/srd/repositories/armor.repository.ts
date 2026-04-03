@@ -18,4 +18,8 @@ export class ArmorRepository {
   async findById(id: string): Promise<ISrdArmor | null> {
     return this.prisma.armor.findUnique({ where: { id } });
   }
+
+  async findByName(name: string): Promise<ISrdArmor | null> {
+    return this.prisma.armor.findFirst({ where: { name } });
+  }
 }

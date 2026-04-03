@@ -68,4 +68,36 @@ export class ClassRepository {
       domains: c.domains.map((cd) => cd.domain),
     };
   }
+
+  async findByName(name: string): Promise<ISrdClass | null> {
+    const c = await this.prisma.srdClass.findFirst({
+      where: { name },
+      include: {
+        features: true,
+        subclasses: { select: { id: true, name: true } },
+        domains: { include: { domain: { select: { id: true, name: true } } } },
+        suggestedPrimary: { select: { id: true, name: true } },
+        suggestedSecondary: { select: { id: true, name: true } },
+        suggestedArmor: { select: { id: true, name: true } },
+      },
+    });
+    if (!c) return null;
+    return {
+      id: c.id,
+      name: c.name,
+      description: c.description,
+      evasion: c.evasion,
+      hp: c.hp,
+      items: c.items,
+      suggestedTraits: c.suggestedTraits,
+      hopeFeatureName: c.hopeFeatureName,
+      hopeFeatureText: c.hopeFeatureText,
+      suggestedPrimary: c.suggestedPrimary,
+      suggestedSecondary: c.suggestedSecondary,
+      suggestedArmor: c.suggestedArmor,
+      features: c.features,
+      subclasses: c.subclasses,
+      domains: c.domains.map((cd) => cd.domain),
+    };
+  }
 }

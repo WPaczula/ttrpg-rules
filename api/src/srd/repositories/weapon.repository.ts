@@ -22,4 +22,8 @@ export class WeaponRepository {
   async findById(id: string): Promise<ISrdWeapon | null> {
     return this.prisma.weapon.findUnique({ where: { id } });
   }
+
+  async findByName(name: string): Promise<ISrdWeapon | null> {
+    return this.prisma.weapon.findFirst({ where: { name } });
+  }
 }
