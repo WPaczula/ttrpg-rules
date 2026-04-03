@@ -2,7 +2,7 @@
 
 import type { CharacterData } from "@/lib/character-types"
 import type { ComboboxItem } from "@/components/ui/combobox"
-import type { SrdClass, SrdSubclass, SrdAncestry, SrdCommunity } from "@/lib/srd-data"
+import type { ApiClass, ApiSubclass, ApiAncestry, ApiCommunity, ApiWeapon, ApiArmor, ApiDomainCard } from "@/lib/srd/types"
 import { TraitsDefenseSection } from "./traits-defense-section"
 import { HpStressHopeSection } from "./hp-stress-hope-section"
 import { ExperiencesSection } from "./experiences-section"
@@ -15,11 +15,11 @@ interface StatsTabProps {
   update: (patch: Partial<CharacterData>) => void
   editing: boolean
   domainCardItems: ComboboxItem[]
-  selectedClass: SrdClass | undefined
-  selectedSubclass: SrdSubclass | undefined
-  selectedAncestry: SrdAncestry | undefined
-  selectedSecondaryAncestry: SrdAncestry | undefined
-  selectedCommunity: SrdCommunity | undefined
+  selectedClass: ApiClass | undefined
+  selectedSubclass: ApiSubclass | undefined
+  selectedAncestry: ApiAncestry | undefined
+  selectedSecondaryAncestry: ApiAncestry | undefined
+  selectedCommunity: ApiCommunity | undefined
 }
 
 export function StatsTab({

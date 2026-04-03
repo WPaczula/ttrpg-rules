@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { type ComboboxItem } from "@/components/ui/combobox"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,23 +18,19 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
 import { getTier } from "@/lib/character-types"
-import {
-  SRD_WEAPONS,
-  SRD_ARMOR,
-  SRD_DOMAIN_CARDS,
-  SRD_CLASSES,
-  SRD_ANCESTRIES,
-  SRD_COMMUNITIES,
-  SRD_SUBCLASSES,
-} from "@/lib/srd-data"
+import { useSrdClasses } from "@/lib/srd/use-srd-classes"
+import { useSrdAncestries } from "@/lib/srd/use-srd-ancestries"
+import { useSrdCommunities } from "@/lib/srd/use-srd-communities"
+import { useSrdSubclasses } from "@/lib/srd/use-srd-subclasses"
+import { useSrdWeapons } from "@/lib/srd/use-srd-weapons"
+import { useSrdArmor } from "@/lib/srd/use-srd-armor"
+import { useSrdDomainCards } from "@/lib/srd/use-srd-domain-cards"
 import { cn } from "@/lib/utils"
 import { RotateCcw, Pencil, Save, X, Activity, Backpack, BookOpen } from "lucide-react"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
 import { StatsTab } from "@/components/character-sheet/stats-tab"
 import { EquipmentTab } from "@/components/character-sheet/equipment-tab"
 import { BackgroundTab } from "@/components/character-sheet/background-tab"
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 interface CharacterSheetTabProps {
   character?: import("@/lib/character-types").CharacterData
@@ -55,6 +50,38 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
+
+  const playerTier = getTier(c.level)
+
+  // ── SRD hooks ────────────────────────────────────────────────
+  const { items: classItems, data: classData } = useSrdClasses()
+  const { items: ancestryItems, data: ancestryData } = useSrdAncestries()
+  const { items: communityItems } = useSrdCommunities()
+  const selectedClass = useMemo(
+    () => classData.find((cls) => cls.name === c.class),
+    [classData, c.class]
+  )
+  const classDomainNames = useMemo(
+    () => selectedClass?.domains.map((d) => d.name),
+    [selectedClass]
+  )
+  const classSubclassNames = useMemo(
+    () => selectedClass?.subclasses.map((s) => s.name),
+    [selectedClass]
+  )
+  const { items: subclassItems } = useSrdSubclasses(classSubclassNames)
+  const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(playerTier)
+  const { items: armorItems } = useSrdArmor(playerTier)
+  const { items: domainCardItems } = useSrdDomainCards(c.level, classDomainNames)
+
+  const selectedAncestry = useMemo(
+    () => ancestryData.find((a) => a.name === c.ancestry),
+    [ancestryData, c.ancestry]
+  )
+  const selectedSecondaryAncestry = useMemo(
+    () => ancestryData.find((a) => a.name === c.secondaryAncestry),
+    [ancestryData, c.secondaryAncestry]
+  )
 
   const enterEditMode = () => {
     takeSnapshot()
@@ -80,125 +107,6 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   }
 
   const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
-
-  // ── SRD combobox items (memoized) ────────────────────────────
-  const classItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_CLASSES.map((cls) => ({
-        value: cls.name,
-        label: cls.name,
-        detail: `${cls.domains[0]} & ${cls.domains[1]} · HP ${cls.hp} · Evasion ${cls.evasion}`,
-      })),
-    []
-  )
-
-  const ancestryItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_ANCESTRIES.map((a) => ({
-        value: a.name,
-        label: a.name,
-        detail: a.features.map((f) => f.name).join(", "),
-      })),
-    []
-  )
-
-  const communityItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_COMMUNITIES.map((cm) => ({
-        value: cm.name,
-        label: cm.name,
-        detail: cm.features.map((f) => f.name).join(", "),
-      })),
-    []
-  )
-
-  const selectedClass = useMemo(
-    () => SRD_CLASSES.find((cls) => cls.name === c.class),
-    [c.class]
-  )
-
-  const subclassItems = useMemo<ComboboxItem[]>(() => {
-    if (selectedClass) {
-      return SRD_SUBCLASSES.filter((sc) =>
-        selectedClass.subclasses.includes(sc.name)
-      ).map((sc) => ({
-        value: sc.name,
-        label: sc.name,
-        detail: sc.description,
-      }))
-    }
-    return SRD_SUBCLASSES.map((sc) => ({
-      value: sc.name,
-      label: sc.name,
-      detail: sc.description,
-    }))
-  }, [selectedClass])
-
-  const selectedAncestry = useMemo(
-    () => SRD_ANCESTRIES.find((a) => a.name === c.ancestry),
-    [c.ancestry]
-  )
-  const selectedSecondaryAncestry = useMemo(
-    () => SRD_ANCESTRIES.find((a) => a.name === c.secondaryAncestry),
-    [c.secondaryAncestry]
-  )
-  const selectedCommunity = useMemo(
-    () => SRD_COMMUNITIES.find((cm) => cm.name === c.community),
-    [c.community]
-  )
-  const selectedSubclass = useMemo(
-    () => SRD_SUBCLASSES.find((sc) => sc.name === c.subclass),
-    [c.subclass]
-  )
-
-  const domainCardItems = useMemo<ComboboxItem[]>(() => {
-    let cards = SRD_DOMAIN_CARDS.filter((dc) => dc.level <= c.level)
-    if (selectedClass) {
-      const classDomains = selectedClass.domains
-      cards = cards.filter((dc) => classDomains.includes(dc.domain))
-    }
-    return cards.map((dc) => ({
-      value: dc.name,
-      label: dc.name,
-      detail: `Lvl ${dc.level} · Recall ${dc.recallCost}`,
-      group: dc.domain,
-    }))
-  }, [selectedClass, c.level])
-
-  const playerTier = getTier(c.level)
-
-  const primaryWeaponItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_WEAPONS.filter((w) => w.type === "Primary" && w.tier <= playerTier).map((w) => ({
-        value: w.name,
-        label: w.name,
-        detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
-        group: w.damageType,
-      })),
-    [playerTier]
-  )
-
-  const secondaryWeaponItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_WEAPONS.filter((w) => w.type === "Secondary" && w.tier <= playerTier).map((w) => ({
-        value: w.name,
-        label: w.name,
-        detail: `${w.damage} · ${w.trait} · ${w.range} · ${w.burden}`,
-        group: w.damageType,
-      })),
-    [playerTier]
-  )
-
-  const armorItems = useMemo<ComboboxItem[]>(
-    () =>
-      SRD_ARMOR.filter((a) => a.tier <= playerTier).map((a) => ({
-        value: a.name,
-        label: a.name,
-        detail: `Score ${a.baseScore} · Thresholds ${a.baseThresholds}${a.feature ? ` · ${a.feature}` : ""}`,
-        group: `Tier ${a.tier}`,
-      })),
-    [playerTier]
-  )
 
   if (!isLoaded) {
     return (
@@ -261,12 +169,8 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
             Tier {tier}
           </Badge>
-          {c.class && (
-            <span className="text-foreground font-medium">{c.class}</span>
-          )}
-          {c.subclass && (
-            <span className="text-muted-foreground">({c.subclass})</span>
-          )}
+          {c.class && <span className="text-foreground font-medium">{c.class}</span>}
+          {c.subclass && <span className="text-muted-foreground">({c.subclass})</span>}
         </div>
         {(c.ancestry || c.community) && (
           <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
@@ -300,8 +204,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           character={c}
           update={update}
           classItems={classItems}
+          classData={classData}
           subclassItems={subclassItems}
           ancestryItems={ancestryItems}
+          ancestryData={ancestryData}
           communityItems={communityItems}
         />
       )}
@@ -337,10 +243,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             editing={editing}
             domainCardItems={domainCardItems}
             selectedClass={selectedClass}
-            selectedSubclass={selectedSubclass}
+            selectedSubclass={undefined}
             selectedAncestry={selectedAncestry}
             selectedSecondaryAncestry={selectedSecondaryAncestry}
-            selectedCommunity={selectedCommunity}
+            selectedCommunity={undefined}
           />
         </TabsContent>
 
