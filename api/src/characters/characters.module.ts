@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CharactersController } from './characters.controller';
 import { CharactersService } from './characters.service';
+import { SyncCharacterService } from './sync-character.service';
 import { CharactersGateway } from './characters.gateway';
 import { CharacterRepository } from './repositories/character.repository';
 import { ExperienceRepository } from './repositories/experience.repository';
@@ -9,6 +10,10 @@ import { ThresholdBonusRepository } from './repositories/threshold-bonus.reposit
 import { GameLogicModule } from '../game-logic/game-logic.module';
 import { SrdModule } from '../srd/srd.module';
 import { ClassRepository } from '../srd/repositories/class.repository';
+import { SubclassRepository } from '../srd/repositories/subclass.repository';
+import { AncestryRepository } from '../srd/repositories/ancestry.repository';
+import { CommunityRepository } from '../srd/repositories/community.repository';
+import { WeaponRepository } from '../srd/repositories/weapon.repository';
 import { ArmorRepository } from '../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
 import { AuthModule } from '../auth/auth.module';
@@ -22,6 +27,7 @@ import { LevelUpRepository } from './repositories/level-up.repository';
   providers: [
     CharactersGateway,
     CharactersService,
+    SyncCharacterService,
     LevelUpService,
     CharacterRepository,
     LevelUpRepository,
@@ -29,6 +35,10 @@ import { LevelUpRepository } from './repositories/level-up.repository';
     CharacterDomainCardRepository,
     ThresholdBonusRepository,
     ClassRepository,
+    SubclassRepository,
+    AncestryRepository,
+    CommunityRepository,
+    WeaponRepository,
     ArmorRepository,
     DomainCardRepository,
     CharacterOwnerGuard,

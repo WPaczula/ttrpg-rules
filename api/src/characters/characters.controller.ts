@@ -9,10 +9,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Req,
 } from '@nestjs/common';
 import { CharactersService } from './characters.service';
 import { LevelUpService } from './level-up.service';
+import { SyncCharacterService } from './sync-character.service';
 import { ApplyLevelUpDto } from './dto/apply-level-up.dto';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
@@ -20,6 +22,7 @@ import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { AddDomainCardDto } from './dto/add-domain-card.dto';
 import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
+import { SyncCharacterDto } from './dto/sync-character.dto';
 import { GM } from '../auth/decorators/gm.decorator';
 import { PC } from '../auth/decorators/pc.decorator';
 import { OwnerOnly } from './decorators/owner-only.decorator';
@@ -30,6 +33,7 @@ export class CharactersController {
   constructor(
     private readonly service: CharactersService,
     private readonly levelUpService: LevelUpService,
+    private readonly syncService: SyncCharacterService,
   ) {}
 
   @GM()
@@ -143,5 +147,16 @@ export class CharactersController {
     @Body() dto: ApplyLevelUpDto,
   ) {
     return this.levelUpService.applyLevelUp(id, dto);
+  }
+
+  /** Temporary sync endpoint — will be removed once localStorage migration is complete */
+  @PC()
+  @Put('sync')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async syncCharacter(
+    @Body() dto: SyncCharacterDto,
+    @Req() req: RequestWithUser,
+  ): Promise<void> {
+    await this.syncService.syncCharacter(req.user.id, dto);
   }
 }
