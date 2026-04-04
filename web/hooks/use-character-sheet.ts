@@ -1,13 +1,38 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useCallback } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@clerk/nextjs"
 import { CharacterData, DEFAULT_CHARACTER } from "@/lib/character-types"
-import { useSync } from "@/hooks/use-sync"
-import { useUpdateCharacter, PATCH_FIELDS, CharacterPatch } from "@/hooks/use-update-character"
+import { canSync, syncCharacterToApi } from "@/lib/sync/character-sync"
 import { apiFetch } from "@/lib/srd/api-client"
 
 const STORAGE_KEY = "daggerheart-character-sheet"
+
+export interface CharacterPatch {
+  hpMarked?: number
+  stressMarked?: number
+  hope?: number
+  goldHandfuls?: number
+  goldBags?: number
+  goldChests?: number
+  armorMarked?: number
+  agility?: number
+  strength?: number
+  finesse?: number
+  instinct?: number
+  presence?: number
+  knowledge?: number
+  notes?: string
+}
+
+export const PATCH_FIELDS = new Set<keyof CharacterPatch>([
+  "hpMarked", "stressMarked", "hope",
+  "goldHandfuls", "goldBags", "goldChests",
+  "armorMarked",
+  "agility", "strength", "finesse", "instinct", "presence", "knowledge",
+  "notes",
+])
 
 interface ServerCharacterResponse {
   id: string
@@ -45,6 +70,11 @@ interface ServerCharacterResponse {
   proficiency: number
   notes: string
   items: string[]
+}
+
+interface CharacterQueryData {
+  character: CharacterData
+  id: string
 }
 
 function serverResponseToCharacterData(res: ServerCharacterResponse): CharacterData {
@@ -93,33 +123,15 @@ function serverResponseToCharacterData(res: ServerCharacterResponse): CharacterD
 }
 
 export function useCharacterSheet() {
-  const [character, setCharacterState] = useState<CharacterData>(DEFAULT_CHARACTER)
-  const [characterId, setCharacterId] = useState<string | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const savePausedRef = useRef(false)
-  const snapshotRef = useRef<CharacterData | null>(null)
-  const characterIdRef = useRef<string | null>(null)
-  const { syncCharacter } = useSync()
-  const updateMutation = useUpdateCharacter(characterId)
-  const updateMutationRef = useRef(updateMutation.mutate)
+  const queryClient = useQueryClient()
   const { getToken } = useAuth()
 
-  // Keep ref in sync with state so callbacks have access to latest value
-  useEffect(() => {
-    characterIdRef.current = characterId
-  }, [characterId])
+  const { data, isLoading } = useQuery<CharacterQueryData | null>({
+    queryKey: ["character"],
+    queryFn: async () => {
+      const token = await getToken()
 
-  useEffect(() => {
-    updateMutationRef.current = updateMutation.mutate
-  }, [updateMutation.mutate])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      let loaded: CharacterData | null = null
-
+      // One-time localStorage migration: sync existing data to server then clear
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) {
@@ -127,142 +139,130 @@ export function useCharacterSheet() {
           delete parsed.minorThreshold
           delete parsed.majorThreshold
           delete parsed.severeThreshold
-          if (typeof parsed._id === "string") {
-            setCharacterId(parsed._id)
-            characterIdRef.current = parsed._id
+          delete parsed._id
+          const migrationData: CharacterData = { ...DEFAULT_CHARACTER, ...parsed }
+          if (canSync(migrationData)) {
+            await syncCharacterToApi(migrationData, token)
           }
-          loaded = { ...DEFAULT_CHARACTER, ...parsed }
+          localStorage.removeItem(STORAGE_KEY)
         }
       } catch {
-        // Invalid localStorage data, will fall through to server load
+        // Migration failure must not block loading
+        try { localStorage.removeItem(STORAGE_KEY) } catch {}
       }
 
-      if (loaded) {
-        if (!cancelled) {
-          setCharacterState(loaded)
-          setIsLoaded(true)
-        }
-        return
+      const res = await apiFetch<ServerCharacterResponse | null>("/characters/me", token)
+      if (!res) return null
+      return { character: serverResponseToCharacterData(res), id: res.id }
+    },
+    staleTime: Infinity,
+    retry: false,
+  })
+
+  const character = data?.character ?? DEFAULT_CHARACTER
+  const characterId = data?.id ?? null
+
+  const patchMutation = useMutation<
+    void,
+    Error,
+    { id: string; patch: Partial<CharacterPatch>; next: CharacterData },
+    { previous: CharacterQueryData | null | undefined }
+  >({
+    mutationFn: async ({ id, patch }) => {
+      const token = await getToken()
+      await apiFetch(`/characters/${id}`, token, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      })
+    },
+    onMutate: async ({ next }) => {
+      await queryClient.cancelQueries({ queryKey: ["character"] })
+      const previous = queryClient.getQueryData<CharacterQueryData | null>(["character"])
+      queryClient.setQueryData<CharacterQueryData | null>(["character"], (old) =>
+        old ? { ...old, character: next } : null,
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(["character"], context.previous)
       }
+    },
+  })
 
-      // No localStorage data — try fetching from server
-      try {
-        const token = await getToken()
-        if (token) {
-          const res = await apiFetch<ServerCharacterResponse | null>(
-            "/characters/me",
-            token,
-          )
-          if (!cancelled && res) {
-            const data = serverResponseToCharacterData(res)
-            setCharacterState(data)
-            setCharacterId(res.id)
-            characterIdRef.current = res.id
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, _id: res.id }))
-            } catch {}
-          }
-        }
-      } catch {
-        // Server unavailable — stay with defaults
+  const syncMutation = useMutation<
+    void,
+    Error,
+    { next: CharacterData },
+    { previous: CharacterQueryData | null | undefined }
+  >({
+    mutationFn: async ({ next }) => {
+      const token = await getToken()
+      await syncCharacterToApi(next, token)
+    },
+    onMutate: async ({ next }) => {
+      await queryClient.cancelQueries({ queryKey: ["character"] })
+      const previous = queryClient.getQueryData<CharacterQueryData | null>(["character"])
+      queryClient.setQueryData<CharacterQueryData | null>(["character"], (old) =>
+        old ? { ...old, character: next } : null,
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(["character"], context.previous)
       }
-
-      if (!cancelled) setIsLoaded(true)
-    }
-
-    load()
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    },
+  })
 
   const setCharacter = useCallback(
     (updater: CharacterData | ((prev: CharacterData) => CharacterData)) => {
-      setCharacterState((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater
-        if (!savePausedRef.current) {
-          if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-          saveTimerRef.current = setTimeout(() => {
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...next, _id: characterIdRef.current }))
-            } catch {}
+      const current = queryClient.getQueryData<CharacterQueryData | null>(["character"])
+      const prev = current?.character ?? DEFAULT_CHARACTER
+      const next = typeof updater === "function" ? updater(prev) : updater
 
-            // Diff prev and next to determine changed keys
-            const changedKeys = (Object.keys(next) as (keyof CharacterData)[]).filter(
-              (key) => prev[key] !== next[key],
-            )
-            const allPatchable = changedKeys.length > 0 && changedKeys.every((k) => PATCH_FIELDS.has(k as keyof CharacterPatch))
+      const changedKeys = (Object.keys(next) as (keyof CharacterData)[]).filter(
+        (key) => prev[key] !== next[key],
+      )
+      const allPatchable =
+        changedKeys.length > 0 &&
+        changedKeys.every((k) => PATCH_FIELDS.has(k as keyof CharacterPatch))
 
-            if (allPatchable && characterIdRef.current !== null) {
-              const patch: Partial<CharacterPatch> = {}
-              for (const key of changedKeys) {
-                ;(patch as Record<string, unknown>)[key as string] = next[key]
-              }
-              updateMutationRef.current(patch)
-            } else {
-              syncCharacter(next)
-            }
-          }, 500)
+      const id = current?.id ?? null
+
+      if (allPatchable && id) {
+        const patch: Partial<CharacterPatch> = {}
+        for (const key of changedKeys) {
+          ;(patch as Record<string, unknown>)[key] = next[key as keyof CharacterData]
         }
-        return next
-      })
+        patchMutation.mutate({ id, patch, next })
+      } else {
+        syncMutation.mutate({ next })
+      }
     },
-    [syncCharacter], // updateMutationRef is a stable ref — intentionally excluded from deps
+    [queryClient, patchMutation, syncMutation],
   )
 
   const resetCharacter = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...DEFAULT_CHARACTER, _id: characterIdRef.current }))
-    } catch {}
-    setCharacterState(DEFAULT_CHARACTER)
-  }, [])
+    // Reset local cache only — server data is preserved until user recreates a character
+    queryClient.setQueryData<CharacterQueryData | null>(["character"], (old) =>
+      old ? { ...old, character: DEFAULT_CHARACTER } : null,
+    )
+  }, [queryClient])
 
-  const pauseSave = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    savePausedRef.current = true
-  }, [])
-
-  const resumeSave = useCallback(() => {
-    savePausedRef.current = false
-  }, [])
-
-  const takeSnapshot = useCallback(() => {
-    setCharacterState((current) => {
-      snapshotRef.current = structuredClone(current)
-      return current
-    })
-  }, [])
-
-  const restoreSnapshot = useCallback(() => {
-    if (snapshotRef.current) {
-      const snapshot = snapshotRef.current
-      snapshotRef.current = null
-      setCharacterState(snapshot)
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...snapshot, _id: characterIdRef.current }))
-      } catch {}
-    }
-  }, [])
-
-  const flushToStorage = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    setCharacterState((current) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, _id: characterIdRef.current }))
-      } catch {}
-      syncCharacter(current)
-      return current
-    })
-    snapshotRef.current = null
-  }, [syncCharacter])
+  // No-op stubs retained for call-site compatibility while CharacterSheetTab is updated (Task 2)
+  const pauseSave = useCallback(() => {}, [])
+  const resumeSave = useCallback(() => {}, [])
+  const takeSnapshot = useCallback(() => {}, [])
+  const restoreSnapshot = useCallback(() => {}, [])
+  const flushToStorage = useCallback(() => {}, [])
 
   return {
     character,
     characterId,
     setCharacter,
     resetCharacter,
-    isLoaded,
+    isLoaded: !isLoading,
     pauseSave,
     resumeSave,
     takeSnapshot,
