@@ -31,10 +31,11 @@ import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-d
 import { StatsTab } from "@/components/character-sheet/stats-tab"
 import { EquipmentTab } from "@/components/character-sheet/equipment-tab"
 import { BackgroundTab } from "@/components/character-sheet/background-tab"
+import type { CharacterData } from "@/lib/character-types"
 
 interface CharacterSheetTabProps {
-  character?: import("@/lib/character-types").CharacterData
-  setCharacter?: (updater: import("@/lib/character-types").CharacterData | ((prev: import("@/lib/character-types").CharacterData) => import("@/lib/character-types").CharacterData)) => void
+  character?: CharacterData
+  setCharacter?: (updater: CharacterData | ((prev: CharacterData) => CharacterData)) => void
   resetCharacter?: () => void
   isLoaded?: boolean
 }
@@ -45,21 +46,25 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const setCharacter = props.setCharacter ?? internal.setCharacter
   const resetCharacter = props.resetCharacter ?? internal.resetCharacter
   const isLoaded = props.isLoaded ?? internal.isLoaded
-  const { pauseSave, resumeSave, takeSnapshot, restoreSnapshot, flushToStorage } = internal
+
   const [confirmReset, setConfirmReset] = useState(false)
   const [identityDialogOpen, setIdentityDialogOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false)
+  const [draft, setDraft] = useState<CharacterData | null>(null)
 
-  const playerTier = getTier(c.level)
+  // While in edit mode, render draft; otherwise render server-synced character
+  const displayChar = editing && draft ? draft : c
+
+  const playerTier = getTier(displayChar.level)
 
   // ── SRD hooks ────────────────────────────────────────────────
   const { items: classItems, data: classData } = useSrdClasses()
   const { items: ancestryItems, data: ancestryData } = useSrdAncestries()
   const { items: communityItems } = useSrdCommunities()
   const selectedClass = useMemo(
-    () => classData.find((cls) => cls.name === c.class),
-    [classData, c.class]
+    () => classData.find((cls) => cls.name === displayChar.class),
+    [classData, displayChar.class]
   )
   const classDomainNames = useMemo(
     () => selectedClass?.domains.map((d) => d.name),
@@ -72,26 +77,25 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const { items: subclassItems } = useSrdSubclasses(classSubclassNames)
   const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(playerTier)
   const { items: armorItems } = useSrdArmor(playerTier)
-  const { items: domainCardItems } = useSrdDomainCards(c.level, classDomainNames)
+  const { items: domainCardItems } = useSrdDomainCards(displayChar.level, classDomainNames)
 
   const selectedAncestry = useMemo(
-    () => ancestryData.find((a) => a.name === c.ancestry),
-    [ancestryData, c.ancestry]
+    () => ancestryData.find((a) => a.name === displayChar.ancestry),
+    [ancestryData, displayChar.ancestry]
   )
   const selectedSecondaryAncestry = useMemo(
-    () => ancestryData.find((a) => a.name === c.secondaryAncestry),
-    [ancestryData, c.secondaryAncestry]
+    () => ancestryData.find((a) => a.name === displayChar.secondaryAncestry),
+    [ancestryData, displayChar.secondaryAncestry]
   )
 
   const enterEditMode = () => {
-    takeSnapshot()
-    pauseSave()
+    setDraft(c)
     setEditing(true)
   }
 
   const handleSave = () => {
-    resumeSave()
-    flushToStorage()
+    if (draft) setCharacter(draft)
+    setDraft(null)
     setEditing(false)
   }
 
@@ -100,13 +104,19 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   }
 
   const confirmDiscard = () => {
-    restoreSnapshot()
-    resumeSave()
+    setDraft(null)
     setEditing(false)
     setDiscardDialogOpen(false)
   }
 
-  const update = (patch: Partial<typeof c>) => setCharacter((prev) => ({ ...prev, ...patch }))
+  // In edit mode: update local draft only. Outside edit mode: fire mutation immediately.
+  const update = (patch: Partial<CharacterData>) => {
+    if (editing) {
+      setDraft((prev) => (prev ? { ...prev, ...patch } : { ...c, ...patch }))
+    } else {
+      setCharacter((prev) => ({ ...prev, ...patch }))
+    }
+  }
 
   if (!isLoaded) {
     return (
@@ -118,7 +128,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     )
   }
 
-  const tier = getTier(c.level)
+  const tier = getTier(displayChar.level)
 
   const handleReset = () => {
     if (confirmReset) {
@@ -138,14 +148,14 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         <div className="flex items-center gap-2">
           {editing ? (
             <Input
-              value={c.name}
+              value={displayChar.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder="Character name…"
               className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50 flex-1"
             />
           ) : (
             <span className="text-lg font-semibold text-gold flex-1 truncate">
-              {c.name || <span className="text-muted-foreground/50 italic font-normal">Character name…</span>}
+              {displayChar.name || <span className="text-muted-foreground/50 italic font-normal">Character name…</span>}
             </span>
           )}
           {!editing && (
@@ -164,27 +174,27 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-sm">
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground">Lvl</span>
-            <span className="font-medium text-foreground">{c.level}</span>
+            <span className="font-medium text-foreground">{displayChar.level}</span>
           </div>
           <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
             Tier {tier}
           </Badge>
-          {c.class && <span className="text-foreground font-medium">{c.class}</span>}
-          {c.subclass && <span className="text-muted-foreground">({c.subclass})</span>}
+          {displayChar.class && <span className="text-foreground font-medium">{displayChar.class}</span>}
+          {displayChar.subclass && <span className="text-muted-foreground">({displayChar.subclass})</span>}
         </div>
-        {(c.ancestry || c.community) && (
+        {(displayChar.ancestry || displayChar.community) && (
           <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
-            {c.ancestry && (
+            {displayChar.ancestry && (
               <span>
-                {c.ancestry}
-                {c.secondaryAncestry && ` + ${c.secondaryAncestry}`}
+                {displayChar.ancestry}
+                {displayChar.secondaryAncestry && ` + ${displayChar.secondaryAncestry}`}
               </span>
             )}
-            {c.ancestry && c.community && <span>·</span>}
-            {c.community && <span>{c.community}</span>}
+            {displayChar.ancestry && displayChar.community && <span>·</span>}
+            {displayChar.community && <span>{displayChar.community}</span>}
           </div>
         )}
-        {!c.class && !c.ancestry && !c.community && (
+        {!displayChar.class && !displayChar.ancestry && !displayChar.community && (
           <button
             onClick={() => { enterEditMode(); setIdentityDialogOpen(true) }}
             className="text-xs text-muted-foreground/70 italic hover:text-gold transition-colors"
@@ -201,7 +211,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         <EditIdentityDialog
           open={identityDialogOpen}
           onOpenChange={setIdentityDialogOpen}
-          character={c}
+          character={displayChar}
           update={update}
           classItems={classItems}
           classData={classData}
@@ -237,7 +247,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
         <TabsContent value="stats" className="mt-0">
           <StatsTab
-            character={c}
+            character={displayChar}
             tier={tier}
             update={update}
             editing={editing}
@@ -252,7 +262,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
         <TabsContent value="equipment" className="mt-0">
           <EquipmentTab
-            character={c}
+            character={displayChar}
             update={update}
             primaryWeaponItems={primaryWeaponItems}
             secondaryWeaponItems={secondaryWeaponItems}
@@ -262,7 +272,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
         </TabsContent>
 
         <TabsContent value="background" className="mt-0">
-          <BackgroundTab character={c} update={update} />
+          <BackgroundTab character={displayChar} update={update} />
         </TabsContent>
       </Tabs>
 
