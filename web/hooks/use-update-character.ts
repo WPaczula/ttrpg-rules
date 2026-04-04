@@ -21,12 +21,20 @@ export interface CharacterPatch {
   notes?: string
 }
 
+export const PATCH_FIELDS = new Set<string>([
+  'hpMarked', 'stressMarked', 'hope',
+  'goldHandfuls', 'goldBags', 'goldChests',
+  'armorMarked',
+  'agility', 'strength', 'finesse', 'instinct', 'presence', 'knowledge',
+  'notes',
+])
+
 export function useUpdateCharacter(characterId: string | null) {
   const { getToken } = useAuth()
 
   return useMutation({
     mutationFn: async (patch: CharacterPatch) => {
-      if (!characterId) return
+      if (!characterId) throw new Error('characterId is required')
       const token = await getToken()
       await apiFetch(`/characters/${characterId}`, token, {
         method: "PATCH",

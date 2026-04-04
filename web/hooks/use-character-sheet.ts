@@ -4,27 +4,10 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { CharacterData, DEFAULT_CHARACTER } from "@/lib/character-types"
 import { useSync } from "@/hooks/use-sync"
-import { useUpdateCharacter } from "@/hooks/use-update-character"
+import { useUpdateCharacter, PATCH_FIELDS, CharacterPatch } from "@/hooks/use-update-character"
 import { apiFetch } from "@/lib/srd/api-client"
 
 const STORAGE_KEY = "daggerheart-character-sheet"
-
-const PATCH_FIELDS = new Set<keyof CharacterData>([
-  "hpMarked",
-  "stressMarked",
-  "hope",
-  "goldHandfuls",
-  "goldBags",
-  "goldChests",
-  "armorMarked",
-  "agility",
-  "strength",
-  "finesse",
-  "instinct",
-  "presence",
-  "knowledge",
-  "notes",
-])
 
 interface ServerCharacterResponse {
   id: string
@@ -119,12 +102,17 @@ export function useCharacterSheet() {
   const characterIdRef = useRef<string | null>(null)
   const { syncCharacter } = useSync()
   const updateMutation = useUpdateCharacter(characterId)
+  const updateMutationRef = useRef(updateMutation.mutate)
   const { getToken } = useAuth()
 
   // Keep ref in sync with state so callbacks have access to latest value
   useEffect(() => {
     characterIdRef.current = characterId
   }, [characterId])
+
+  useEffect(() => {
+    updateMutationRef.current = updateMutation.mutate
+  }, [updateMutation.mutate])
 
   useEffect(() => {
     let cancelled = false
@@ -205,11 +193,11 @@ export function useCharacterSheet() {
             const allPatchable = changedKeys.length > 0 && changedKeys.every((k) => PATCH_FIELDS.has(k))
 
             if (allPatchable && characterIdRef.current !== null) {
-              const patch: Record<string, unknown> = {}
+              const patch: Partial<CharacterPatch> = {}
               for (const key of changedKeys) {
-                patch[key] = next[key]
+                (patch as Record<string, unknown>)[key as string] = (next as unknown as Record<string, unknown>)[key as string]
               }
-              updateMutation.mutate(patch as Parameters<typeof updateMutation.mutate>[0])
+              updateMutationRef.current(patch)
             } else {
               syncCharacter(next)
             }
@@ -218,7 +206,7 @@ export function useCharacterSheet() {
         return next
       })
     },
-    [syncCharacter, updateMutation],
+    [syncCharacter],
   )
 
   const resetCharacter = useCallback(() => {
