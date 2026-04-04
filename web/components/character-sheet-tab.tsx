@@ -56,7 +56,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   // While in edit mode, render draft; otherwise render server-synced character
   const displayChar = editing && draft ? draft : c
 
-  const playerTier = getTier(displayChar.level)
+  const tier = getTier(displayChar.level)
 
   // ── SRD hooks ────────────────────────────────────────────────
   const { items: classItems, data: classData } = useSrdClasses()
@@ -75,8 +75,8 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     [selectedClass]
   )
   const { items: subclassItems } = useSrdSubclasses(classSubclassNames)
-  const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(playerTier)
-  const { items: armorItems } = useSrdArmor(playerTier)
+  const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(tier)
+  const { items: armorItems } = useSrdArmor(tier)
   const { items: domainCardItems } = useSrdDomainCards(displayChar.level, classDomainNames)
 
   const selectedAncestry = useMemo(
@@ -127,8 +127,6 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
       </div>
     )
   }
-
-  const tier = getTier(displayChar.level)
 
   const handleReset = () => {
     if (confirmReset) {
