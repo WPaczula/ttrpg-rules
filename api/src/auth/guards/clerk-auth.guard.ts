@@ -30,8 +30,11 @@ export class ClerkAuthGuard implements CanActivate {
       const payload = await this.clerk.verifyToken(token);
       request.user = await this.users.findOrCreate(payload.sub);
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+    } catch (e: any) {
+      console.error(e);
+      throw new UnauthorizedException(
+        'Invalid or expired token' + JSON.stringify(e),
+      );
     }
   }
 }

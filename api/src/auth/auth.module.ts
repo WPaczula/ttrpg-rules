@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClerkAuthGuard } from './guards/clerk-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { UsersModule } from '../users/users.module';
-import { createClerkClient } from '@clerk/backend';
+import { verifyToken } from '@clerk/backend';
 
 @Module({
   imports: [UsersModule],
@@ -11,10 +11,14 @@ import { createClerkClient } from '@clerk/backend';
     RolesGuard,
     {
       provide: 'CLERK_CLIENT',
-      useFactory: () =>
-        createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY ?? '' }),
+      useFactory: () => {
+        const secretKey = process.env.CLERK_SECRET_KEY ?? '';
+        return {
+          verifyToken: (token: string) => verifyToken(token, { secretKey }),
+        };
+      },
     },
   ],
-  exports: [ClerkAuthGuard, RolesGuard],
+  exports: [ClerkAuthGuard, RolesGuard, 'CLERK_CLIENT', UsersModule],
 })
 export class AuthModule {}

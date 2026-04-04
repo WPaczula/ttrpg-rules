@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@clerk/nextjs"
 import { type ComboboxItem } from "@/components/ui/combobox"
-import { srdFetch } from "./api-client"
+import { apiFetch } from "./api-client"
 import { srdIdCache } from "./srd-id-cache"
 import type { ApiSubclass } from "./types"
 
@@ -14,7 +14,7 @@ export function useSrdSubclasses(filterByClassNames?: string[]) {
     queryKey: ["srd", "subclasses"],
     queryFn: async () => {
       const token = await getToken()
-      const data = await srdFetch<ApiSubclass[]>("/srd/subclasses", token)
+      const data = await apiFetch<ApiSubclass[]>("/srd/subclasses", token)
       data.forEach((sc) => {
         srdIdCache.subclassByName.set(sc.name, { id: sc.id, className: sc.className })
       })

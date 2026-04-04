@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { readdir, readFile } from 'fs/promises';
 import { join, relative } from 'path';
 
-const SRD_PATH = process.env.SRD_PATH;
+const SRD_PATH = process.env.SRD_PATH as string;
 if (!SRD_PATH) {
   console.error('Error: SRD_PATH environment variable is required.');
   console.error('Usage: SRD_PATH=../server/daggerheart-srd npx tsx scripts/index-rules.ts');

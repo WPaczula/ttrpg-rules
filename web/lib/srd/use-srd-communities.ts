@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@clerk/nextjs"
 import { type ComboboxItem } from "@/components/ui/combobox"
-import { srdFetch } from "./api-client"
+import { apiFetch } from "./api-client"
 import { srdIdCache } from "./srd-id-cache"
 import type { ApiCommunity } from "./types"
 
@@ -14,7 +14,7 @@ export function useSrdCommunities() {
     queryKey: ["srd", "communities"],
     queryFn: async () => {
       const token = await getToken()
-      const data = await srdFetch<ApiCommunity[]>("/srd/communities", token)
+      const data = await apiFetch<ApiCommunity[]>("/srd/communities", token)
       data.forEach((cm) => {
         srdIdCache.communityByName.set(cm.name, { id: cm.id })
       })

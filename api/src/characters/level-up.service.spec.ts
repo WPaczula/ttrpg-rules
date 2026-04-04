@@ -51,6 +51,7 @@ const makeCharacter = (
   primaryWeaponId: null,
   secondaryWeaponId: null,
   notes: '',
+  items: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   class: { id: 'cls-1', name: 'Warrior' },
@@ -94,8 +95,11 @@ const mockCharacterDomainCardRepo = {
   add: jest.fn(),
 };
 
-const mockPrisma = {
-  $transaction: jest.fn((fn: any) => fn(mockPrisma)),
+const mockPrisma: {
+  $transaction: jest.Mock;
+  characterMarkedTrait: { create: jest.Mock; deleteMany: jest.Mock };
+} = {
+  $transaction: jest.fn((fn: (tx: typeof mockPrisma) => unknown) => fn(mockPrisma)),
   characterMarkedTrait: {
     create: jest.fn(),
     deleteMany: jest.fn(),

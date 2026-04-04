@@ -48,6 +48,16 @@ export class CharactersController {
     return this.service.create(dto, req.user.id);
   }
 
+  @PC()
+  @Get('me')
+  async findMine(@Req() req: RequestWithUser) {
+    const character = await this.service.findByUserId(req.user.id);
+    if (!character) {
+      return null;
+    }
+    return character;
+  }
+
   @OwnerOnly()
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {

@@ -8,16 +8,22 @@ import {
   type LootRarity,
   type DiceOption,
   type GoldDenomination,
+  type SrdItem,
   DEFAULT_LOOT_STORE,
   normalizeRoll,
   lookupItem,
 } from "@/lib/loot-types"
+import { useAuthFetch } from "@/lib/api"
 
 const STORAGE_KEY = "daggerheart-loot-session"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
 
 export function useLootStore() {
+  const authFetch = useAuthFetch()
   const [store, setStoreState] = useState<LootStore>(DEFAULT_LOOT_STORE)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [srdItems, setSrdItems] = useState<SrdItem[]>([])
+  const [srdConsumables, setSrdConsumables] = useState<SrdItem[]>([])
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -32,6 +38,22 @@ export function useLootStore() {
     }
     setIsLoaded(true)
   }, [])
+
+  useEffect(() => {
+    async function fetchLootData() {
+      try {
+        const [itemsRes, consumablesRes] = await Promise.all([
+          authFetch(`${API_BASE}/srd/items`),
+          authFetch(`${API_BASE}/srd/consumables`),
+        ])
+        if (itemsRes.ok) setSrdItems(await itemsRes.json())
+        if (consumablesRes.ok) setSrdConsumables(await consumablesRes.json())
+      } catch {
+        // Silently fail; loot lookup will return undefined
+      }
+    }
+    fetchLootData()
+  }, [authFetch])
 
   const setStore = useCallback(
     (updater: LootStore | ((prev: LootStore) => LootStore)) => {
@@ -59,7 +81,7 @@ export function useLootStore() {
       rollTotal: number
     ) => {
       const tableIndex = normalizeRoll(rollTotal, diceOption)
-      const found = lookupItem(tableIndex, itemType)
+      const found = lookupItem(tableIndex, itemType, srdItems, srdConsumables)
       const entry: LootLogEntry = {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
@@ -69,13 +91,13 @@ export function useLootStore() {
         diceOption,
         rollTotal,
         tableIndex,
-        name: found.name,
-        description: found.description,
+        name: found?.name,
+        description: found?.description,
       }
       setStore((prev) => ({ ...prev, log: [entry, ...prev.log] }))
       return entry
     },
-    [setStore]
+    [setStore, srdItems, srdConsumables]
   )
 
   const addGold = useCallback(

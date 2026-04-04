@@ -1,6 +1,6 @@
 import type { CharacterData } from "@/lib/character-types"
 import { srdIdCache } from "@/lib/srd/srd-id-cache"
-import { srdFetch } from "@/lib/srd/api-client"
+import { apiFetch } from "@/lib/srd/api-client"
 
 export interface SyncExperiencePayload {
   name: string

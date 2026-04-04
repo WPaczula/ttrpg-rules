@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@clerk/nextjs"
 import { type ComboboxItem } from "@/components/ui/combobox"
-import { srdFetch } from "./api-client"
+import { apiFetch } from "./api-client"
 import { srdIdCache } from "./srd-id-cache"
 import type { ApiDomainCard } from "./types"
 
@@ -14,7 +14,7 @@ export function useSrdDomainCards(characterLevel: number, classDomainNames?: str
     queryKey: ["srd", "domain-cards"],
     queryFn: async () => {
       const token = await getToken()
-      const data = await srdFetch<ApiDomainCard[]>("/srd/domain-cards", token)
+      const data = await apiFetch<ApiDomainCard[]>("/srd/domain-cards", token)
       data.forEach((dc) => {
         srdIdCache.domainCardByName.set(dc.name, { id: dc.id })
       })

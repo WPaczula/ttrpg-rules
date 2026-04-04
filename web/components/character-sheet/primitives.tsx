@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { formatModifier } from "@/lib/character-types"
-import type { SrdFeature } from "@/lib/srd-data"
+import type { ApiFeature } from "@/lib/srd/types"
 import { cn } from "@/lib/utils"
 import { ChevronDown } from "lucide-react"
 import { SrdMarkdown } from "./srd-markdown"
@@ -219,7 +219,7 @@ export function NumberStepper({ label, value, onChange, min = 0, max = 20 }: Num
 
 // ─── Feature Display ──────────────────────────────────────────────────────
 
-export function FeatureList({ label, features }: { label: string; features: SrdFeature[] }) {
+export function FeatureList({ label, features }: { label: string; features: ApiFeature[] }) {
   if (features.length === 0) return null
   return (
     <div className="space-y-1.5">

@@ -78,6 +78,8 @@ export class CharacterRepository {
     notes?: string;
     hpTotal: number;
     evasion: number;
+    experiences?: { name: string; modifier: number }[];
+    domainCardIds?: string[];
   }): Promise<ICharacterWithRelations> {
     const character = await this.prisma.character.create({
       data: {
@@ -102,6 +104,12 @@ export class CharacterRepository {
         notes: data.notes ?? '',
         hpTotal: data.hpTotal,
         evasion: data.evasion,
+        experiences: data.experiences?.length
+          ? { create: data.experiences.map(({ name, modifier }) => ({ name, modifier })) }
+          : undefined,
+        domainCards: data.domainCardIds?.length
+          ? { create: data.domainCardIds.map((domainCardId) => ({ domainCardId })) }
+          : undefined,
       },
       include: CHARACTER_INCLUDE,
     });
@@ -114,6 +122,16 @@ export class CharacterRepository {
       orderBy: { createdAt: 'desc' },
     });
     return characters.map((c) => this.mapCharacter(c));
+  }
+
+  async findByUserId(userId: string): Promise<ICharacterWithRelations | null> {
+    const character = await this.prisma.character.findFirst({
+      where: { userId },
+      include: CHARACTER_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!character) return null;
+    return this.mapCharacter(character);
   }
 
   async findById(id: string): Promise<ICharacterWithRelations | null> {

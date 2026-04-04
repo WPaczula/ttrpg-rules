@@ -63,6 +63,7 @@ const makeCharacter = (
   primaryWeaponId: null,
   secondaryWeaponId: null,
   notes: '',
+  items: [],
   createdAt: new Date(),
   updatedAt: new Date(),
   class: { id: 'cls-1', name: 'Warrior' },
@@ -152,6 +153,86 @@ describe('CharactersService', () => {
       ],
     }).compile();
     service = module.get(CharactersService);
+  });
+
+  const baseCreateDto = {
+    name: 'Aria',
+    classId: 'cls-1',
+    subclassId: 'sub-1',
+    ancestryId: 'anc-1',
+    ancestryFeatureId: 'af-1',
+    communityId: 'com-1',
+    agility: 1, strength: 0, finesse: 2, instinct: 0, presence: 1, knowledge: -1,
+  };
+
+  describe('create', () => {
+    beforeEach(() => {
+      mockClassRepo.findById.mockResolvedValue({ id: 'cls-1', hp: 6, evasion: 10 });
+      mockCharacterRepo.create.mockResolvedValue(makeCharacter());
+    });
+
+    it('rejects an unknown domain card id', async () => {
+      mockDomainCardSrdRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        service.create({ ...baseCreateDto, domainCardIds: ['dc-bad'] }, 'user-1'),
+      ).rejects.toThrow('not found');
+    });
+
+    it('rejects a domain card whose level exceeds 1 for a level-1 character', async () => {
+      mockDomainCardSrdRepo.findById.mockResolvedValue({ id: 'dc-1', level: 2 });
+
+      await expect(
+        service.create({ ...baseCreateDto, domainCardIds: ['dc-1'] }, 'user-1'),
+      ).rejects.toThrow('not available');
+    });
+
+    it('passes experiences to the repository', async () => {
+      const experiences = [{ name: 'Scouting', modifier: 2 }];
+
+      await service.create({ ...baseCreateDto, experiences }, 'user-1');
+
+      expect(mockCharacterRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ experiences }),
+      );
+    });
+
+    it('passes domainCardIds to the repository after validation', async () => {
+      mockDomainCardSrdRepo.findById.mockResolvedValue({ id: 'dc-1', level: 1 });
+
+      await service.create({ ...baseCreateDto, domainCardIds: ['dc-1'] }, 'user-1');
+
+      expect(mockCharacterRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ domainCardIds: ['dc-1'] }),
+      );
+    });
+  });
+
+  describe('addDomainCard', () => {
+    it('rejects a domain card whose level exceeds the character level', async () => {
+      // tier 2 char: old code would allow level <= 4, correct rule: level <= 2
+      mockGameLogic.computeTier.mockReturnValue(2);
+      const character = makeCharacter({ level: 2 });
+      mockCharacterRepo.findById.mockResolvedValue(character);
+      mockDomainCardSrdRepo.findById.mockResolvedValue({ id: 'dc-1', level: 3 });
+
+      await expect(
+        service.addDomainCard('char-1', { domainCardId: 'dc-1' }),
+      ).rejects.toThrow('not available');
+    });
+
+    it('accepts a domain card whose level equals the character level', async () => {
+      mockGameLogic.computeTier.mockReturnValue(2);
+      const character = makeCharacter({ level: 2 });
+      mockCharacterRepo.findById.mockResolvedValue(character);
+      mockDomainCardSrdRepo.findById.mockResolvedValue({ id: 'dc-1', level: 2 });
+      mockDomainCardRepo.exists.mockResolvedValue(false);
+      mockDomainCardRepo.add.mockResolvedValue({ id: 'cdc-1' });
+
+      await expect(
+        service.addDomainCard('char-1', { domainCardId: 'dc-1' }),
+      ).resolves.not.toThrow();
+    });
   });
 
   describe('update', () => {

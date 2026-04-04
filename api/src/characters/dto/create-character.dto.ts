@@ -6,7 +6,11 @@ import {
   Min,
   Max,
   IsNotEmpty,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateExperienceDto } from './create-experience.dto';
 
 export class CreateCharacterDto {
   @IsString()
@@ -81,4 +85,15 @@ export class CreateCharacterDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreateExperienceDto)
+  experiences?: CreateExperienceDto[];
+
+  @IsArray()
+  @IsOptional()
+  @IsUUID('4', { each: true })
+  domainCardIds?: string[];
 }

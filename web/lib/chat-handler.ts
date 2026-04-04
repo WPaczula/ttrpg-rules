@@ -38,7 +38,7 @@ function selectModel(isCreative: boolean) {
 
 export interface ChatHandlerConfig {
   getSystemPrompt: (body: any) => string | Promise<string>;
-  tools: Record<string, any>;
+  tools: Record<string, any> | ((token: string | null) => Record<string, any>);
   label: string;
   useSmartRouting?: boolean;
   model?: string;
@@ -47,10 +47,13 @@ export interface ChatHandlerConfig {
 export function createChatHandler(config: ChatHandlerConfig) {
   return async function POST(req: Request) {
     try {
-      const { userId } = await auth();
+      const { userId, getToken } = await auth();
       if (!userId) {
         return Response.json({ error: 'Unauthorized' }, { status: 401 });
       }
+
+      const token = await getToken();
+      const tools = typeof config.tools === 'function' ? config.tools(token) : config.tools;
 
       const body = await req.json();
       const { messages } = body;
@@ -70,7 +73,7 @@ export function createChatHandler(config: ChatHandlerConfig) {
           model,
           system: systemPrompt,
           messages: modelMessages,
-          tools: config.tools,
+          tools,
           stopWhen: stepCountIs(5),
         });
 
@@ -84,7 +87,7 @@ export function createChatHandler(config: ChatHandlerConfig) {
         model,
         system: systemPrompt,
         messages: modelMessages,
-        tools: config.tools,
+        tools,
         stopWhen: stepCountIs(5),
       });
 

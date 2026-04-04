@@ -1,5 +1,3 @@
-import { ITEMS, CONSUMABLES } from "./loot-data"
-
 // ─── Rarity ──────────────────────────────────────────────────────────────────
 
 export type LootRarity = "common" | "uncommon" | "rare" | "legendary"
@@ -37,6 +35,12 @@ export const RARITY_BADGE_COLORS: Record<LootRarity, string> = {
 
 export type LootItemType = "item" | "consumable"
 
+export interface SrdItem {
+  roll: number
+  name: string
+  description: string
+}
+
 // ─── Lookup logic ─────────────────────────────────────────────────────────────
 
 /**
@@ -51,9 +55,9 @@ export function normalizeRoll(total: number, option: DiceOption): number {
   return Math.max(1, Math.min(60, normalized))
 }
 
-export function lookupItem(tableIndex: number, type: LootItemType) {
-  const table = type === "item" ? ITEMS : CONSUMABLES
-  return table.find((e) => e.roll === tableIndex) ?? table[tableIndex - 1] ?? table[0]
+export function lookupItem(tableIndex: number, type: LootItemType, items: SrdItem[], consumables: SrdItem[]): SrdItem | undefined {
+  const table = type === "item" ? items : consumables
+  return table.find((e) => e.roll === tableIndex) ?? table[tableIndex - 1]
 }
 
 // ─── Session log ──────────────────────────────────────────────────────────────

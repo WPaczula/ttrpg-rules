@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@clerk/nextjs"
 import { type ComboboxItem } from "@/components/ui/combobox"
-import { srdFetch } from "./api-client"
+import { apiFetch } from "./api-client"
 import { srdIdCache } from "./srd-id-cache"
 import type { ApiArmor } from "./types"
 
@@ -14,7 +14,7 @@ export function useSrdArmor(playerTier: number) {
     queryKey: ["srd", "armor"],
     queryFn: async () => {
       const token = await getToken()
-      const data = await srdFetch<ApiArmor[]>("/srd/armor", token)
+      const data = await apiFetch<ApiArmor[]>("/srd/armor", token)
       data.forEach((a) => {
         srdIdCache.armorByName.set(a.name, { id: a.id })
       })

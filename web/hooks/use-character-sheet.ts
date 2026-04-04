@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { CharacterData, DEFAULT_CHARACTER } from "@/lib/character-types"
 import { useSync } from "@/hooks/use-sync"
-import { srdFetch } from "@/lib/srd/api-client"
+import { apiFetch } from "@/lib/srd/api-client"
 
 const STORAGE_KEY = "daggerheart-character-sheet"
 
@@ -130,12 +130,12 @@ export function useCharacterSheet() {
       try {
         const token = await getToken()
         if (token) {
-          const res = await srdFetch<ServerCharacterResponse[]>(
-            "/characters",
+          const res = await apiFetch<ServerCharacterResponse | null>(
+            "/characters/me",
             token,
           )
-          if (!cancelled && res && res.length > 0) {
-            const data = serverResponseToCharacterData(res[0])
+          if (!cancelled && res) {
+            const data = serverResponseToCharacterData(res)
             setCharacterState(data)
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(data))

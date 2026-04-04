@@ -3,7 +3,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import type { CharacterData } from "@/lib/character-types"
 import { CLASS_FEATURE_THRESHOLD_BONUSES, CLASS_LEVEL_FEATURE_THRESHOLD_BONUSES } from "@/lib/character-types"
-import type { SrdAncestry, SrdClass, SrdCommunity, SrdSubclass } from "@/lib/srd-data"
+import type { ApiAncestry, ApiClass, ApiCommunity, ApiSubclass } from "@/lib/srd/types"
 import { Scroll, Shield, Swords, Sparkles, TreePine } from "lucide-react"
 import { Section, FeatureList } from "./primitives"
 
@@ -55,11 +55,11 @@ function ThresholdToggle({
 interface FeaturesSectionProps {
   character: CharacterData
   update: (patch: Partial<CharacterData>) => void
-  selectedClass: SrdClass | undefined
-  selectedSubclass: SrdSubclass | undefined
-  selectedAncestry: SrdAncestry | undefined
-  selectedSecondaryAncestry: SrdAncestry | undefined
-  selectedCommunity: SrdCommunity | undefined
+  selectedClass: ApiClass | undefined
+  selectedSubclass: ApiSubclass | undefined
+  selectedAncestry: ApiAncestry | undefined
+  selectedSecondaryAncestry: ApiAncestry | undefined
+  selectedCommunity: ApiCommunity | undefined
 }
 
 export function FeaturesSection({
@@ -153,10 +153,10 @@ export function FeaturesSection({
             {selectedSubclass && (
               <TabsContent value="subclass">
                 <div className="space-y-2">
-                  <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.foundation} />
-                  <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.specialization} />
-                  <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.mastery} />
-                  {[...selectedSubclass.foundation, ...selectedSubclass.specialization, ...selectedSubclass.mastery].map((f) => {
+                  <FeatureList label={`${selectedSubclass.name} — Foundation`} features={selectedSubclass.features.filter((f) => f.tier === "foundation")} />
+                  <FeatureList label={`${selectedSubclass.name} — Specialization`} features={selectedSubclass.features.filter((f) => f.tier === "specialization")} />
+                  <FeatureList label={`${selectedSubclass.name} — Mastery`} features={selectedSubclass.features.filter((f) => f.tier === "mastery")} />
+                  {selectedSubclass.features.map((f) => {
                     const key = `${selectedSubclass.name}:${f.name}`
                     const bonusDef = CLASS_FEATURE_THRESHOLD_BONUSES[key]
                     if (!bonusDef) return null

@@ -87,6 +87,22 @@ export class CharactersService {
       );
     }
 
+    for (const domainCardId of dto.domainCardIds ?? []) {
+      const card = await this.domainCards.findById(domainCardId);
+      if (!card) {
+        throw new NotFoundException(
+          ErrorCode.SRD_RESOURCE_NOT_FOUND,
+          `Domain card ${domainCardId} not found`,
+        );
+      }
+      if (card.level > 1) {
+        throw new BadRequestException(
+          ErrorCode.DOMAIN_CARD_NOT_AVAILABLE,
+          `Card level ${card.level} is not available at character level 1 (max level 1)`,
+        );
+      }
+    }
+
     const character = await this.characters.create({
       ...dto,
       userId,
@@ -98,6 +114,10 @@ export class CharactersService {
 
   findAll(): Promise<ICharacterWithRelations[]> {
     return this.characters.findAll();
+  }
+
+  findByUserId(userId: string): Promise<ICharacterWithRelations | null> {
+    return this.characters.findByUserId(userId);
   }
 
   async findOne(id: string): Promise<CharacterResponse> {
@@ -196,13 +216,12 @@ export class CharactersService {
       );
     }
 
-    // Check tier eligibility: card level must be <= character tier * 2
-    const tier = this.gameLogic.computeTier(character.level);
-    const maxLevel = tier * 2;
+    // Check level eligibility: domain card level must not exceed character level
+    const maxLevel = character.level;
     if (card.level > maxLevel) {
       throw new BadRequestException(
         ErrorCode.DOMAIN_CARD_NOT_AVAILABLE,
-        `Card level ${card.level} is not available at tier ${tier} (max level ${maxLevel})`,
+        `Card level ${card.level} is not available at character level ${character.level} (max level ${maxLevel})`,
       );
     }
 

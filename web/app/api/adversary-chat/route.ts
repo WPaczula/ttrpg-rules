@@ -1,6 +1,6 @@
 import { createChatHandler } from '@/lib/chat-handler';
 import { buildAdversaryChatPrompt } from '@/lib/prompts';
-import { adversaryChatTools } from '@/lib/tools';
+import { createAdversaryChatTools } from '@/lib/tools';
 
 export const POST = createChatHandler({
   getSystemPrompt: (body) => {
@@ -8,7 +8,7 @@ export const POST = createChatHandler({
     const pcTier = Math.max(1, Math.min(4, Number(body.pcTier ?? 1)));
     return buildAdversaryChatPrompt(pcCount, pcTier);
   },
-  tools: adversaryChatTools,
+  tools: createAdversaryChatTools,
   label: 'Adversary chat',
   useSmartRouting: true,
 });
