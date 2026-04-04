@@ -17,7 +17,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
 import { useCharacterSheet } from "@/hooks/use-character-sheet"
-import { getTier } from "@/lib/character-types"
+import { DEFAULT_CHARACTER, getTier } from "@/lib/character-types"
 import { useSrdClasses } from "@/lib/srd/use-srd-classes"
 import { useSrdAncestries } from "@/lib/srd/use-srd-ancestries"
 import { useSrdCommunities } from "@/lib/srd/use-srd-communities"
@@ -130,7 +130,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
 
   const handleReset = () => {
     if (confirmReset) {
-      resetCharacter()
+      setDraft(DEFAULT_CHARACTER)
       setConfirmReset(false)
     } else {
       setConfirmReset(true)
