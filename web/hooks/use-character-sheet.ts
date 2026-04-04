@@ -253,23 +253,11 @@ export function useCharacterSheet() {
     )
   }, [queryClient])
 
-  // No-op stubs retained for call-site compatibility while CharacterSheetTab is updated (Task 2)
-  const pauseSave = useCallback(() => {}, [])
-  const resumeSave = useCallback(() => {}, [])
-  const takeSnapshot = useCallback(() => {}, [])
-  const restoreSnapshot = useCallback(() => {}, [])
-  const flushToStorage = useCallback(() => {}, [])
-
   return {
     character,
     characterId,
     setCharacter,
     resetCharacter,
     isLoaded: !isLoading,
-    pauseSave,
-    resumeSave,
-    takeSnapshot,
-    restoreSnapshot,
-    flushToStorage,
   }
 }
