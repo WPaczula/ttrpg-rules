@@ -4,11 +4,30 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { CharacterData, DEFAULT_CHARACTER } from "@/lib/character-types"
 import { useSync } from "@/hooks/use-sync"
+import { useUpdateCharacter } from "@/hooks/use-update-character"
 import { apiFetch } from "@/lib/srd/api-client"
 
 const STORAGE_KEY = "daggerheart-character-sheet"
 
+const PATCH_FIELDS = new Set<keyof CharacterData>([
+  "hpMarked",
+  "stressMarked",
+  "hope",
+  "goldHandfuls",
+  "goldBags",
+  "goldChests",
+  "armorMarked",
+  "agility",
+  "strength",
+  "finesse",
+  "instinct",
+  "presence",
+  "knowledge",
+  "notes",
+])
+
 interface ServerCharacterResponse {
+  id: string
   class: { name: string }
   subclass: { name: string }
   ancestry: { name: string }
@@ -92,12 +111,20 @@ function serverResponseToCharacterData(res: ServerCharacterResponse): CharacterD
 
 export function useCharacterSheet() {
   const [character, setCharacterState] = useState<CharacterData>(DEFAULT_CHARACTER)
+  const [characterId, setCharacterId] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savePausedRef = useRef(false)
   const snapshotRef = useRef<CharacterData | null>(null)
+  const characterIdRef = useRef<string | null>(null)
   const { syncCharacter } = useSync()
+  const updateMutation = useUpdateCharacter(characterId)
   const { getToken } = useAuth()
+
+  // Keep ref in sync with state so callbacks have access to latest value
+  useEffect(() => {
+    characterIdRef.current = characterId
+  }, [characterId])
 
   useEffect(() => {
     let cancelled = false
@@ -112,6 +139,10 @@ export function useCharacterSheet() {
           delete parsed.minorThreshold
           delete parsed.majorThreshold
           delete parsed.severeThreshold
+          if (typeof parsed._id === "string") {
+            setCharacterId(parsed._id)
+            characterIdRef.current = parsed._id
+          }
           loaded = { ...DEFAULT_CHARACTER, ...parsed }
         }
       } catch {
@@ -137,8 +168,10 @@ export function useCharacterSheet() {
           if (!cancelled && res) {
             const data = serverResponseToCharacterData(res)
             setCharacterState(data)
+            setCharacterId(res.id)
+            characterIdRef.current = res.id
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+              localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, _id: res.id }))
             } catch {}
           }
         }
@@ -162,21 +195,36 @@ export function useCharacterSheet() {
           if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
           saveTimerRef.current = setTimeout(() => {
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+              localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...next, _id: characterIdRef.current }))
             } catch {}
-            syncCharacter(next)
+
+            // Diff prev and next to determine changed keys
+            const changedKeys = (Object.keys(next) as (keyof CharacterData)[]).filter(
+              (key) => prev[key] !== next[key],
+            )
+            const allPatchable = changedKeys.length > 0 && changedKeys.every((k) => PATCH_FIELDS.has(k))
+
+            if (allPatchable && characterIdRef.current !== null) {
+              const patch: Record<string, unknown> = {}
+              for (const key of changedKeys) {
+                patch[key] = next[key]
+              }
+              updateMutation.mutate(patch as Parameters<typeof updateMutation.mutate>[0])
+            } else {
+              syncCharacter(next)
+            }
           }, 500)
         }
         return next
       })
     },
-    [syncCharacter],
+    [syncCharacter, updateMutation],
   )
 
   const resetCharacter = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CHARACTER))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...DEFAULT_CHARACTER, _id: characterIdRef.current }))
     } catch {}
     setCharacterState(DEFAULT_CHARACTER)
   }, [])
@@ -204,7 +252,7 @@ export function useCharacterSheet() {
       setCharacterState(snapshot)
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...snapshot, _id: characterIdRef.current }))
       } catch {}
     }
   }, [])
@@ -213,7 +261,7 @@ export function useCharacterSheet() {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     setCharacterState((current) => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, _id: characterIdRef.current }))
       } catch {}
       syncCharacter(current)
       return current
@@ -223,6 +271,7 @@ export function useCharacterSheet() {
 
   return {
     character,
+    characterId,
     setCharacter,
     resetCharacter,
     isLoaded,
