@@ -26,7 +26,7 @@ export interface CharacterPatch {
   notes?: string
 }
 
-export const PATCH_FIELDS = new Set<keyof CharacterPatch>([
+export const PATCH_FIELDS = new Set<string>([
   "hpMarked", "stressMarked", "hope",
   "goldHandfuls", "goldBags", "goldChests",
   "armorMarked",
@@ -215,6 +215,9 @@ export function useCharacterSheet() {
     },
   })
 
+  const patchMutate = patchMutation.mutate
+  const syncMutate = syncMutation.mutate
+
   const setCharacter = useCallback(
     (updater: CharacterData | ((prev: CharacterData) => CharacterData)) => {
       const current = queryClient.getQueryData<CharacterQueryData | null>(["character"])
@@ -226,7 +229,7 @@ export function useCharacterSheet() {
       )
       const allPatchable =
         changedKeys.length > 0 &&
-        changedKeys.every((k) => PATCH_FIELDS.has(k as keyof CharacterPatch))
+        changedKeys.every((k) => PATCH_FIELDS.has(k))
 
       const id = current?.id ?? null
 
@@ -235,12 +238,12 @@ export function useCharacterSheet() {
         for (const key of changedKeys) {
           ;(patch as Record<string, unknown>)[key] = next[key as keyof CharacterData]
         }
-        patchMutation.mutate({ id, patch, next })
+        patchMutate({ id, patch, next })
       } else {
-        syncMutation.mutate({ next })
+        syncMutate({ next })
       }
     },
-    [queryClient, patchMutation, syncMutation],
+    [queryClient, patchMutate, syncMutate],
   )
 
   const resetCharacter = useCallback(() => {
