@@ -190,12 +190,12 @@ export function useCharacterSheet() {
             const changedKeys = (Object.keys(next) as (keyof CharacterData)[]).filter(
               (key) => prev[key] !== next[key],
             )
-            const allPatchable = changedKeys.length > 0 && changedKeys.every((k) => PATCH_FIELDS.has(k))
+            const allPatchable = changedKeys.length > 0 && changedKeys.every((k) => PATCH_FIELDS.has(k as keyof CharacterPatch))
 
             if (allPatchable && characterIdRef.current !== null) {
               const patch: Partial<CharacterPatch> = {}
               for (const key of changedKeys) {
-                (patch as Record<string, unknown>)[key as string] = (next as unknown as Record<string, unknown>)[key as string]
+                ;(patch as Record<string, unknown>)[key as string] = next[key]
               }
               updateMutationRef.current(patch)
             } else {
@@ -206,7 +206,7 @@ export function useCharacterSheet() {
         return next
       })
     },
-    [syncCharacter],
+    [syncCharacter], // updateMutationRef is a stable ref — intentionally excluded from deps
   )
 
   const resetCharacter = useCallback(() => {

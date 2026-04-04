@@ -21,7 +21,7 @@ export interface CharacterPatch {
   notes?: string
 }
 
-export const PATCH_FIELDS = new Set<string>([
+export const PATCH_FIELDS = new Set<keyof CharacterPatch>([
   'hpMarked', 'stressMarked', 'hope',
   'goldHandfuls', 'goldBags', 'goldChests',
   'armorMarked',
