@@ -1,4 +1,4 @@
-import { AdvancementType } from '../enums/advancement-type.enum';
+import { AdvancementType } from './advancement-type.enum';
 
 export interface IAdvancementOption {
   type: AdvancementType;

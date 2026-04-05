@@ -13,16 +13,16 @@ import {
   Req,
 } from '@nestjs/common';
 import { CharactersService } from './characters.service';
-import { LevelUpService } from './level-up.service';
-import { SyncCharacterService } from './sync-character.service';
-import { ApplyLevelUpDto } from './dto/apply-level-up.dto';
+import { LevelUpService } from './level-up/level-up.service';
+import { SyncCharacterService } from './sync-character/sync-character.service';
+import { ApplyLevelUpDto } from './level-up/apply-level-up.dto';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { UpdateCharacterDto } from './dto/update-character.dto';
 import { CreateExperienceDto } from './dto/create-experience.dto';
 import { UpdateExperienceDto } from './dto/update-experience.dto';
 import { AddDomainCardDto } from './dto/add-domain-card.dto';
 import { ToggleThresholdBonusDto } from './dto/toggle-threshold-bonus.dto';
-import { SyncCharacterDto } from './dto/sync-character.dto';
+import { SyncCharacterDto } from './sync-character/sync-character.dto';
 import { GM } from '../auth/decorators/gm.decorator';
 import { PC } from '../auth/decorators/pc.decorator';
 import { OwnerOnly } from './decorators/owner-only.decorator';

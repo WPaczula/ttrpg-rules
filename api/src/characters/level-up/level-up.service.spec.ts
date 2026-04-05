@@ -5,15 +5,15 @@ jest.mock('@prisma/client', () => ({
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { LevelUpService } from './level-up.service';
-import { CharacterRepository } from './repositories/character.repository';
-import { LevelUpRepository } from './repositories/level-up.repository';
-import { GameLogicService } from '../game-logic/game-logic.service';
-import { DomainCardRepository } from '../srd/repositories/domain-card.repository';
-import { ExperienceRepository } from './repositories/experience.repository';
-import { CharacterDomainCardRepository } from './repositories/character-domain-card.repository';
-import { PrismaService } from '../prisma/prisma.service';
-import { CharactersGateway } from './characters.gateway';
-import { ICharacterWithRelations } from './interfaces/character.interface';
+import { CharacterRepository } from '../repositories/character.repository';
+import { LevelUpRepository } from './level-up.repository';
+import { GameLogicService } from '../../game-logic/game-logic.service';
+import { DomainCardRepository } from '../../srd/repositories/domain-card.repository';
+import { ExperienceRepository } from '../repositories/experience.repository';
+import { CharacterDomainCardRepository } from '../repositories/character-domain-card.repository';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CharactersGateway } from '../characters.gateway';
+import { ICharacterWithRelations } from '../interfaces/character.interface';
 import { AdvancementType } from '@prisma/client';
 
 const makeCharacter = (

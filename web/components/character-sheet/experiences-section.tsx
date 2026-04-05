@@ -95,9 +95,6 @@ export function ExperiencesSection({ experiences, update, editing = false }: Exp
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground mt-2">
-        Spend Hope to add an experience modifier to a relevant roll.
-      </p>
     </Section>
   )
 }

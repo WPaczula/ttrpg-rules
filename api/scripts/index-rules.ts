@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import OpenAI from 'openai';
 import { readdir, readFile } from 'fs/promises';
 import { join, relative } from 'path';
@@ -13,7 +15,7 @@ if (!SRD_PATH) {
 const SRD_FULL_DOC = join(SRD_PATH, '.build/01_pdf/DH-SRD-2025-09-09.md');
 const SKIP_DIRS = ['.build', '.github'];
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 const openai = new OpenAI();
 
 interface SRDChunk {
@@ -65,6 +67,55 @@ function slugify(text: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim();
+}
+
+const MAX_CHUNK_CHARS = 24000; // ~6000 tokens, safely under the 8192 limit
+
+function splitLargeChunk(chunk: SRDChunk): SRDChunk[] {
+  if (chunk.content.length <= MAX_CHUNK_CHARS) return [chunk];
+
+  // Split by paragraphs first, then fall back to lines, then hard-cut
+  const segments = chunk.content.split(/\n\n+/).flatMap((para) => {
+    if (para.length <= MAX_CHUNK_CHARS) return [para];
+    // Paragraph too big — split by lines
+    const lines = para.split('\n');
+    const lineGroups: string[] = [];
+    let group = '';
+    for (const line of lines) {
+      if (group.length + line.length + 1 > MAX_CHUNK_CHARS && group.length > 0) {
+        lineGroups.push(group);
+        group = line;
+      } else {
+        group = group ? `${group}\n${line}` : line;
+      }
+    }
+    if (group) lineGroups.push(group);
+    return lineGroups;
+  });
+
+  const subChunks: SRDChunk[] = [];
+  let current = '';
+  let part = 0;
+
+  for (const seg of segments) {
+    if (current.length + seg.length + 2 > MAX_CHUNK_CHARS && current.length > 0) {
+      subChunks.push({ ...chunk, id: `${chunk.id}/part-${part}`, content: current.trim() });
+      part++;
+      current = seg;
+    } else {
+      current = current ? `${current}\n\n${seg}` : seg;
+    }
+  }
+
+  if (current.trim().length > 50) {
+    subChunks.push({
+      ...chunk,
+      id: part === 0 ? chunk.id : `${chunk.id}/part-${part}`,
+      content: current.trim(),
+    });
+  }
+
+  return subChunks;
 }
 
 function chunkSRDDocument(content: string): SRDChunk[] {
@@ -145,7 +196,7 @@ function chunkSRDDocument(content: string): SRDChunk[] {
     }
   }
 
-  return chunks;
+  return chunks.flatMap(splitLargeChunk);
 }
 
 async function upsertEmbedding(

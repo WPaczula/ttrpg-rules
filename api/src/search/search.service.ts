@@ -3,13 +3,20 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import { DocumentEmbeddingRepository } from './repositories/document-embedding.repository';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SearchService {
   private readonly openai: OpenAI;
 
-  constructor(private readonly embeddings: DocumentEmbeddingRepository) {
-    this.openai = new OpenAI();
+  constructor(
+    private readonly embeddings: DocumentEmbeddingRepository,
+    private readonly configService: ConfigService,
+  ) {
+    this.openai = new OpenAI({
+      apiKey: this.configService.get('OPENAI_API_KEY'),
+    });
+    console.log(this.configService.get('OPENAI_API_KEY'));
   }
 
   async search(

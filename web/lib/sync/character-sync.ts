@@ -45,7 +45,6 @@ export interface SyncCharacterPayload {
   secondaryWeapon?: string
   armorName?: string
   items: string[]
-  features: string
   notes: string
 }
 
@@ -97,8 +96,7 @@ export function buildSyncPayload(data: CharacterData): SyncCharacterPayload {
     primaryWeapon: data.primaryWeapon || undefined,
     secondaryWeapon: data.secondaryWeapon || undefined,
     armorName: data.armorName || undefined,
-    items: data.items,
-    features: data.features,
+    items: data.items ?? [],
     notes: data.notes,
   }
 }

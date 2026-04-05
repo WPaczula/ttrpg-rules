@@ -39,11 +39,10 @@ function ThresholdToggle({
         }
         update({ thresholdBonuses: next })
       }}
-      className={`flex items-center gap-1.5 px-2 py-1 rounded text-[11px] border transition-colors ${
-        isActive
-          ? "bg-gold/20 border-gold/50 text-gold"
-          : "bg-transparent border-border text-muted-foreground hover:border-gold/30"
-      }`}
+      className={`flex items-center gap-1.5 px-2 py-1 rounded text-[11px] border transition-colors ${isActive
+        ? "bg-gold/20 border-gold/50 text-gold"
+        : "bg-transparent border-border text-muted-foreground hover:border-gold/30"
+        }`}
     >
       <Shield className="w-3 h-3" />
       {label}: {bonusLabel}
@@ -125,7 +124,7 @@ export function FeaturesSection({
             {selectedClass && (
               <TabsContent value="class">
                 <div className="space-y-2">
-                  <FeatureList label={`${selectedClass.name} — Hope Feature`} features={[selectedClass.hopeFeature]} />
+                  <FeatureList label={`${selectedClass.name} — Hope Feature`} features={selectedClass.features} />
                   <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
                   {selectedClass.features.map((f) => {
                     const key = `${selectedClass.name}:${f.name}`

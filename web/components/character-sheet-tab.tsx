@@ -61,7 +61,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   // ── SRD hooks ────────────────────────────────────────────────
   const { items: classItems, data: classData } = useSrdClasses()
   const { items: ancestryItems, data: ancestryData } = useSrdAncestries()
-  const { items: communityItems } = useSrdCommunities()
+  const { items: communityItems, data: communityData } = useSrdCommunities()
   const selectedClass = useMemo(
     () => classData.find((cls) => cls.name === displayChar.class),
     [classData, displayChar.class]
@@ -74,7 +74,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     () => selectedClass?.subclasses.map((s) => s.name),
     [selectedClass]
   )
-  const { items: subclassItems } = useSrdSubclasses(classSubclassNames)
+  const { items: subclassItems, data: subclassData } = useSrdSubclasses(classSubclassNames)
   const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(tier)
   const { items: armorItems } = useSrdArmor(tier)
   const { items: domainCardItems } = useSrdDomainCards(displayChar.level, classDomainNames)
@@ -86,6 +86,14 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   const selectedSecondaryAncestry = useMemo(
     () => ancestryData.find((a) => a.name === displayChar.secondaryAncestry),
     [ancestryData, displayChar.secondaryAncestry]
+  )
+  const selectedSubclass = useMemo(
+    () => subclassData.find((s) => s.name === displayChar.subclass),
+    [subclassData, displayChar.subclass]
+  )
+  const selectedCommunity = useMemo(
+    () => communityData.find((cm) => cm.name === displayChar.community),
+    [communityData, displayChar.community]
   )
 
   const enterEditMode = () => {
@@ -251,10 +259,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             editing={editing}
             domainCardItems={domainCardItems}
             selectedClass={selectedClass}
-            selectedSubclass={undefined}
+            selectedSubclass={selectedSubclass}
             selectedAncestry={selectedAncestry}
             selectedSecondaryAncestry={selectedSecondaryAncestry}
-            selectedCommunity={undefined}
+            selectedCommunity={selectedCommunity}
           />
         </TabsContent>
 

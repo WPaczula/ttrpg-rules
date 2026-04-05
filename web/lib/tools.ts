@@ -66,6 +66,9 @@ export function createRulesTools(token: string | null) {
     ...Object.fromEntries(
       categories.map(({ plural, singular }) => [`get_${singular}`, createGetTool(plural, singular, token)])
     ),
+    // Domain cards (separate path from domains, tool names use underscores)
+    list_domain_cards: createListTool('domain-cards', token),
+    get_domain_card: createGetTool('domain-cards', 'domain-card', token),
     // Search tool
     search_rules: tool({
       description: 'Search rules by semantic meaning. Use for open-ended questions.',

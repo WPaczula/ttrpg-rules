@@ -55,13 +55,15 @@ export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonu
         )}
         {domainCards.map((card) => {
           const srdCard = SRD_DOMAIN_CARDS.find((dc) => dc.name === card.name)
+          const selectedNames = new Set(domainCards.filter((d) => d.id !== card.id && d.name).map((d) => d.name))
+          const availableItems = domainCardItems.filter((item) => !selectedNames.has(item.label))
           return (
             <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
               <div className="flex items-center gap-2">
                 {editing ? (
                   <div className="flex-1">
                     <Combobox
-                      items={domainCardItems}
+                      items={availableItems}
                       value={card.name}
                       onSelect={(name) => {
                         const match = SRD_DOMAIN_CARDS.find((dc) => dc.name === name)
