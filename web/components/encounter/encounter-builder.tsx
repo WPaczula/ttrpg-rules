@@ -129,7 +129,7 @@ export function EncounterBuilder({
                 size="icon"
                 className="h-8 w-8 text-gold hover:bg-gold/10 shrink-0"
                 aria-label="Open music in new tab"
-                onClick={() => window.open(activeEncounter.musicUrl, "_blank", "noopener,noreferrer")}
+                onClick={() => window.open(activeEncounter.musicUrl!, "_blank", "noopener,noreferrer")}
               >
                 <Music className="w-3.5 h-3.5" />
               </Button>
