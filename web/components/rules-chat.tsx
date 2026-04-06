@@ -33,7 +33,6 @@ export function RulesChat({ isActive }: RulesChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const inputAreaRef = useRef<HTMLDivElement>(null)
-  const [isInputFocused, setIsInputFocused] = useState(false)
 
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/rules-chat" }),
@@ -53,16 +52,6 @@ export function RulesChat({ isActive }: RulesChatProps) {
   const isLoading = status === "streaming" || status === "submitted"
 
   useChatScroll(scrollRef, messages, isActive)
-
-  const handleInputFocus = () => {
-    setIsInputFocused(true)
-    setTimeout(() => {
-      inputAreaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-    }, 300)
-  }
-
-  const handleInputBlur = () => setIsInputFocused(false)
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
@@ -121,8 +110,6 @@ export function RulesChat({ isActive }: RulesChatProps) {
               placeholder={isLoading ? "Searching rules..." : "Ask about rules..."}
               disabled={isLoading}
               autoComplete="off"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
             />
             <Button
@@ -136,17 +123,15 @@ export function RulesChat({ isActive }: RulesChatProps) {
           </form>
         </div>
 
-        {!isInputFocused && (
-          <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
-            <p>
-              Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
-              <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
-                DPCGL
-              </a>
-              . Not affiliated with Critical Role or Darrington Press.
-            </p>
-          </footer>
-        )}
+        <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
+          <p>
+            Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
+            <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
+              DPCGL
+            </a>
+            . Not affiliated with Critical Role or Darrington Press.
+          </p>
+        </footer>
       </div>
     </div>
   )

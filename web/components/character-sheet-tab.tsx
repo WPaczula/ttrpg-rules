@@ -147,6 +147,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
   }
 
   return (
+    <div className="h-full overflow-y-auto">
     <div className="max-w-2xl mx-auto px-4 pb-8">
 
       {/* ── Identity Header (static display) ────────────────────── */}
@@ -347,6 +348,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
     </div>
   )
 }
