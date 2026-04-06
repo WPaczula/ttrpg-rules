@@ -78,7 +78,7 @@ export function AdversaryLibrary({
   if (library.length === 0) {
     return (
       <p className="text-sm text-muted-foreground/70 italic py-2">
-        No adversaries imported yet. Use the Import button above to add some.
+        No adversaries imported yet. Use the Adversaries tab to create some.
       </p>
     )
   }
