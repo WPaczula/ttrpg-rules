@@ -2,12 +2,13 @@
 
 import { MobileTabsNav } from "@/components/mobile-tabs-nav"
 import { TabsHeader } from "@/components/tabs-header"
-import { BookOpen, Dices, Swords } from "lucide-react"
+import { BookOpen, Bot, Dices, Swords } from "lucide-react"
 import React from "react"
 
 const gmTabs = [
     { value: "rules", href: "/rules", icon: BookOpen, label: "Rules" },
-    { value: "adversaries", href: "/adversaries", icon: Swords, label: "Adversaries" },
+    { value: "adversaries", href: "/adversaries", icon: Bot, label: "Adversaries" },
+    { value: "encounters", href: "/encounters", icon: Swords, label: "Encounters" },
     { value: "loot", href: "/loot", icon: Dices, label: "Loot" },
 ]
 
