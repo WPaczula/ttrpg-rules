@@ -13,7 +13,7 @@ import {
 } from "@/lib/adversary-types"
 import { Counter } from "@/components/character-sheet/primitives"
 import { cn } from "@/lib/utils"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, Music } from "lucide-react"
 
 interface EncounterBuilderProps {
   encounters: Encounter[]
@@ -112,6 +112,29 @@ export function EncounterBuilder({
             placeholder="Encounter name..."
             className="h-8 bg-input border-border text-sm"
           />
+
+          {/* Music URL */}
+          <div className="flex items-center gap-2">
+            <Input
+              value={activeEncounter.musicUrl ?? ""}
+              onChange={(e) =>
+                onUpdateEncounter(activeEncounter.id, { musicUrl: e.target.value || undefined })
+              }
+              placeholder="Music URL (opens in new tab)..."
+              className="h-8 bg-input border-border text-sm flex-1"
+            />
+            {activeEncounter.musicUrl && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gold hover:bg-gold/10 shrink-0"
+                aria-label="Open music in new tab"
+                onClick={() => window.open(activeEncounter.musicUrl, "_blank", "noopener,noreferrer")}
+              >
+                <Music className="w-3.5 h-3.5" />
+              </Button>
+            )}
+          </div>
 
           {/* PC Count + Budget */}
           <div className="flex items-center justify-between gap-4">
