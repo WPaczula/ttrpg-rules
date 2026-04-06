@@ -71,6 +71,7 @@ export interface Encounter {
   name: string
   pcCount: number
   adversaries: EncounterAdversary[]
+  musicUrl?: string
 }
 
 export interface AdversaryStore {
