@@ -6,7 +6,7 @@ jest.mock('@prisma/client', () => ({
 import { Test, TestingModule } from '@nestjs/testing';
 import { LevelUpService } from './level-up.service';
 import { CharacterRepository } from '../repositories/character.repository';
-import { LevelUpRepository } from './level-up.repository';
+import { LevelUpRepository } from './repositories/level-up.repository';
 import { GameLogicService } from '../../game-logic/game-logic.service';
 import { DomainCardRepository } from '../../srd/repositories/domain-card.repository';
 import { ExperienceRepository } from '../repositories/experience.repository';

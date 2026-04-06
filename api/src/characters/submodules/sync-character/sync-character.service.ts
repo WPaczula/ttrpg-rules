@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ClassRepository } from '../../srd/repositories/class.repository';
-import { SubclassRepository } from '../../srd/repositories/subclass.repository';
-import { AncestryRepository } from '../../srd/repositories/ancestry.repository';
-import { CommunityRepository } from '../../srd/repositories/community.repository';
-import { WeaponRepository } from '../../srd/repositories/weapon.repository';
-import { ArmorRepository } from '../../srd/repositories/armor.repository';
-import { DomainCardRepository } from '../../srd/repositories/domain-card.repository';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { ClassRepository } from '../../../srd/repositories/class.repository';
+import { SubclassRepository } from '../../../srd/repositories/subclass.repository';
+import { AncestryRepository } from '../../../srd/repositories/ancestry.repository';
+import { CommunityRepository } from '../../../srd/repositories/community.repository';
+import { WeaponRepository } from '../../../srd/repositories/weapon.repository';
+import { ArmorRepository } from '../../../srd/repositories/armor.repository';
+import { DomainCardRepository } from '../../../srd/repositories/domain-card.repository';
 import { SyncCharacterDto } from './sync-character.dto';
-import { BadRequestException, ErrorCode } from '../../common/error-codes';
+import { BadRequestException, ErrorCode } from '../../../common/error-codes';
 
 @Injectable()
 export class SyncCharacterService {

@@ -4,7 +4,7 @@ jest.mock('@prisma/client', () => ({
 }));
 
 import { LevelUpRepository } from './level-up.repository';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../../prisma/prisma.service';
 import { AdvancementType } from '@prisma/client';
 
 const mockPrisma = {
@@ -30,7 +30,9 @@ describe('LevelUpRepository', () => {
         { id: 'adv-1', type: AdvancementType.ADD_HP, metadata: null },
         { id: 'adv-2', type: AdvancementType.ADD_HP, metadata: null },
       ];
-      mockPrisma.levelUpAdvancement.findMany.mockResolvedValue(mockAdvancements);
+      mockPrisma.levelUpAdvancement.findMany.mockResolvedValue(
+        mockAdvancements,
+      );
 
       const result = await repo.getAdvancementsInTier('char-1', 2, 4);
 

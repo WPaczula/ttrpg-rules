@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AdvancementType } from './advancement-type.enum';
+import { PrismaService } from '../../../../prisma/prisma.service';
+import { AdvancementType } from '../enums/advancement-type.enum';
 
 interface CreateLevelUpData {
   characterId: string;

@@ -13,11 +13,18 @@ import { SrdModule } from '../srd/srd.module';
 import { AuthModule } from '../auth/auth.module';
 import { CharacterOwnerGuard } from './guards/character-owner.guard';
 import { CharactersGatewayModule } from './characters-gateway.module';
-import { LevelUpModule } from './level-up/level-up.module';
-import { SyncCharacterModule } from './sync-character/sync-character.module';
+import { LevelUpModule } from './submodules/level-up/level-up.module';
+import { SyncCharacterModule } from './submodules/sync-character/sync-character.module';
 
 @Module({
-  imports: [GameLogicModule, SrdModule, AuthModule, CharactersGatewayModule, LevelUpModule, SyncCharacterModule],
+  imports: [
+    GameLogicModule,
+    SrdModule,
+    AuthModule,
+    CharactersGatewayModule,
+    LevelUpModule,
+    SyncCharacterModule,
+  ],
   controllers: [CharactersController],
   providers: [
     CharactersService,

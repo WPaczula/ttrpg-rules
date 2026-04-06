@@ -1,22 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CharacterRepository } from '../repositories/character.repository';
-import { LevelUpRepository } from './level-up.repository';
-import { ExperienceRepository } from '../repositories/experience.repository';
-import { CharacterDomainCardRepository } from '../repositories/character-domain-card.repository';
-import { GameLogicService } from '../../game-logic/game-logic.service';
-import { DomainCardRepository } from '../../srd/repositories/domain-card.repository';
-import { AdvancementType } from './advancement-type.enum';
+import { CharacterRepository } from '../../repositories/character.repository';
+import { LevelUpRepository } from './repositories/level-up.repository';
+import { ExperienceRepository } from '../../repositories/experience.repository';
+import { CharacterDomainCardRepository } from '../../repositories/character-domain-card.repository';
+import { GameLogicService } from '../../../game-logic/game-logic.service';
+import { DomainCardRepository } from '../../../srd/repositories/domain-card.repository';
+import { AdvancementType } from './enums/advancement-type.enum';
 import {
   NotFoundException,
   ConflictException,
   BadRequestException,
   ErrorCode,
-} from '../../common/error-codes';
-import { ILevelUpOptions } from './level-up-options.interface';
-import { ApplyLevelUpDto } from './apply-level-up.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CharactersGateway } from '../characters.gateway';
-import { CharacterResponse } from '../characters.service';
+} from '../../../common/error-codes';
+import { ILevelUpOptions } from './interfaces/level-up-options.interface';
+import { ApplyLevelUpDto } from './dto/apply-level-up.dto';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { CharactersGateway } from '../../characters.gateway';
+import { CharacterResponse } from '../../characters.service';
 
 const SLOT_LIMITS: Record<AdvancementType, number> = {
   [AdvancementType.INCREASE_TRAITS]: 3,
@@ -84,18 +84,16 @@ export class LevelUpService {
       slotUsage[adv.type] = (slotUsage[adv.type] || 0) + 1;
     }
 
-    const availableAdvancements = Object.values(AdvancementType).map(
-      (type) => {
-        const slotsUsed = slotUsage[type] || 0;
-        const slotsMax = SLOT_LIMITS[type];
-        return {
-          type,
-          slotsUsed,
-          slotsMax,
-          available: slotsUsed < slotsMax,
-        };
-      },
-    );
+    const availableAdvancements = Object.values(AdvancementType).map((type) => {
+      const slotsUsed = slotUsage[type] || 0;
+      const slotsMax = SLOT_LIMITS[type];
+      return {
+        type,
+        slotsUsed,
+        slotsMax,
+        available: slotsUsed < slotsMax,
+      };
+    });
 
     // Get eligible domain cards: level <= nextLevel and not already owned
     const allCards = await this.domainCards.findAll();
@@ -175,9 +173,7 @@ export class LevelUpService {
               'INCREASE_TRAITS requires exactly 2 traits',
             );
           }
-          const markedSet = new Set(
-            character.markedTraits.map((m) => m.trait),
-          );
+          const markedSet = new Set(character.markedTraits.map((m) => m.trait));
           for (const t of traits) {
             if (markedSet.has(t) || newMarkedTraits.includes(t)) {
               throw new BadRequestException(
@@ -230,9 +226,7 @@ export class LevelUpService {
           break;
         }
         case AdvancementType.EXTRA_DOMAIN_CARD: {
-          const cardMeta = adv.metadata as
-            | { domainCardId: string }
-            | undefined;
+          const cardMeta = adv.metadata as { domainCardId: string } | undefined;
           if (!cardMeta?.domainCardId) {
             throw new BadRequestException(
               ErrorCode.INVALID_ADVANCEMENT,
@@ -280,7 +274,7 @@ export class LevelUpService {
     });
 
     // Apply character updates
-    const updated = await this.characters.update(characterId, characterUpdate);
+    await this.characters.update(characterId, characterUpdate);
 
     // Create marked traits
     for (const trait of newMarkedTraits) {

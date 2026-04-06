@@ -10,8 +10,8 @@ import {
   IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AdvancementType } from './advancement-type.enum';
-import { Trait } from '../enums/trait.enum';
+import { AdvancementType } from '../enums/advancement-type.enum';
+import { Trait } from '../../../enums/trait.enum';
 
 export class IncreaseTraitsMetadataDto {
   @IsArray()
