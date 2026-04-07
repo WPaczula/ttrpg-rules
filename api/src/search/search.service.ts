@@ -16,7 +16,6 @@ export class SearchService {
     this.openai = new OpenAI({
       apiKey: this.configService.get('OPENAI_API_KEY'),
     });
-    console.log(this.configService.get('OPENAI_API_KEY'));
   }
 
   async search(
