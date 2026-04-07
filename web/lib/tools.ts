@@ -32,7 +32,7 @@ function createListTool(plural: string, token: string | null) {
         headers: authHeaders(token),
       });
       const data = await res.json();
-      return Array.isArray(data) ? data.map(item => JSON.stringify(item)).join('\n') : JSON.stringify(data);
+      return Array.isArray(data) ? data.map(item => `id:${item.id};name:${item.name}`).join('\n') : JSON.stringify(data);
     },
   });
 }
