@@ -147,8 +147,7 @@ export function useCharacterSheet() {
           localStorage.removeItem(STORAGE_KEY)
         }
       } catch {
-        // Migration failure must not block loading
-        try { localStorage.removeItem(STORAGE_KEY) } catch {}
+        alert('failed to sync the data')
       }
 
       const res = await apiFetch<ServerCharacterResponse | null>("/characters/me", token)
