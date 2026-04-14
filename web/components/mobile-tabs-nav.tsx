@@ -16,7 +16,7 @@ export function MobileTabsNav({ tabs }: MobileTabsNavProps) {
   if (!isMobile) return null
 
   return (
-    <nav className="shrink-0 border-t border-border bg-card/80 backdrop-blur-sm">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/80 backdrop-blur-sm">
       <div className="flex items-stretch justify-around">
         {tabs.map(({ href, icon: Icon, label }) => (
           <button
