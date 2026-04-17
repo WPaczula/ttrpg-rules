@@ -8,7 +8,7 @@ import { WeaponRepository } from '../../../srd/repositories/weapon.repository';
 import { ArmorRepository } from '../../../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../../../srd/repositories/domain-card.repository';
 import { SyncCharacterDto } from './sync-character.dto';
-import { BadRequestException, ErrorCode } from '../../../common/error-codes';
+import { BadRequestException, ConflictException, ErrorCode } from '../../../common/error-codes';
 
 @Injectable()
 export class SyncCharacterService {
@@ -69,7 +69,21 @@ export class SyncCharacterService {
       .filter((dc): dc is NonNullable<typeof dc> => dc !== null)
       .map((dc) => dc.id);
 
-    const existing = await this.prisma.character.findFirst({ where: { userId } });
+    const existing = await this.prisma.character.findFirst({
+      where: { userId },
+      select: { id: true, classId: true, _count: { select: { levelUpRecords: true } } },
+    });
+
+    if (
+      existing &&
+      existing.classId !== cls.id &&
+      existing._count.levelUpRecords > 0
+    ) {
+      throw new ConflictException(
+        ErrorCode.FORBIDDEN,
+        'Class cannot be changed after the character has advanced',
+      );
+    }
 
     await this.prisma.$transaction(async (tx) => {
       const characterData = {

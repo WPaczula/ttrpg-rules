@@ -26,7 +26,7 @@ import { useSrdWeapons } from "@/lib/srd/use-srd-weapons"
 import { useSrdArmor } from "@/lib/srd/use-srd-armor"
 import { useSrdDomainCards } from "@/lib/srd/use-srd-domain-cards"
 import { cn } from "@/lib/utils"
-import { RotateCcw, Pencil, Save, X, Activity, Backpack, BookOpen } from "lucide-react"
+import { RotateCcw, Pencil, Save, X, Activity, Backpack, BookOpen, UserCog } from "lucide-react"
 import { EditIdentityDialog } from "@/components/character-sheet/edit-identity-dialog"
 import { StatsTab } from "@/components/character-sheet/stats-tab"
 import { EquipmentTab } from "@/components/character-sheet/equipment-tab"
@@ -201,7 +201,20 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             {displayChar.community && <span>{displayChar.community}</span>}
           </div>
         )}
-        {!displayChar.class && !displayChar.ancestry && !displayChar.community && (
+        {editing && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIdentityDialogOpen(true)}
+            className="mt-1 border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
+          >
+            <UserCog className="w-3.5 h-3.5 mr-1.5" />
+            {displayChar.class || displayChar.ancestry || displayChar.community
+              ? "Edit class, ancestry & community"
+              : "Set class, ancestry & community"}
+          </Button>
+        )}
+        {!editing && !displayChar.class && !displayChar.ancestry && !displayChar.community && (
           <button
             onClick={() => { enterEditMode(); setIdentityDialogOpen(true) }}
             className="text-xs text-muted-foreground/70 italic hover:text-gold transition-colors"
@@ -226,6 +239,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           ancestryItems={ancestryItems}
           ancestryData={ancestryData}
           communityItems={communityItems}
+          classLocked={!!c.class && c.level > 1}
         />
       )}
 

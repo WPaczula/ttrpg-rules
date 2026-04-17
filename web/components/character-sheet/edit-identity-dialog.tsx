@@ -40,6 +40,8 @@ interface EditIdentityDialogProps {
   ancestryItems: ComboboxItem[]
   ancestryData: ApiAncestry[]
   communityItems: ComboboxItem[]
+  /** Disable class selection — class is locked once the character has advanced. */
+  classLocked?: boolean
 }
 
 export function EditIdentityDialog({
@@ -53,6 +55,7 @@ export function EditIdentityDialog({
   ancestryItems,
   ancestryData,
   communityItems,
+  classLocked = false,
 }: EditIdentityDialogProps) {
   const primaryAncestry = useMemo(
     () => ancestryData.find((a) => a.name === c.ancestry),
@@ -125,26 +128,40 @@ export function EditIdentityDialog({
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Class</label>
-            <Combobox
-              items={classItems}
-              value={c.class}
-              onSelect={(name) => {
-                const cls = classData.find((cl) => cl.name === name)
-                const patch: Partial<CharacterData> = { class: name }
-                if (cls) {
-                  patch.evasion = cls.evasion
-                  patch.hpTotal = cls.hp
-                  const subclassNames = cls.subclasses.map((s) => s.name)
-                  if (!subclassNames.includes(c.subclass)) {
-                    patch.subclass = ""
+            {classLocked ? (
+              <>
+                <div
+                  className="flex w-full items-center justify-between rounded-md border border-border bg-input px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
+                  aria-disabled="true"
+                >
+                  <span className="truncate">{c.class || "No class selected"}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Class is locked — it cannot be changed once the character has advanced past level 1.
+                </p>
+              </>
+            ) : (
+              <Combobox
+                items={classItems}
+                value={c.class}
+                onSelect={(name) => {
+                  const cls = classData.find((cl) => cl.name === name)
+                  const patch: Partial<CharacterData> = { class: name }
+                  if (cls) {
+                    patch.evasion = cls.evasion
+                    patch.hpTotal = cls.hp
+                    const subclassNames = cls.subclasses.map((s) => s.name)
+                    if (!subclassNames.includes(c.subclass)) {
+                      patch.subclass = ""
+                    }
                   }
-                }
-                update(patch)
-              }}
-              placeholder="Select class…"
-              searchPlaceholder="Search classes…"
-              className="text-sm"
-            />
+                  update(patch)
+                }}
+                placeholder="Select class…"
+                searchPlaceholder="Search classes…"
+                className="text-sm"
+              />
+            )}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground uppercase tracking-wider">Subclass</label>
