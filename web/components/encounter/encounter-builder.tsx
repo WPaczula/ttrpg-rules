@@ -103,16 +103,6 @@ export function EncounterBuilder({
 
       {activeEncounter && (
         <>
-          {/* Encounter name */}
-          <Input
-            value={activeEncounter.name}
-            onChange={(e) =>
-              onUpdateEncounter(activeEncounter.id, { name: e.target.value })
-            }
-            placeholder="Encounter name..."
-            className="h-8 bg-input border-border text-sm"
-          />
-
           {/* Music URL */}
           <div className="flex items-center gap-2">
             <Input
