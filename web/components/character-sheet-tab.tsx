@@ -70,11 +70,11 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
     () => selectedClass?.domains.map((d) => d.name),
     [selectedClass]
   )
-  const classSubclassNames = useMemo(
-    () => selectedClass?.subclasses.map((s) => s.name),
+  const classSubclassFilter = useMemo(
+    () => (selectedClass ? [selectedClass.name] : undefined),
     [selectedClass]
   )
-  const { items: subclassItems, data: subclassData } = useSrdSubclasses(classSubclassNames)
+  const { items: subclassItems, data: subclassData } = useSrdSubclasses(classSubclassFilter)
   const { primaryItems: primaryWeaponItems, secondaryItems: secondaryWeaponItems } = useSrdWeapons(tier)
   const { items: armorItems } = useSrdArmor(tier)
   const { items: domainCardItems } = useSrdDomainCards(displayChar.level, classDomainNames)
