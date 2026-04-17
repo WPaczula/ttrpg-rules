@@ -16,13 +16,13 @@ export function MobileTabsNav({ tabs }: MobileTabsNavProps) {
   if (!isMobile) return null
 
   return (
-    <nav className="shrink-0 border-t border-border bg-card/80 backdrop-blur-sm">
-      <div className="flex items-stretch justify-around">
+    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/80 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-stretch justify-around h-14">
         {tabs.map(({ href, icon: Icon, label }) => (
           <button
             key={href}
             onClick={() => router.push(href)}
-            className={`flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors ${
+            className={`flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors ${
               pathname === href ? "text-gold" : "text-muted-foreground"
             }`}
           >
