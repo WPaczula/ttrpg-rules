@@ -184,9 +184,12 @@ export function EditIdentityDialog({
               items={ancestryItems}
               value={c.ancestry}
               onSelect={(name) => {
+                const nextAncestry = ancestryData.find((a) => a.name === name)
                 const patch: Partial<CharacterData> = {
                   ancestry: name,
-                  ancestryFeature: "",
+                  // Default to the first feature so single-ancestry characters
+                  // have a valid value; multi-ancestry users can override below.
+                  ancestryFeature: nextAncestry?.features[0]?.name ?? "",
                   secondaryAncestryFeature: "",
                 }
                 if (name === c.secondaryAncestry) {
