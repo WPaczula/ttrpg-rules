@@ -27,7 +27,7 @@ export function TabsHeader({ tabs, role }: TabsHeaderProps) {
 
   return (
     <div className="shrink-0 flex items-center justify-between border-b border-border bg-card/80 backdrop-blur-sm px-3 h-11">
-      <span className="text-xs text-muted-foreground font-medium">Daggerheart</span>
+      <span className="font-display text-sm tracking-[0.2em] text-gold uppercase">Daggerheart</span>
 
       {/* Desktop: nav links in header */}
       <div className="hidden md:flex h-auto bg-transparent rounded-none border-none p-0 gap-1">

@@ -41,9 +41,15 @@
   
   /* Custom tokens for Daggerheart */
   --gold: oklch(0.75 0.12 80);
+  --gold-bright: oklch(0.83 0.11 80);
+  --gold-dim: oklch(0.55 0.08 75);
+  --gold-line: oklch(0.48 0.08 75);
   --gold-muted: oklch(0.55 0.08 75);
   --purple-deep: oklch(0.25 0.08 280);
   --purple-glow: oklch(0.45 0.15 300);
+  --border-strong: oklch(0.38 0.05 70);
+  --ink-dim: oklch(0.65 0.02 80);
+  --panel-deep: oklch(0.10 0.02 280);
 }
 
 .dark {
@@ -82,10 +88,17 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-geist), 'Geist Fallback', system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), 'Geist Mono Fallback', ui-monospace, monospace;
+  --font-display: var(--font-cinzel), 'Cinzel', 'Times New Roman', serif;
   --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-dim: var(--gold-dim);
+  --color-gold-line: var(--gold-line);
   --color-gold-muted: var(--gold-muted);
+  --color-border-strong: var(--border-strong);
+  --color-ink-dim: var(--ink-dim);
+  --color-panel-deep: var(--panel-deep);
   --color-purple-deep: var(--purple-deep);
   --color-purple-glow: var(--purple-glow);
   --color-background: var(--background);
@@ -160,4 +173,366 @@
     scrollbar-width: thin;
     scrollbar-color: var(--purple-glow) var(--purple-deep);
   }
+
+  body {
+    background-image:
+      radial-gradient(ellipse at top, color-mix(in oklch, var(--gold) 4%, transparent), transparent 50%);
+  }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Daggerheart design-system utility classes
+   (derived from design handoff — Character Sheet.html)
+   ═══════════════════════════════════════════════════════════ */
+
+.font-display { font-family: var(--font-display); }
+
+/* ── Ribbon section header ─────────────────────────────── */
+.dh-ribbon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.25rem 0 0.75rem;
+  width: 100%;
+  user-select: none;
+}
+.dh-ribbon-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-line) 30%, var(--gold-line));
+}
+.dh-ribbon-line.right {
+  background: linear-gradient(90deg, var(--gold-line), var(--gold-line) 70%, transparent);
+}
+.dh-ribbon-box {
+  position: relative;
+  padding: 6px 22px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--gold-line);
+  border-bottom: 1px solid var(--gold-line);
+  background: linear-gradient(180deg, color-mix(in oklch, var(--gold) 6%, transparent), color-mix(in oklch, var(--gold) 2%, transparent));
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dh-ribbon-box::before,
+.dh-ribbon-box::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 10px;
+  background: var(--gold-line);
+}
+.dh-ribbon-box::before {
+  left: -10px;
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+.dh-ribbon-box::after {
+  right: -10px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+@media (max-width: 420px) {
+  .dh-ribbon-box { font-size: 11.5px; letter-spacing: 0.1em; padding: 6px 16px; }
+}
+
+/* ── Trait shield (hex-bottom card with top ribbon) ────── */
+.dh-trait {
+  position: relative;
+  padding-top: 14px;
+  text-align: center;
+}
+.dh-trait-ribbon {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--background);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 3px 14px;
+  z-index: 2;
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+}
+.dh-trait-body {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+  padding: 18px 6px 22px;
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: border-color 0.15s;
+}
+.dh-trait-body:hover { border-color: var(--gold-line); }
+.dh-trait-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.dh-trait-actions {
+  font-size: 9px;
+  color: var(--ink-dim);
+  line-height: 1.3;
+  padding: 0 2px;
+  max-width: 100%;
+}
+@media (min-width: 640px) {
+  .dh-trait-body { padding: 22px 8px 26px; min-height: 120px; gap: 4px; }
+  .dh-trait-value { font-size: 28px; }
+  .dh-trait-actions { font-size: 10px; padding: 0 4px; max-width: 90%; }
+}
+
+/* ── Hex badge (Evasion / Prof / Tier) ─────────────────── */
+.dh-hex {
+  position: relative;
+  padding: 14px 6px 12px;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  text-align: center;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dh-hex-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.dh-hex-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--gold);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ── Checkbox slot box (HP / Stress / Armor) ───────────── */
+.dh-check-box {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  position: relative;
+}
+.dh-check-box:hover { border-color: var(--gold); }
+.dh-check-box.is-checked {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.dh-check-box.is-checked::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 7px;
+  border-left: 2px solid var(--background);
+  border-bottom: 2px solid var(--background);
+  transform: rotate(-45deg) translateY(-2px);
+}
+.dh-check-box.is-severe { border-style: dashed; }
+.dh-check-box.is-severe.is-checked {
+  background: var(--destructive);
+  border-color: var(--destructive);
+}
+.dh-check-box.is-stress.is-checked {
+  background: var(--purple-glow);
+  border-color: var(--purple-glow);
+}
+.dh-check-box.is-stress.is-checked::after {
+  border-color: var(--background);
+}
+
+/* ── Damage threshold chevrons ─────────────────────────── */
+.dh-thresholds {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+.dh-thr {
+  flex: 1;
+  position: relative;
+  padding: 12px 18px 12px 28px;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+  margin-right: -8px;
+}
+.dh-thr:first-child {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+}
+.dh-thr:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+  margin-right: 0;
+}
+.dh-thr-label {
+  display: block;
+  color: var(--ink-dim);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dh-thr-val {
+  display: block;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* ── Hope diamonds ─────────────────────────────────────── */
+.dh-hope-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 3px;
+}
+.dh-hope-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  text-align: center;
+}
+.dh-hope-diamonds {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 0;
+}
+.dh-diamond {
+  width: 24px;
+  height: 24px;
+  transform: rotate(45deg);
+  border: 1px solid var(--border-strong);
+  background: var(--panel-deep);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.dh-diamond:hover { border-color: var(--gold); }
+.dh-diamond.is-filled {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--gold) 30%, transparent);
+}
+
+/* ── Domain card (clipped corner) ──────────────────────── */
+.dh-domain-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 4px;
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: border-color 0.15s;
+}
+.dh-domain-card:hover { border-color: var(--gold-line); }
+.dh-domain-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+/* ── Feature card / Equipment card ─────────────────────── */
+.dh-feat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 14px;
+  border-radius: 3px;
+}
+.dh-feat-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 6px;
+}
+.dh-feat-group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--gold-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+/* ── Chips ─────────────────────────────────────────────── */
+.dh-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.dh-chip-tier {
+  color: color-mix(in oklch, var(--purple-glow) 60%, white);
+  border-color: var(--purple-glow);
+  background: color-mix(in oklch, var(--purple-glow) 20%, transparent);
+}
+
+/* ── Gold pips ─────────────────────────────────────────── */
+.dh-gold-pip {
+  border: 1px solid var(--border-strong);
+  background: var(--card);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.12s;
+}
+.dh-gold-pip:hover { border-color: var(--gold); }
+.dh-gold-pip.is-filled {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--gold) 35%, transparent);
+}
+.dh-gold-pip-handful { width: 18px; height: 18px; border-radius: 50%; }
+.dh-gold-pip-bag {
+  width: 16px; height: 22px;
+  clip-path: polygon(30% 0, 70% 0, 70% 18%, 100% 35%, 100% 100%, 0 100%, 0 35%, 30% 18%);
+}
+.dh-gold-pip-chest { width: 28px; height: 22px; border-radius: 3px; }

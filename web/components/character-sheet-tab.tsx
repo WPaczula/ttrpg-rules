@@ -161,7 +161,7 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
               className="text-lg font-semibold text-gold bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50 flex-1"
             />
           ) : (
-            <span className="text-lg font-semibold text-gold flex-1 truncate">
+            <span className="font-display text-[28px] leading-none font-semibold tracking-wide text-gold flex-1 truncate">
               {displayChar.name || <span className="text-muted-foreground/50 italic font-normal">Character name…</span>}
             </span>
           )}
@@ -178,15 +178,10 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-sm">
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground">Lvl</span>
-            <span className="font-medium text-foreground">{displayChar.level}</span>
-          </div>
-          <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
-            Tier {tier}
-          </Badge>
-          {displayChar.class && <span className="text-foreground font-medium">{displayChar.class}</span>}
+        <div className="flex flex-wrap gap-x-2 gap-y-1 items-center text-sm">
+          <span className="dh-chip">LVL {displayChar.level}</span>
+          <span className="dh-chip dh-chip-tier">TIER {tier}</span>
+          {displayChar.class && <span className="text-foreground font-semibold">{displayChar.class}</span>}
           {displayChar.subclass && <span className="text-muted-foreground">({displayChar.subclass})</span>}
         </div>
         {(displayChar.ancestry || displayChar.community) && (

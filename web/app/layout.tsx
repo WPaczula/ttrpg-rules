@@ -6,9 +6,9 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { QueryProvider } from '@/components/query-provider'
 import './globals.css'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
-const _cinzel = Cinzel({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+const cinzel = Cinzel({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-cinzel" });
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -48,7 +48,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <QueryProvider>
-        <html lang="en">
+        <html lang="en" className={`${geist.variable} ${geistMono.variable} ${cinzel.variable}`}>
           <body className="font-sans antialiased">
             {children}
             <Analytics />

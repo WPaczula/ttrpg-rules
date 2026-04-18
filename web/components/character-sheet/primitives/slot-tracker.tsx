@@ -10,25 +10,50 @@ interface SlotTrackerProps {
   total: number
   marked: number
   onToggle: (n: number) => void
-  filledClass: string
-  emptyClass: string
+  /** optional override: extra classes applied when a box is checked */
+  filledClass?: string
+  /** optional override: extra classes applied when a box is empty */
+  emptyClass?: string
+  /** variant affects checked color: 'hp' | 'stress' | 'armor' */
+  variant?: "hp" | "stress" | "armor"
+  /** boxes from this index onward render with dashed (severe) style (HP only) */
+  severeFromIndex?: number
   label: string
 }
 
-export function SlotTracker({ total, marked, onToggle, filledClass, emptyClass, label }: SlotTrackerProps) {
+export function SlotTracker({
+  total,
+  marked,
+  onToggle,
+  filledClass,
+  emptyClass,
+  variant = "armor",
+  severeFromIndex,
+  label,
+}: SlotTrackerProps) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {Array.from({ length: total }, (_, i) => (
-        <button
-          key={i}
-          onClick={() => onToggle(toggleSlot(marked, i))}
-          className={cn(
-            "min-w-[44px] min-h-[44px] rounded-md border-2 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-gold/50",
-            i < marked ? filledClass : emptyClass
-          )}
-          aria-label={`${label} slot ${i + 1} ${i < marked ? "(marked)" : "(empty)"}`}
-        />
-      ))}
+    <div className="flex flex-wrap gap-1.5">
+      {Array.from({ length: total }, (_, i) => {
+        const isChecked = i < marked
+        const isSevere = severeFromIndex !== undefined && i >= severeFromIndex
+        return (
+          <button
+            key={i}
+            onClick={() => onToggle(toggleSlot(marked, i))}
+            className={cn(
+              "dh-check-box",
+              isChecked && "is-checked",
+              isSevere && "is-severe",
+              variant === "stress" && "is-stress",
+              isChecked && filledClass,
+              !isChecked && emptyClass
+            )}
+            aria-label={`${label} slot ${i + 1} ${isChecked ? "(marked)" : "(empty)"}`}
+            aria-checked={isChecked}
+            role="checkbox"
+          />
+        )
+      })}
     </div>
   )
 }

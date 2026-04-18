@@ -58,7 +58,7 @@ export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonu
           const selectedNames = new Set(domainCards.filter((d) => d.id !== card.id && d.name).map((d) => d.name))
           const availableItems = domainCardItems.filter((item) => !selectedNames.has(item.label))
           return (
-            <div key={card.id} className="space-y-1.5 bg-purple-deep/30 border border-border rounded-lg p-3">
+            <div key={card.id} className="dh-domain-card space-y-1.5">
               <div className="flex items-center gap-2">
                 {editing ? (
                   <div className="flex-1">
@@ -79,7 +79,7 @@ export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonu
                     />
                   </div>
                 ) : (
-                  <span className="flex-1 text-sm font-medium text-foreground truncate">
+                  <span className="flex-1 font-display text-[17px] font-bold text-foreground truncate">
                     {card.name || <span className="text-muted-foreground italic">Unnamed card</span>}
                   </span>
                 )}
@@ -96,9 +96,7 @@ export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonu
               {srdCard && (
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
-                      {srdCard.domain}
-                    </Badge>
+                    <span className="dh-domain-tag">{srdCard.domain}</span>
                     <span>Lvl {srdCard.level}</span>
                     <span>· Recall {srdCard.recallCost}</span>
                   </div>
@@ -166,11 +164,7 @@ export function DomainCardsSection({ domainCards, domainCardItems, thresholdBonu
               )}
               {!srdCard && card.name && !editing && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {card.domain && (
-                    <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
-                      {card.domain}
-                    </Badge>
-                  )}
+                  {card.domain && <span className="dh-domain-tag">{card.domain}</span>}
                   <span>Lvl {card.level}</span>
                 </div>
               )}
