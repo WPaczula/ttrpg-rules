@@ -9,6 +9,15 @@ interface GoldSectionProps {
   update: (patch: Partial<CharacterData>) => void
 }
 
+function convertGold(handfuls: number, bags: number, chests: number) {
+  bags += Math.floor(handfuls / 10)
+  handfuls = handfuls % 10
+  chests += Math.floor(bags / 10)
+  bags = bags % 10
+  chests = Math.min(chests, 99)
+  return { goldHandfuls: handfuls, goldBags: bags, goldChests: chests }
+}
+
 function GoldTier({
   label,
   value,
@@ -69,7 +78,7 @@ export function GoldSection({ character: c, update }: GoldSectionProps) {
           total={10}
           max={10}
           value={c.goldHandfuls}
-          onChange={(v) => update({ goldHandfuls: v })}
+          onChange={(v) => update(convertGold(v, c.goldBags, c.goldChests))}
         />
         <GoldTier
           label="Bags"
@@ -77,7 +86,7 @@ export function GoldSection({ character: c, update }: GoldSectionProps) {
           total={10}
           max={10}
           value={c.goldBags}
-          onChange={(v) => update({ goldBags: v })}
+          onChange={(v) => update(convertGold(c.goldHandfuls, v, c.goldChests))}
         />
         <GoldTier
           label="Chest"
