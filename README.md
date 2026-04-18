@@ -1,16 +1,34 @@
 # Daggerheart AI
 
-TTRPG assistant for Daggerheart, with a rules server, web chat UI, and Claude Code skills.
+TTRPG assistant for Daggerheart — character management, GM tools, rules chat, and Claude Code integration.
+
+## Stack
+
+- **Frontend**: Next.js, React 19, TailwindCSS, Radix UI, Vercel AI SDK
+- **Backend**: NestJS, Prisma, PostgreSQL
+- **MCP Server**: Node.js with SQLite embeddings for semantic search
+- **Auth**: Clerk
+- **AI**: Anthropic Claude (Haiku for factual, Sonnet for creative)
 
 ## Setup
 
-### Server
+### API (NestJS backend)
+
+```bash
+cd api
+cp .env.example .env    # add DATABASE_URL, CLERK_SECRET_KEY, etc.
+npm install
+npx prisma migrate deploy
+npm run start:dev
+```
+
+### MCP Server
 
 ```bash
 cd server
-cp .env.example .env    # add your OPENAI_API_KEY
+cp .env.example .env    # add OPENAI_API_KEY
 npm install
-npm run index-rules     # index Daggerheart SRD
+npm run index-rules     # index Daggerheart SRD into SQLite
 npm run build
 ```
 
@@ -18,7 +36,7 @@ npm run build
 
 ```bash
 cd web
-cp .env.example .env   # add your ANTHROPIC_API_KEY
+cp .env.example .env    # add ANTHROPIC_API_KEY, NEXT_PUBLIC_CLERK_*, API_URL
 npm install
 npm run dev
 ```
@@ -32,7 +50,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "daggerheart": {
       "command": "node",
-      "args": ["<path-to>/daggerheart-ai/server/dist/index.js"],
+      "args": ["<path-to>/ttrpg-rules/server/dist/index.js"],
       "env": {
         "OPENAI_API_KEY": "your-key-here"
       }
@@ -43,42 +61,65 @@ Add to your `.mcp.json`:
 
 ### Skills
 
-Copy skills to your Claude Code skills directory:
-
 ```bash
 cp -r skills/* ~/.claude/skills/
 ```
 
-## MCP Tools
+## Web App
 
-Category tools (Daggerheart) -- dynamically registered for each category:
+### Player (PC) Routes
 
-- `list_classes`, `get_class`
-- `list_subclasses`, `get_subclass`
-- `list_ancestries`, `get_ancestry`
-- `list_communities`, `get_community`
-- `list_domains`, `get_domain`
-- `list_armor`, `get_armor_item`
-- `list_weapons`, `get_weapon`
+- `/sheet` - Interactive character sheet (stats, HP/Stress/Hope, traits, domain cards, equipment, experiences, gold)
+- `/levelup` - Level-up with options selector
+- `/chat` - AI chat for rules questions and character help
+
+### GM Routes
+
+- `/adversaries` - Adversary/NPC library
+- `/encounters` - Encounter builder with adversary instances
+- `/loot` - Gold and treasure distribution
+- `/rules` - Rules reference and semantic search
+
+## REST API (NestJS, port 3000)
+
+### Characters `/api/characters`
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/me` | Get your character (PC) |
+| POST | `/` | Create character (PC) |
+| PATCH | `/:id` | Update character |
+| DELETE | `/:id` | Delete character |
+| GET | `/:id/computed-stats` | Derived stat calculations |
+| GET | `/:id/level-up/options` | Available level-up choices |
+| POST | `/:id/level-up` | Apply level-up |
+| POST | `/:id/experiences` | Add experience |
+| POST | `/:id/domain-cards` | Add domain card |
+
+### SRD `/api/srd`
+
+`GET /weapons`, `/armor`, `/classes`, `/subclasses`, `/ancestries`, `/communities`, `/domains`, `/domain-cards`, `/adversaries`, `/beastforms`, `/consumables`, `/environments`, `/items` — each supports `/:id` for detail.
+
+### Search `/api/search`
+
+- `POST /` - Semantic search with optional `category` and `limit` filters
+
+### Chat (Next.js API routes)
+
+- `POST /api/chat` - General Daggerheart chat
+- `POST /api/rules-chat` - Rules-specific chat
+- `POST /api/adversary-chat` - Adversary/encounter chat
+
+## MCP Tools (Claude Code / Claude Desktop)
+
+Category tools — dynamically registered for each: `classes`, `subclasses`, `ancestries`, `communities`, `domains`, `armor`, `weapons`, `adversaries`:
+
+- `list_<category>` — list all items with summaries
+- `get_<singular>` — get full detail for one item
 
 Search:
 
-- `search_rules` - Semantic search across Daggerheart rules
-
-## REST API
-
-The server also exposes REST endpoints on port 3001:
-
-- `/api/daggerheart/search` - Daggerheart semantic search
-- `/api/daggerheart/documents/:category` - List/get documents by category
-
-## Web App
-
-Next.js chat interface with:
-
-- Daggerheart-focused chat UI with history
-- Streaming responses via Vercel AI SDK + Anthropic
-- Smart model routing (Haiku for factual, Sonnet for creative)
+- `search_rules` — semantic vector search across Daggerheart SRD (supports `category` and `limit`)
 
 ## Skills
 
@@ -93,14 +134,28 @@ Next.js chat interface with:
 ## Project Structure
 
 ```
-daggerheart-ai/
-  server/               # Express + MCP server
+ttrpg-rules/
+  api/                  # NestJS backend
+    src/
+      auth/             # Clerk auth + role guards
+      characters/       # Character CRUD, level-up, domain cards
+      game-logic/       # Stat calculations
+      srd/              # SRD endpoints with caching
+      search/           # Semantic search service
+      users/            # User roles
+    prisma/             # Schema and migrations
+  server/               # MCP + Express server
     src/                # TypeScript source
     data/               # SQLite embedding databases
-    scripts/            # Indexing scripts
-    daggerheart-srd/    # Daggerheart SRD markdown files (git submodule)
-  web/                  # Next.js chat UI
+    daggerheart-srd/    # SRD markdown (git submodule)
+  web/                  # Next.js frontend
+    app/
+      (pc)/             # Player routes
+      (gm)/             # GM routes
+      api/              # Streaming chat endpoints
+    components/
+      character-sheet/  # HP, stats, traits, gold, domain cards
+      encounter/        # Encounter builder
   skills/               # Claude Code skills
-  campaign/             # Your campaign data (created by skills)
   docs/plans/           # Design documents
 ```
