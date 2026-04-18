@@ -269,29 +269,34 @@
   background: var(--card);
   border: 1px solid var(--border-strong);
   clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
-  padding: 22px 8px 26px;
-  min-height: 120px;
+  padding: 18px 6px 22px;
+  min-height: 92px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   transition: border-color 0.15s;
 }
 .dh-trait-body:hover { border-color: var(--gold-line); }
 .dh-trait-value {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--gold);
   line-height: 1;
 }
 .dh-trait-actions {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--ink-dim);
-  line-height: 1.35;
-  padding: 0 4px;
-  max-width: 90%;
+  line-height: 1.3;
+  padding: 0 2px;
+  max-width: 100%;
+}
+@media (min-width: 640px) {
+  .dh-trait-body { padding: 22px 8px 26px; min-height: 120px; gap: 4px; }
+  .dh-trait-value { font-size: 28px; }
+  .dh-trait-actions { font-size: 10px; padding: 0 4px; max-width: 90%; }
 }
 
 /* ── Hex badge (Evasion / Prof / Tier) ─────────────────── */

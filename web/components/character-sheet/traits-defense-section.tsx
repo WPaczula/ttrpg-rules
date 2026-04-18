@@ -184,7 +184,7 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
             <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2.5 max-[520px]:grid-cols-2">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
             {(["AGI", "STR", "FIN", "INS", "PRE", "KNO"] as const).map((short) => {
               const key = TRAIT_SHORT_TO_KEY[short]
               return (
