@@ -1,6 +1,5 @@
 "use client"
 
-import { Separator } from "@/components/ui/separator"
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,22 +16,19 @@ interface SectionProps {
 
 export function Section({ icon, title, defaultOpen = false, children }: SectionProps) {
   return (
-    <>
-      <Collapsible defaultOpen={defaultOpen}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full py-3 group">
-          <div className="flex items-center gap-2">
-            <span className="text-gold">{icon}</span>
-            <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
-              {title}
-            </span>
-          </div>
-          <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pb-4">
-          {children}
-        </CollapsibleContent>
-      </Collapsible>
-      <Separator className="bg-border" />
-    </>
+    <Collapsible defaultOpen={defaultOpen} className="group">
+      <CollapsibleTrigger className="dh-ribbon cursor-pointer">
+        <div className="dh-ribbon-line" aria-hidden />
+        <div className="dh-ribbon-box">
+          <span className="text-gold flex items-center">{icon}</span>
+          <span>{title}</span>
+          <ChevronDown className="w-3 h-3 text-gold-dim transition-transform duration-200 group-data-[state=closed]:-rotate-90" />
+        </div>
+        <div className="dh-ribbon-line right" aria-hidden />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pb-3 pt-1">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

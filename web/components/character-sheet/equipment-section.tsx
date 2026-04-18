@@ -28,7 +28,7 @@ export function EquipmentSection({
     <Section icon={<Sword className="w-4 h-4" />} title="Equipment">
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <label className="text-xs text-muted-foreground uppercase tracking-wider">Primary Weapon</label>
+          <label className="font-mono text-[10px] text-gold-dim tracking-[0.14em] uppercase font-semibold">Primary Weapon</label>
           {editing ? (
             <Combobox
               items={primaryWeaponItems}
@@ -39,7 +39,7 @@ export function EquipmentSection({
               className="text-sm"
             />
           ) : (
-            <p className="text-sm text-foreground">{c.primaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
+            <p className="font-display text-[17px] font-bold text-foreground">{c.primaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
           )}
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.primaryWeapon)
@@ -57,7 +57,7 @@ export function EquipmentSection({
           })()}
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-muted-foreground uppercase tracking-wider">Secondary Weapon</label>
+          <label className="font-mono text-[10px] text-gold-dim tracking-[0.14em] uppercase font-semibold">Secondary Weapon</label>
           {editing ? (
             <Combobox
               items={secondaryWeaponItems}
@@ -68,7 +68,7 @@ export function EquipmentSection({
               className="text-sm"
             />
           ) : (
-            <p className="text-sm text-foreground">{c.secondaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
+            <p className="font-display text-[17px] font-bold text-foreground">{c.secondaryWeapon || <span className="text-muted-foreground italic">None</span>}</p>
           )}
           {(() => {
             const w = SRD_WEAPONS.find((w) => w.name === c.secondaryWeapon)
@@ -86,7 +86,7 @@ export function EquipmentSection({
           })()}
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs text-muted-foreground uppercase tracking-wider">Armor</label>
+          <label className="font-mono text-[10px] text-gold-dim tracking-[0.14em] uppercase font-semibold">Armor</label>
           {editing ? (
             <Combobox
               items={armorItems}
@@ -111,7 +111,7 @@ export function EquipmentSection({
               className="text-sm"
             />
           ) : (
-            <p className="text-sm text-foreground">{c.armorName || <span className="text-muted-foreground italic">None</span>}</p>
+            <p className="font-display text-[17px] font-bold text-foreground">{c.armorName || <span className="text-muted-foreground italic">None</span>}</p>
           )}
           {(() => {
             const a = SRD_ARMOR.find((a) => a.name === c.armorName)

@@ -3,10 +3,10 @@
 import { useMemo } from "react"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import type { CharacterData } from "@/lib/character-types"
-import { formatModifier, computeThresholds } from "@/lib/character-types"
+import { computeThresholds } from "@/lib/character-types"
 import { SRD_ARMOR, SRD_WEAPONS } from "@/lib/srd-data"
 import { Shield, Info } from "lucide-react"
-import { Section, StatBox, TraitStepper, NumberStepper, SlotTracker } from "./primitives"
+import { Section, StatBox, TraitStepper, TraitShield, NumberStepper, SlotTracker } from "./primitives"
 
 // ─── Modifier helpers ────────────────────────────────────────────────────────
 
@@ -150,6 +150,15 @@ const TRAIT_SHORT_TO_KEY: Record<string, TraitKey> = {
   AGI: "agility", STR: "strength", FIN: "finesse", INS: "instinct", PRE: "presence", KNO: "knowledge",
 }
 
+const TRAIT_ACTIONS: Record<string, string> = {
+  AGI: "Sprint · Leap · Maneuver",
+  STR: "Lift · Smash · Grapple",
+  FIN: "Control · Hide · Tinker",
+  INS: "Perceive · Sense · Navigate",
+  PRE: "Charm · Perform · Deceive",
+  KNO: "Recall · Analyze · Comprehend",
+}
+
 interface TraitsDefenseSectionProps {
   character: CharacterData
   tier: number
@@ -165,32 +174,31 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
   return (
     <Section icon={<Shield className="w-4 h-4" />} title="Traits & Defense" defaultOpen>
       <div className="space-y-5">
-        <div className="grid grid-cols-2 gap-2">
-          {editing ? (
-            <>
-              <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
-              <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
-              <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
-              <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
-              <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
-              <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
-            </>
-          ) : (
-            <>
-              {(["AGI", "STR", "FIN", "INS", "PRE", "KNO"] as const).map((short) => {
-                const key = TRAIT_SHORT_TO_KEY[short]
-                return (
-                  <StatBoxWithInfo
-                    key={short}
-                    label={short}
-                    value={formatModifier(c[key])}
-                    modifiers={traitMods[key]}
-                  />
-                )
-              })}
-            </>
-          )}
-        </div>
+        {editing ? (
+          <div className="grid grid-cols-2 gap-2">
+            <TraitStepper label="AGI" value={c.agility} onChange={(v) => update({ agility: v })} />
+            <TraitStepper label="STR" value={c.strength} onChange={(v) => update({ strength: v })} />
+            <TraitStepper label="FIN" value={c.finesse} onChange={(v) => update({ finesse: v })} />
+            <TraitStepper label="INS" value={c.instinct} onChange={(v) => update({ instinct: v })} />
+            <TraitStepper label="PRE" value={c.presence} onChange={(v) => update({ presence: v })} />
+            <TraitStepper label="KNO" value={c.knowledge} onChange={(v) => update({ knowledge: v })} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2.5 max-[520px]:grid-cols-2">
+            {(["AGI", "STR", "FIN", "INS", "PRE", "KNO"] as const).map((short) => {
+              const key = TRAIT_SHORT_TO_KEY[short]
+              return (
+                <TraitShield
+                  key={short}
+                  label={short}
+                  value={c[key]}
+                  actions={TRAIT_ACTIONS[short]}
+                  info={traitMods[key].length > 0 ? <ModifierInfo modifiers={traitMods[key]} /> : undefined}
+                />
+              )
+            })}
+          </div>
+        )}
         {editing && (
           <p className="text-xs text-muted-foreground">
             Distribute: +2, +1, +1, +0, +0, −1
@@ -226,8 +234,7 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
               total={c.armorScore}
               marked={c.armorMarked}
               onToggle={(n) => update({ armorMarked: n })}
-              filledClass="bg-gold/30 border-gold"
-              emptyClass="bg-transparent border-border hover:border-gold/50"
+              variant="armor"
               label="Armor"
             />
           ) : (
@@ -281,17 +288,21 @@ export function TraitsDefenseSection({ character: c, tier, update, editing = fal
               </PopoverContent>
             </Popover>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-input border border-border rounded-md px-3 py-2 text-center">
-              <span className="text-xs text-muted-foreground block">Major</span>
-              <span className="text-gold font-bold text-lg">{thresholds.totalMajor}</span>
+          <div className="dh-thresholds">
+            <div className="dh-thr">
+              <span className="dh-thr-label">Minor</span>
+              <span className="dh-thr-val">—</span>
             </div>
-            <div className="bg-input border border-border rounded-md px-3 py-2 text-center">
-              <span className="text-xs text-muted-foreground block">Severe</span>
-              <span className="text-gold font-bold text-lg">{thresholds.totalSevere}</span>
+            <div className="dh-thr">
+              <span className="dh-thr-label">Major</span>
+              <span className="dh-thr-val">{thresholds.totalMajor}</span>
+            </div>
+            <div className="dh-thr">
+              <span className="dh-thr-label">Severe</span>
+              <span className="dh-thr-val">{thresholds.totalSevere}</span>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground text-center">
             Damage below Major ({thresholds.totalMajor}) = minor (1 HP).
           </p>
         </div>

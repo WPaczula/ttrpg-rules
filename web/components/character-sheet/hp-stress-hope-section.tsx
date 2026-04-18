@@ -7,6 +7,8 @@ import { SRD_CLASSES } from "@/lib/srd-data"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { SrdMarkdown } from "./srd-markdown"
 
+const HOPE_MAX = 6
+
 interface HpStressHopeSectionProps {
   character: CharacterData
   update: (patch: Partial<CharacterData>) => void
@@ -40,8 +42,8 @@ export function HpStressHopeSection({ character: c, update, editing }: HpStressH
             total={c.hpTotal}
             marked={c.hpMarked}
             onToggle={(n) => update({ hpMarked: n })}
-            filledClass="bg-destructive/60 border-destructive"
-            emptyClass="bg-transparent border-border hover:border-destructive/50"
+            variant="hp"
+            severeFromIndex={Math.max(0, c.hpTotal - 2)}
             label="HP"
           />
         </div>
@@ -69,22 +71,34 @@ export function HpStressHopeSection({ character: c, update, editing }: HpStressH
             total={c.stressTotal}
             marked={c.stressMarked}
             onToggle={(n) => update({ stressMarked: n })}
-            filledClass="bg-purple-glow/40 border-purple-glow"
-            emptyClass="bg-transparent border-border hover:border-purple-glow/50"
+            variant="stress"
             label="Stress"
           />
         </div>
 
         {/* Hope */}
-        <div className="flex flex-col items-center gap-1 bg-purple-deep/50 border border-border rounded-lg p-3">
-          <span className="text-xs text-muted-foreground uppercase tracking-wider">Hope</span>
-          <Counter
-            value={c.hope}
-            onChange={(v) => update({ hope: v })}
-            min={0}
-            max={12}
-            label="Hope"
-          />
+        <div className="dh-hope-card">
+          <div className="dh-hope-title">Hope</div>
+          <div className="dh-hope-diamonds">
+            {Array.from({ length: HOPE_MAX }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => update({ hope: i < c.hope ? i : i + 1 })}
+                className={`dh-diamond ${i < c.hope ? "is-filled" : ""}`}
+                aria-label={`Hope ${i + 1} ${i < c.hope ? "(filled)" : "(empty)"}`}
+              />
+            ))}
+          </div>
+          <div className="flex justify-center mt-1">
+            <Counter
+              value={c.hope}
+              onChange={(v) => update({ hope: v })}
+              min={0}
+              max={HOPE_MAX}
+              label="Hope"
+            />
+          </div>
           <HopeActions characterClass={c.class} />
         </div>
       </div>
