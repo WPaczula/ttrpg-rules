@@ -46,13 +46,6 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
     submit()
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      submit()
-    }
-  }
-
   return (
     <div className="flex h-full bg-background">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
@@ -75,7 +68,7 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
               rows={1}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
-              onKeyDown={handleKeyDown}
+              enterKeyHint="enter"
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20 min-h-0 resize-none"
             />
             <Button
