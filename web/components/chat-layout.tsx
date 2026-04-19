@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import type { RefObject, ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Send } from "lucide-react"
 
 interface ChatLayoutProps {
@@ -17,6 +17,7 @@ interface ChatLayoutProps {
 
 export function ChatLayout({ header, children, scrollRef, placeholder, isLoading, onSubmit }: ChatLayoutProps) {
   const inputAreaRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isInputFocused, setIsInputFocused] = useState(false)
 
   const handleInputFocus = () => {
@@ -30,14 +31,25 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
     setIsInputFocused(false)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const form = e.currentTarget
-    const input = form.elements.namedItem("message") as HTMLInputElement
-    const value = input.value.trim()
+  const submit = () => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    const value = textarea.value.trim()
     if (value && !isLoading) {
       onSubmit(value)
-      input.value = ""
+      textarea.value = ""
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    submit()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      submit()
     }
   }
 
@@ -53,15 +65,18 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
         </div>
 
         <div ref={inputAreaRef} className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
-            <Input
+          <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto items-end">
+            <Textarea
+              ref={textareaRef}
               name="message"
               placeholder={placeholder}
               disabled={isLoading}
               autoComplete="off"
+              rows={1}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
-              className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
+              onKeyDown={handleKeyDown}
+              className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20 min-h-0 resize-none"
             />
             <Button
               type="submit"
