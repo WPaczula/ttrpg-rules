@@ -134,7 +134,7 @@ function parseMarkdown(content: string) {
       flushTable()
       flushBlockquote()
       elements.push(
-        <h1 key={i} className="text-xl font-sans font-semibold text-gold mb-3 mt-2">
+        <h1 key={i} className="font-display text-xl font-semibold tracking-wide text-gold mb-3 mt-2">
           {line.slice(2)}
         </h1>
       )
@@ -147,7 +147,7 @@ function parseMarkdown(content: string) {
       flushTable()
       flushBlockquote()
       elements.push(
-        <h2 key={i} className="text-lg font-sans font-semibold text-gold mb-2 mt-3">
+        <h2 key={i} className="font-display text-lg font-semibold tracking-wide text-gold mb-2 mt-3">
           {line.slice(3)}
         </h2>
       )
@@ -160,7 +160,7 @@ function parseMarkdown(content: string) {
       flushTable()
       flushBlockquote()
       elements.push(
-        <h3 key={i} className="text-base font-sans font-semibold text-gold/80 mb-1 mt-2">
+        <h3 key={i} className="font-display text-base font-semibold tracking-wide text-gold/80 mb-1 mt-2">
           {line.slice(4)}
         </h3>
       )
@@ -231,10 +231,10 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
     >
       <div
         className={cn(
-          "max-w-[85%] rounded-lg px-4 py-3",
+          "max-w-[85%]",
           isBot
-            ? "bg-card border border-border shadow-[0_0_15px_rgba(139,92,246,0.1)]"
-            : "bg-gold/20 border border-gold/30 text-foreground"
+            ? "dh-domain-card shadow-[0_0_15px_rgba(139,92,246,0.1)]"
+            : "border border-gold-line bg-gold/10 text-foreground p-[14px] rounded-[4px] [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
         )}
       >
         {isBot && content ? (

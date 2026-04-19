@@ -53,9 +53,9 @@ export default function EncountersPage() {
     <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="max-w-2xl mx-auto px-4 pb-8">
         {/* Header */}
-        <div className="py-4 space-y-1">
-          <h1 className="text-lg font-semibold text-gold flex items-center gap-2">
-            <Swords className="w-5 h-5" />
+        <div className="py-4 space-y-2">
+          <h1 className="font-display text-[28px] leading-none font-semibold tracking-wide text-gold flex items-center gap-3">
+            <Swords className="w-6 h-6 shrink-0" />
             Encounters
           </h1>
           <p className="text-xs text-muted-foreground">
@@ -84,7 +84,7 @@ export default function EncountersPage() {
                   {confirmClear ? "Confirm clear?" : "Clear All"}
                 </Button>
               )}
-              <span className="text-[10px] text-muted-foreground ml-auto">
+              <span className="dh-feat-group-label ml-auto !mb-0">
                 {store.library.length} adversar{store.library.length === 1 ? "y" : "ies"}
               </span>
             </div>
@@ -118,7 +118,7 @@ export default function EncountersPage() {
         {/* Active Encounter Cards */}
         {activeEncounter && activeEncounter.adversaries.length > 0 && (
           <div className="space-y-3 pt-2">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-1">
+            <div className="dh-feat-group-label px-1 !mb-0">
               Active Encounter — {activeEncounter.adversaries.length} adversar{activeEncounter.adversaries.length === 1 ? "y" : "ies"}
             </div>
             {activeEncounter.adversaries.map((inst) => {

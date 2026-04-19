@@ -4,8 +4,7 @@ import { useSignIn } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Swords, Lock, User } from "lucide-react"
+import { Swords, Lock, User, LogIn } from "lucide-react"
 
 export default function SignInPage() {
   const { signIn, errors, fetchStatus } = useSignIn()
@@ -41,42 +40,61 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md bg-card border-border shadow-[0_0_30px_rgba(139,92,246,0.15)]">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
+      <div className="w-full max-w-md">
+        {/* ── Hex badge + title ─────────────────────────────────── */}
+        <div className="flex flex-col items-center">
+          <div className="dh-hex w-24 h-[96px] flex items-center justify-center shadow-[0_0_24px_color-mix(in_oklch,var(--gold)_18%,transparent)]">
             <Swords className="w-8 h-8 text-gold" />
           </div>
-          <CardTitle className="text-2xl font-sans text-gold">DH helper</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            This tool is invite-only
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <h1 className="font-display text-[30px] leading-none font-semibold tracking-[0.18em] text-gold uppercase mt-4">
+            DH Helper
+          </h1>
+        </div>
+
+        {/* ── Ribbon divider ────────────────────────────────────── */}
+        <div className="dh-ribbon">
+          <div className="dh-ribbon-line" aria-hidden />
+          <div className="dh-ribbon-box">
+            <Lock className="w-3 h-3" />
+            <span>Invite Only</span>
+          </div>
+          <div className="dh-ribbon-line right" aria-hidden />
+        </div>
+
+        {/* ── Form card (clipped corner, like domain card) ──────── */}
+        <div className="dh-domain-card mt-1 p-6 shadow-[0_0_30px_color-mix(in_oklch,var(--purple-glow)_20%,transparent)]">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="username" className="text-sm text-muted-foreground flex items-center gap-2">
-                <User className="w-4 h-4" />
+              <label
+                htmlFor="username"
+                className="dh-feat-group-label flex items-center gap-2"
+              >
+                <User className="w-3.5 h-3.5" />
                 Username
               </label>
               <Input
                 id="username"
                 name="username"
                 type="text"
-                placeholder="Enter username..."
-                className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
+                placeholder="Enter username…"
+                className="bg-input border-border-strong text-foreground placeholder:text-muted-foreground/60 focus-visible:border-gold focus-visible:ring-gold/20 h-10"
               />
             </div>
+
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm text-muted-foreground flex items-center gap-2">
-                <Lock className="w-4 h-4" />
+              <label
+                htmlFor="password"
+                className="dh-feat-group-label flex items-center gap-2"
+              >
+                <Lock className="w-3.5 h-3.5" />
                 Password
               </label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Enter password..."
-                className="bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
+                placeholder="Enter password…"
+                className="bg-input border-border-strong text-foreground placeholder:text-muted-foreground/60 focus-visible:border-gold focus-visible:ring-gold/20 h-10"
               />
               {errors?.fields?.password && (
                 <p className="text-destructive text-sm">{errors.fields.password.message}</p>
@@ -85,16 +103,18 @@ export default function SignInPage() {
                 <p className="text-destructive text-sm">{errors.fields.identifier.message}</p>
               )}
             </div>
+
             <Button
               type="submit"
               disabled={fetchStatus === "fetching"}
-              className="w-full bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
+              className="w-full bg-gold text-background hover:bg-gold/80 disabled:opacity-50 font-display font-semibold tracking-[0.18em] uppercase text-xs h-10"
             >
-              {fetchStatus === "fetching" ? "Signing in..." : "Sign In"}
+              <LogIn className="w-3.5 h-3.5 mr-1.5" />
+              {fetchStatus === "fetching" ? "Signing In…" : "Sign In"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

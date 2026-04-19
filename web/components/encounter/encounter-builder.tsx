@@ -83,9 +83,9 @@ export function EncounterBuilder({
           variant="outline"
           size="sm"
           onClick={() => onAddEncounter(`Encounter ${encounters.length + 1}`)}
-          className="border-border text-gold hover:bg-gold/10 shrink-0"
+          className="border-gold/40 text-gold hover:bg-gold/10 hover:text-gold shrink-0"
         >
-          <Plus className="w-3.5 h-3.5 mr-1" />
+          <Plus className="w-3.5 h-3.5 mr-1.5" />
           New
         </Button>
         {activeEncounter && (
@@ -110,8 +110,8 @@ export function EncounterBuilder({
               onChange={(e) =>
                 onUpdateEncounter(activeEncounter.id, { musicUrl: e.target.value || undefined })
               }
-              placeholder="Music URL (opens in new tab)..."
-              className="h-8 bg-input border-border text-sm flex-1"
+              placeholder="Music URL (opens in new tab)…"
+              className="h-8 bg-input border-border-strong text-sm flex-1 placeholder:text-muted-foreground/60 focus-visible:border-gold focus-visible:ring-gold/20"
             />
             {activeEncounter.musicUrl && (
               <Button
@@ -129,7 +129,7 @@ export function EncounterBuilder({
           {/* PC Count + Budget */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">PCs</span>
+              <span className="dh-feat-group-label !mb-0">PCs</span>
               <Counter
                 value={activeEncounter.pcCount}
                 onChange={(v) =>
@@ -142,19 +142,17 @@ export function EncounterBuilder({
               />
             </div>
             <div className="text-right">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                Battle Points
-              </div>
+              <div className="dh-feat-group-label !mb-0.5">Battle Points</div>
               <div
                 className={cn(
-                  "text-lg font-bold tabular-nums",
+                  "font-display text-xl font-semibold tabular-nums leading-none",
                   isOverBudget ? "text-destructive" : remaining <= 2 ? "text-amber-400" : "text-gold"
                 )}
               >
                 {spent} / {budget}
               </div>
               {isOverBudget && (
-                <div className="text-[10px] text-destructive">
+                <div className="text-[10px] text-destructive mt-0.5">
                   {Math.abs(remaining)} over budget
                 </div>
               )}
@@ -175,9 +173,7 @@ export function EncounterBuilder({
           {/* Add adversary */}
           {library.length > 0 && (
             <div>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                Add Adversary
-              </span>
+              <span className="dh-feat-group-label">Add Adversary</span>
               <Combobox
                 items={adversaryItems}
                 value=""

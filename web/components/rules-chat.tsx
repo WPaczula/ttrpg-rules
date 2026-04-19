@@ -60,14 +60,18 @@ export function RulesChat({ isActive }: RulesChatProps) {
   }
 
   const header = (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
-          <BookOpen className="w-5 h-5 text-gold" />
+    <header className="border-b border-border bg-card/50 backdrop-blur-sm py-2">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="dh-ribbon" style={{ margin: 0 }}>
+          <div className="dh-ribbon-line" aria-hidden />
+          <div className="dh-ribbon-box">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Rules Reference</span>
+          </div>
+          <div className="dh-ribbon-line right" aria-hidden />
         </div>
-        <div>
-          <h1 className="font-sans font-semibold text-gold text-lg">Rules Reference</h1>
-          <p className="text-xs text-muted-foreground">Daggerheart SRD</p>
+        <div className="flex justify-center mt-2">
+          <span className="dh-chip">Daggerheart SRD</span>
         </div>
       </div>
     </header>

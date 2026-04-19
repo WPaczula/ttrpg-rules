@@ -35,8 +35,8 @@ export function AdversaryCard({
     <Collapsible defaultOpen>
       <div
         className={cn(
-          "rounded-lg border bg-card/50 transition-colors",
-          isDefeated ? "border-destructive/30 opacity-60" : "border-border"
+          "dh-domain-card !p-0 transition-colors",
+          isDefeated ? "!border-destructive/30 opacity-60" : ""
         )}
       >
         {/* Header */}
@@ -45,7 +45,7 @@ export function AdversaryCard({
             {isDefeated && <Skull className="w-4 h-4 text-destructive shrink-0" />}
             <span
               className={cn(
-                "font-medium text-sm truncate",
+                "font-display text-base font-semibold tracking-wide truncate",
                 isDefeated ? "text-muted-foreground line-through" : "text-foreground"
               )}
             >
@@ -89,9 +89,7 @@ export function AdversaryCard({
 
             {/* HP Tracking */}
             <div className="space-y-1.5">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                Hit Points
-              </span>
+              <span className="dh-feat-group-label">Hit Points</span>
               <SlotTracker
                 total={adv.hp}
                 marked={instance.hpMarked}
@@ -104,9 +102,7 @@ export function AdversaryCard({
 
             {/* Stress Tracking */}
             <div className="space-y-1.5">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                Stress
-              </span>
+              <span className="dh-feat-group-label">Stress</span>
               <SlotTracker
                 total={adv.stress}
                 marked={instance.stressMarked}
@@ -120,9 +116,7 @@ export function AdversaryCard({
             {/* Features */}
             {adv.features && adv.features.length > 0 && (
               <div className="space-y-1.5">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                  Features
-                </span>
+                <span className="dh-feat-group-label">Features</span>
                 {adv.features.map((f) => (
                   <div key={f.name} className="bg-purple-deep/30 border border-border rounded-md px-3 py-2">
                     <span className="text-xs font-medium text-gold">{f.name}</span>
