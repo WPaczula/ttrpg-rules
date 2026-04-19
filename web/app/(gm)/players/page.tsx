@@ -68,13 +68,19 @@ function PlayerCard({ player: p }: { player: PlayerSummary }) {
       </div>
 
       <StatRow label="Armor" marked={p.armorMarked} total={p.armorScore}>
-        <SlotTracker
-          total={p.armorScore}
-          marked={p.armorMarked}
-          onToggle={noop}
-          variant="armor"
-          label="Armor"
-        />
+        {p.armorScore > 0 ? (
+          <SlotTracker
+            total={p.armorScore}
+            marked={p.armorMarked}
+            onToggle={noop}
+            variant="armor"
+            label="Armor"
+          />
+        ) : (
+          <span className="text-xs text-muted-foreground italic">
+            No armor equipped
+          </span>
+        )}
       </StatRow>
 
       <StatRow label="HP" marked={p.hpMarked} total={p.hpTotal}>

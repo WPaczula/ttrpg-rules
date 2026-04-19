@@ -44,7 +44,12 @@ interface StatUpdate {
   value: number
 }
 
-const DEFAULT_ARMOR_SCORE = 2
+interface ArmorChange {
+  characterId: string
+  characterName: string
+  armor: { id: string; name: string; baseScore: number } | null
+  armorMarked: number
+}
 
 function toSummary(c: ServerCharacter): PlayerSummary {
   return {
@@ -55,7 +60,7 @@ function toSummary(c: ServerCharacter): PlayerSummary {
     hpMarked: c.hpMarked,
     stressTotal: c.stressTotal,
     stressMarked: c.stressMarked,
-    armorScore: c.armor?.baseScore ?? DEFAULT_ARMOR_SCORE,
+    armorScore: c.armor?.baseScore ?? 0,
     armorMarked: c.armorMarked,
     hope: c.hope,
   }
@@ -111,6 +116,20 @@ export function usePlayersLive() {
           prev.map((p) =>
             p.id === update.characterId
               ? { ...p, [update.stat]: update.value }
+              : p,
+          ),
+        )
+      })
+
+      socket.on("armorChange", (event: ArmorChange) => {
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p.id === event.characterId
+              ? {
+                  ...p,
+                  armorScore: event.armor?.baseScore ?? 0,
+                  armorMarked: event.armorMarked,
+                }
               : p,
           ),
         )

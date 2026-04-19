@@ -144,7 +144,7 @@ export class CharactersService {
     id: string,
     dto: UpdateCharacterDto,
   ): Promise<CharacterResponse> {
-    await this.findCharacter(id);
+    const previous = await this.findCharacter(id);
     const character = await this.characters.update(id, dto);
     const response = this.buildResponse(character);
 
@@ -159,6 +159,21 @@ export class CharactersService {
 
     if (updates.length > 0) {
       this.gateway.broadcastStatUpdates(character.userId, updates);
+    }
+
+    if (previous.armorId !== character.armorId) {
+      this.gateway.broadcastArmorChange(character.userId, {
+        characterId: character.id,
+        characterName: character.name,
+        armor: character.armor
+          ? {
+              id: character.armor.id,
+              name: character.armor.name,
+              baseScore: character.armor.baseScore,
+            }
+          : null,
+        armorMarked: character.armorMarked,
+      });
     }
 
     return response;

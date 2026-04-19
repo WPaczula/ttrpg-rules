@@ -43,7 +43,7 @@ interface ServerCharacterResponse {
   ancestryFeature: { name: string }
   secondaryAncestryFeature: { name: string } | null
   community: { name: string }
-  armor: { name: string } | null
+  armor: { name: string; baseScore: number } | null
   primaryWeapon: { name: string } | null
   secondaryWeapon: { name: string } | null
   markedTraits: { trait: string }[]
@@ -100,6 +100,7 @@ function serverResponseToCharacterData(res: ServerCharacterResponse): CharacterD
     stressTotal: res.stressTotal,
     stressMarked: res.stressMarked,
     evasion: res.evasion,
+    armorScore: res.armor?.baseScore ?? 0,
     armorMarked: res.armorMarked,
     hope: res.hope,
     goldHandfuls: res.goldHandfuls,

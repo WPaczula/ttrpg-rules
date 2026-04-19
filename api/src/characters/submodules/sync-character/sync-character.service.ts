@@ -9,6 +9,7 @@ import { ArmorRepository } from '../../../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../../../srd/repositories/domain-card.repository';
 import { SyncCharacterDto } from './sync-character.dto';
 import { BadRequestException, ConflictException, ErrorCode } from '../../../common/error-codes';
+import { CharactersGateway } from '../../characters.gateway';
 
 @Injectable()
 export class SyncCharacterService {
@@ -21,6 +22,7 @@ export class SyncCharacterService {
     private readonly weapons: WeaponRepository,
     private readonly armor: ArmorRepository,
     private readonly domainCards: DomainCardRepository,
+    private readonly gateway: CharactersGateway,
   ) {}
 
   async syncCharacter(userId: string, dto: SyncCharacterDto): Promise<void> {
@@ -71,7 +73,12 @@ export class SyncCharacterService {
 
     const existing = await this.prisma.character.findFirst({
       where: { userId },
-      select: { id: true, classId: true, _count: { select: { levelUpRecords: true } } },
+      select: {
+        id: true,
+        classId: true,
+        armorId: true,
+        _count: { select: { levelUpRecords: true } },
+      },
     });
 
     if (
@@ -85,7 +92,10 @@ export class SyncCharacterService {
       );
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    const newArmorId = armorData?.id ?? null;
+    const oldArmorId = existing?.armorId ?? null;
+
+    const characterId = await this.prisma.$transaction(async (tx) => {
       const characterData = {
         name: dto.name,
         level: dto.level,
@@ -120,8 +130,11 @@ export class SyncCharacterService {
         items: dto.items,
       };
 
+      let resultId: string;
+
       if (existing) {
         await tx.character.update({ where: { id: existing.id }, data: characterData });
+        resultId = existing.id;
 
         await tx.characterExperience.deleteMany({ where: { characterId: existing.id } });
         await tx.characterDomainCard.deleteMany({ where: { characterId: existing.id } });
@@ -159,6 +172,7 @@ export class SyncCharacterService {
         const created = await tx.character.create({
           data: { ...characterData, userId },
         });
+        resultId = created.id;
 
         if (dto.experiences.length > 0) {
           await tx.characterExperience.createMany({
@@ -189,6 +203,23 @@ export class SyncCharacterService {
           });
         }
       }
+
+      return resultId;
     });
+
+    if (oldArmorId !== newArmorId) {
+      this.gateway.broadcastArmorChange(userId, {
+        characterId,
+        characterName: dto.name,
+        armor: armorData
+          ? {
+              id: armorData.id,
+              name: armorData.name,
+              baseScore: armorData.baseScore,
+            }
+          : null,
+        armorMarked: dto.armorMarked,
+      });
+    }
   }
 }
