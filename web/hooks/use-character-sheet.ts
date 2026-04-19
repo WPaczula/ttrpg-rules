@@ -118,7 +118,7 @@ function serverResponseToCharacterData(res: ServerCharacterResponse): CharacterD
       domain: dc.domainCard.domainName,
     })),
     notes: res.notes,
-    items: res.items,
+    items: res.items ?? [],
   }
 }
 
