@@ -69,7 +69,7 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
               enterKeyHint="enter"
-              className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20 min-h-0 resize-none"
+              className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20 min-h-0 max-h-24 resize-none overflow-y-auto"
             />
             <Button
               type="submit"
