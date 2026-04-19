@@ -61,13 +61,13 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
               autoComplete="off"
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
-              className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20"
+              className="flex-1 h-10 bg-input border-border-strong text-foreground placeholder:text-muted-foreground/60 focus-visible:border-gold focus-visible:ring-gold/20"
             />
             <Button
               type="submit"
               disabled={isLoading}
               onMouseDown={(e) => e.preventDefault()}
-              className="bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
+              className="h-10 bg-gold text-background hover:bg-gold/80 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
             </Button>
