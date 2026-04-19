@@ -122,8 +122,8 @@ export function EncounterProposal({ data, pcCount, onAccept, accepted }: Encount
         <div className="flex items-center gap-2">
           <Button
             size="sm"
+            variant="gold"
             onClick={handleAccept}
-            className="bg-gold text-background hover:bg-gold/80 font-semibold"
           >
             <Check className="w-3.5 h-3.5 mr-1.5" />
             Accept Encounter

@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { FieldLabel } from "@/components/ui/field-label"
 import type { CharacterData } from "@/lib/character-types"
 import { NumberStepper } from "./primitives"
 
@@ -114,7 +115,7 @@ export function EditIdentityDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Level</label>
+            <FieldLabel>Level</FieldLabel>
             <select
               value={c.level}
               onChange={(e) => update({ level: Number(e.target.value) })}
@@ -127,7 +128,7 @@ export function EditIdentityDialog({
             </select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Class</label>
+            <FieldLabel>Class</FieldLabel>
             {classLocked ? (
               <>
                 <div
@@ -164,7 +165,7 @@ export function EditIdentityDialog({
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Subclass</label>
+            <FieldLabel>Subclass</FieldLabel>
             <Combobox
               items={subclassItems}
               value={c.subclass}
@@ -177,9 +178,9 @@ export function EditIdentityDialog({
 
           {/* Primary Ancestry */}
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">
+            <FieldLabel>
               {isMultiancestry ? "Primary Ancestry" : "Ancestry"}
-            </label>
+            </FieldLabel>
             <Combobox
               items={ancestryItems}
               value={c.ancestry}
@@ -205,9 +206,7 @@ export function EditIdentityDialog({
 
           {/* Secondary Ancestry */}
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">
-              Secondary Ancestry
-            </label>
+            <FieldLabel>Secondary Ancestry</FieldLabel>
             <Combobox
               items={secondaryAncestryItems}
               value={c.secondaryAncestry}
@@ -270,7 +269,7 @@ export function EditIdentityDialog({
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Community</label>
+            <FieldLabel>Community</FieldLabel>
             <Combobox
               items={communityItems}
               value={c.community}
@@ -281,7 +280,7 @@ export function EditIdentityDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground uppercase tracking-wider">Evasion</label>
+            <FieldLabel>Evasion</FieldLabel>
             <NumberStepper
               label="Evasion"
               value={c.evasion}

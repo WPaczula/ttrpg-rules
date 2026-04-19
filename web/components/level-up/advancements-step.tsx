@@ -52,7 +52,7 @@ export function AdvancementsStep({
           icon={<Swords className="w-5 h-5" />}
           title="Choose Advancements"
         />
-        <Badge className="ml-auto bg-purple-glow/20 text-gold border-purple-glow/40 text-xs">
+        <Badge variant="tier" className="ml-auto text-xs">
           {slotsUsed}/2
         </Badge>
       </div>

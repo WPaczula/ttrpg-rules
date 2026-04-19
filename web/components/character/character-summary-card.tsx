@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { IconTag } from "@/components/ui/icon-tag"
+import { StatTile, StatTileLabel, StatTileValue } from "@/components/ui/stat-tile"
 import type { CharacterData } from "@/lib/character-types"
 import { DEFAULT_CHARACTER, formatModifier } from "@/lib/character-types"
 import { cn } from "@/lib/utils"
@@ -61,15 +63,16 @@ export function CharacterSummaryCard({ data, onApplyToSheet, accepted }: Charact
       {/* Traits grid */}
       <div className="grid grid-cols-6 gap-1.5 text-center">
         {traits.map(({ label, value }) => (
-          <div key={label} className="rounded-md bg-background/50 border border-border-strong py-1.5 px-1 space-y-0.5">
-            <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-gold-dim">{label}</div>
-            <div className={cn(
-              "font-display text-sm font-semibold",
-              value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-foreground"
-            )}>
+          <StatTile key={label}>
+            <StatTileLabel>{label}</StatTileLabel>
+            <StatTileValue
+              className={cn(
+                value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-foreground"
+              )}
+            >
               {formatModifier(value)}
-            </div>
-          </div>
+            </StatTileValue>
+          </StatTile>
         ))}
       </div>
 
@@ -80,13 +83,13 @@ export function CharacterSummaryCard({ data, onApplyToSheet, accepted }: Charact
           { label: "Stress", value: data.stressTotal, Icon: Zap },
           { label: "Evasion", value: data.evasion, Icon: Shield },
         ].map(({ label, value, Icon }) => (
-          <div key={label} className="rounded-md bg-background/50 border border-border-strong py-1.5 px-1 space-y-0.5">
-            <div className="flex items-center justify-center gap-0.5 text-gold-dim">
+          <StatTile key={label}>
+            <StatTileLabel className="flex items-center justify-center gap-0.5 text-gold-dim">
               <Icon className="w-3 h-3" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</span>
-            </div>
-            <div className="font-display text-sm font-semibold text-gold">{value}</div>
-          </div>
+              <span>{label}</span>
+            </StatTileLabel>
+            <StatTileValue>{value}</StatTileValue>
+          </StatTile>
         ))}
       </div>
 
@@ -96,22 +99,22 @@ export function CharacterSummaryCard({ data, onApplyToSheet, accepted }: Charact
           <div className="dh-feat-group-label">Equipment</div>
           <div className="flex flex-wrap gap-2">
             {data.primaryWeapon && (
-              <div className="flex items-center gap-1 rounded-md bg-background/50 border border-border px-2 py-1">
+              <IconTag>
                 <Swords className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs">{data.primaryWeapon}</span>
-              </div>
+                <span>{data.primaryWeapon}</span>
+              </IconTag>
             )}
             {data.secondaryWeapon && (
-              <div className="flex items-center gap-1 rounded-md bg-background/50 border border-border px-2 py-1">
+              <IconTag>
                 <Swords className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs">{data.secondaryWeapon}</span>
-              </div>
+                <span>{data.secondaryWeapon}</span>
+              </IconTag>
             )}
             {data.armorName && (
-              <div className="flex items-center gap-1 rounded-md bg-background/50 border border-border px-2 py-1">
+              <IconTag>
                 <Shield className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs">{data.armorName}</span>
-              </div>
+                <span>{data.armorName}</span>
+              </IconTag>
             )}
           </div>
         </div>
@@ -158,11 +161,7 @@ export function CharacterSummaryCard({ data, onApplyToSheet, accepted }: Charact
           Applied to character sheet
         </div>
       ) : (
-        <Button
-          size="sm"
-          onClick={handleApply}
-          className="bg-gold text-background hover:bg-gold/80 font-semibold"
-        >
+        <Button size="sm" variant="gold" onClick={handleApply}>
           <Check className="w-3.5 h-3.5 mr-1.5" />
           Apply to Character Sheet
         </Button>

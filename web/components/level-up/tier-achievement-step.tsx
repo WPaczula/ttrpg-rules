@@ -1,5 +1,6 @@
 "use client"
 
+import { InfoBox, InfoBoxHeader, InfoBoxDescription } from "@/components/ui/info-box"
 import { type SrdClass } from "@/lib/srd-data"
 import { StepHeader } from "./primitives"
 import { Sparkles, Zap, Star } from "lucide-react"
@@ -32,51 +33,43 @@ export function TierAchievementStep({
       </p>
 
       <div className="space-y-3">
-        <div className="bg-purple-deep/30 border border-border rounded-lg p-3 space-y-1">
-          <div className="flex items-center gap-2">
+        <InfoBox>
+          <InfoBoxHeader>
             <Zap className="w-4 h-4 text-gold" />
-            <span className="text-sm font-medium text-foreground">
-              Proficiency +1
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Your Proficiency increases from {proficiency} to{" "}
-            {proficiency + 1}.
-          </p>
-        </div>
+            Proficiency +1
+          </InfoBoxHeader>
+          <InfoBoxDescription>
+            Your Proficiency increases from {proficiency} to {proficiency + 1}.
+          </InfoBoxDescription>
+        </InfoBox>
 
-        <div className="bg-purple-deep/30 border border-border rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-2">
+        <InfoBox className="space-y-2">
+          <InfoBoxHeader>
             <Star className="w-4 h-4 text-gold" />
-            <span className="text-sm font-medium text-foreground">
-              New Experience (+2)
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground">
+            New Experience (+2)
+          </InfoBoxHeader>
+          <InfoBoxDescription>
             You gain a new Experience with a +2 modifier. Name it now or fill
             it in later.
-          </p>
+          </InfoBoxDescription>
           <input
             value={newExperienceName}
             onChange={(e) => onExperienceNameChange(e.target.value)}
             placeholder="e.g. Survived the Siege of Karhold..."
             className="w-full bg-input border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-gold"
           />
-        </div>
+        </InfoBox>
 
         {nextLevel >= 5 && (
-          <div className="bg-purple-deep/30 border border-border rounded-lg p-3 space-y-1">
-            <div className="flex items-center gap-2">
+          <InfoBox>
+            <InfoBoxHeader>
               <Sparkles className="w-4 h-4 text-gold" />
-              <span className="text-sm font-medium text-foreground">
-                Clear Marked Traits
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Any marked character traits are cleared when you reach this
-              tier.
-            </p>
-          </div>
+              Clear Marked Traits
+            </InfoBoxHeader>
+            <InfoBoxDescription>
+              Any marked character traits are cleared when you reach this tier.
+            </InfoBoxDescription>
+          </InfoBox>
         )}
       </div>
     </div>

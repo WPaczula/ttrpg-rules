@@ -327,8 +327,8 @@ export function CharacterSheetTab(props: CharacterSheetTabProps) {
             </Button>
             <Button
               size="sm"
+              variant="gold"
               onClick={handleSave}
-              className="bg-gold text-background hover:bg-gold/80 font-semibold"
             >
               <Save className="w-3.5 h-3.5 mr-1.5" />
               Save

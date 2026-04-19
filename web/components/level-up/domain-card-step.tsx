@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Combobox, type ComboboxItem } from "@/components/ui/combobox"
+import { InfoBox } from "@/components/ui/info-box"
 import { type SrdDomainCard } from "@/lib/srd-data"
 import { StepHeader } from "./primitives"
 import { BookOpen } from "lucide-react"
@@ -42,9 +43,9 @@ export function DomainCardStep({
       />
 
       {srdNewCard && (
-        <div className="bg-purple-deep/30 border border-border rounded-lg p-3 space-y-1">
+        <InfoBox>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge className="bg-purple-glow/20 text-gold border-purple-glow/40 text-[10px] px-1.5 py-0">
+            <Badge variant="tier" className="text-[10px] px-1.5 py-0">
               {srdNewCard.domain}
             </Badge>
             <span>Lvl {srdNewCard.level}</span>
@@ -53,7 +54,7 @@ export function DomainCardStep({
           <p className="text-xs text-muted-foreground/80 leading-relaxed">
             {srdNewCard.description}
           </p>
-        </div>
+        </InfoBox>
       )}
 
       {existingCardCount >= 5 && newDomainCard && (
