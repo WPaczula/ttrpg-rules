@@ -9,7 +9,6 @@ import { getMessageContent, makeWelcomeMessage } from "@/lib/chat-messages"
 import { createChatStorage } from "@/lib/chat-storage"
 import { useChatScroll } from "@/hooks/use-chat-scroll"
 import { ChatLayout } from "@/components/chat-layout"
-import { BookOpen } from "lucide-react"
 
 const WELCOME_TEXT = `# Rules Reference
 
@@ -59,23 +58,8 @@ export function RulesChat({ isActive }: RulesChatProps) {
     sendMessage({ text: value })
   }
 
-  const header = (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
-          <BookOpen className="w-5 h-5 text-gold" />
-        </div>
-        <div>
-          <h1 className="font-sans font-semibold text-gold text-lg">Rules Reference</h1>
-          <p className="text-xs text-muted-foreground">Daggerheart SRD</p>
-        </div>
-      </div>
-    </header>
-  )
-
   return (
     <ChatLayout
-      header={header}
       scrollRef={scrollRef}
       placeholder={isLoading ? "Searching rules..." : "Ask about rules..."}
       isLoading={isLoading}

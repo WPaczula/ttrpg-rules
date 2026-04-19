@@ -11,7 +11,6 @@ import { getMessageContent, getToolResultFromMessage, makeWelcomeMessage } from 
 import { createChatStorage } from "@/lib/chat-storage"
 import { useChatScroll } from "@/hooks/use-chat-scroll"
 import { ChatLayout } from "@/components/chat-layout"
-import { Swords } from "lucide-react"
 
 const WELCOME_TEXT = `# Welcome, Adventurer!
 
@@ -78,23 +77,8 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
     sendMessage({ text: value })
   }
 
-  const header = (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
-          <Swords className="w-5 h-5 text-gold" />
-        </div>
-        <div>
-          <h1 className="font-sans font-semibold text-gold text-lg">Character Creator</h1>
-          <p className="text-xs text-muted-foreground">TTRPG Compatible</p>
-        </div>
-      </div>
-    </header>
-  )
-
   return (
     <ChatLayout
-      header={header}
       scrollRef={scrollRef}
       placeholder={isLoading ? "Thinking..." : "Type your message..."}
       isLoading={isLoading}
