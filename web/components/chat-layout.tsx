@@ -75,7 +75,8 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
               type="submit"
               disabled={isLoading}
               onMouseDown={(e) => e.preventDefault()}
-              className="h-10 bg-gold text-background hover:bg-gold/80 disabled:opacity-50"
+              variant="gold"
+              className="h-10"
             >
               <Send className="w-4 h-4" />
             </Button>

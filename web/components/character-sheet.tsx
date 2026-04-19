@@ -1,6 +1,8 @@
 "use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { FieldLabel } from "@/components/ui/field-label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Copy, X, Scroll } from "lucide-react"
@@ -64,45 +66,46 @@ export function CharacterSheet({ character, onClose, showClose }: CharacterSheet
           <div className="space-y-4">
             {character.name && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Name</p>
+                <FieldLabel asChild><p>Name</p></FieldLabel>
                 <p className="text-foreground font-medium">{character.name}</p>
               </div>
             )}
             {character.class && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Class</p>
+                <FieldLabel asChild><p>Class</p></FieldLabel>
                 <p className="text-foreground font-medium">{character.class}</p>
               </div>
             )}
             {character.subclass && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Subclass</p>
+                <FieldLabel asChild><p>Subclass</p></FieldLabel>
                 <p className="text-foreground font-medium">{character.subclass}</p>
               </div>
             )}
             {character.ancestry && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Ancestry</p>
+                <FieldLabel asChild><p>Ancestry</p></FieldLabel>
                 <p className="text-foreground font-medium">{character.ancestry}</p>
               </div>
             )}
             {character.community && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Community</p>
+                <FieldLabel asChild><p>Community</p></FieldLabel>
                 <p className="text-foreground font-medium">{character.community}</p>
               </div>
             )}
             {character.traits && character.traits.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Traits</p>
+                <FieldLabel asChild><p>Traits</p></FieldLabel>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {character.traits.map((trait, i) => (
-                    <span
+                    <Badge
                       key={i}
-                      className="px-2 py-0.5 text-xs bg-purple-glow/20 text-gold-muted rounded-full border border-purple-glow/30"
+                      variant="tier"
+                      className="rounded-full text-gold-muted border-purple-glow/30"
                     >
                       {trait}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -124,7 +127,8 @@ export function CharacterSheet({ character, onClose, showClose }: CharacterSheet
         <Button
           onClick={exportCharacter}
           disabled={!hasData}
-          className="w-full bg-gold text-background hover:bg-gold/90 disabled:opacity-50"
+          variant="gold"
+          className="w-full"
         >
           <Copy className="w-4 h-4 mr-2" />
           Export Character

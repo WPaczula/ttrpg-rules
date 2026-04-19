@@ -60,9 +60,10 @@ export function WizardShell({
         {step !== "confirm" && (
           <Button
             size="sm"
+            variant="goldOutline"
             onClick={onNext}
             disabled={!canProceed}
-            className="ml-auto bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25"
+            className="ml-auto"
           >
             Next
             <ChevronRight className="w-4 h-4 ml-1" />

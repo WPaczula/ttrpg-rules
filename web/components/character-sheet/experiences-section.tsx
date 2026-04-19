@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { StepperButton } from "@/components/ui/stepper-button"
 import { formatModifier, type Experience, type CharacterData } from "@/lib/character-types"
 import { Star, Plus, Trash2 } from "lucide-react"
 import { Section } from "./primitives"
@@ -52,21 +53,21 @@ export function ExperiencesSection({ experiences, update, editing = false }: Exp
             )}
             {editing ? (
               <div className="flex items-center gap-1 shrink-0">
-                <button
+                <StepperButton
                   onClick={() => updateExperience(exp.id, { modifier: Math.max(1, exp.modifier - 1) })}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-border bg-input text-foreground hover:bg-secondary active:scale-95 text-sm"
+                  aria-label="Decrease modifier"
                 >
                   −
-                </button>
+                </StepperButton>
                 <span className="w-8 text-center text-sm font-bold text-gold">
                   {formatModifier(exp.modifier)}
                 </span>
-                <button
+                <StepperButton
                   onClick={() => updateExperience(exp.id, { modifier: Math.min(6, exp.modifier + 1) })}
-                  className="w-7 h-7 flex items-center justify-center rounded border border-border bg-input text-foreground hover:bg-secondary active:scale-95 text-sm"
+                  aria-label="Increase modifier"
                 >
                   +
-                </button>
+                </StepperButton>
               </div>
             ) : (
               <span className="text-sm font-bold text-gold shrink-0">

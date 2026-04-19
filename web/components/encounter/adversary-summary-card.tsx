@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { StatTile, StatTileLabel, StatTileValue } from "@/components/ui/stat-tile"
 import {
   type Adversary,
   type AdversaryType,
@@ -62,13 +63,13 @@ export function AdversarySummaryCard({ data, onAddToEncounter, accepted }: Adver
           { label: "Diff", value: data.difficulty, Icon: Target },
           { label: "Thresholds", value: data.thresholds, Icon: Shield },
         ].map(({ label, value, Icon }) => (
-          <div key={label} className="rounded-md bg-background/50 border border-border-strong py-1.5 px-1 space-y-0.5">
-            <div className="flex items-center justify-center gap-0.5 text-gold-dim">
+          <StatTile key={label}>
+            <StatTileLabel className="flex items-center justify-center gap-0.5 text-gold-dim">
               <Icon className="w-3 h-3" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.14em]">{label}</span>
-            </div>
-            <div className="font-display text-sm font-semibold text-gold">{value}</div>
-          </div>
+              <span>{label}</span>
+            </StatTileLabel>
+            <StatTileValue>{value}</StatTileValue>
+          </StatTile>
         ))}
       </div>
 
@@ -105,11 +106,7 @@ export function AdversarySummaryCard({ data, onAddToEncounter, accepted }: Adver
           Added to encounter
         </div>
       ) : (
-        <Button
-          size="sm"
-          onClick={handleAdd}
-          className="bg-gold text-background hover:bg-gold/80 font-semibold"
-        >
+        <Button size="sm" variant="gold" onClick={handleAdd}>
           <Check className="w-3.5 h-3.5 mr-1.5" />
           Add to Encounter
         </Button>

@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { FieldLabel } from "@/components/ui/field-label"
+import { OptionButton } from "@/components/ui/option-button"
 import {
   type LootRarity,
   type LootItemType,
@@ -68,73 +70,54 @@ export function RollerSection({
     <section className="space-y-4">
       {/* Item type */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Type
-        </label>
+        <FieldLabel>Type</FieldLabel>
         <div className="flex gap-2 flex-wrap">
           {(["item", "consumable", "mixed"] as const).map((t) => (
-            <button
+            <OptionButton
               key={t}
               onClick={() => setItemType(t)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm border transition-colors",
-                itemType === t
-                  ? "bg-gold/15 text-gold border-gold/30"
-                  : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-              )}
+              active={itemType === t}
+              className="flex items-center gap-1.5"
             >
               {t === "item" && <Package className="w-3.5 h-3.5" />}
               {t === "consumable" && <FlaskConical className="w-3.5 h-3.5" />}
               {t === "mixed" && <Dices className="w-3.5 h-3.5" />}
               {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
+            </OptionButton>
           ))}
         </div>
       </div>
 
       {/* Rarity */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Rarity
-        </label>
+        <FieldLabel>Rarity</FieldLabel>
         <div className="flex gap-2 flex-wrap">
           {RARITIES.map((r) => (
-            <button
+            <OptionButton
               key={r}
               onClick={() => onRarityChange(r)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-sm border transition-colors",
-                rarity === r
-                  ? "bg-gold/15 text-gold border-gold/30"
-                  : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-              )}
+              active={rarity === r}
             >
               {rarityLabel(r)}
-            </button>
+            </OptionButton>
           ))}
         </div>
       </div>
 
       {/* Dice guidance */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Dice to Roll
-        </label>
+        <FieldLabel>Dice to Roll</FieldLabel>
         <div className="flex gap-2">
           {diceOptions.map((opt, idx) => (
-            <button
+            <OptionButton
               key={idx}
               onClick={() => setDiceIndex(idx as 0 | 1)}
-              className={cn(
-                "flex flex-col items-center px-4 py-2 rounded-md border text-sm font-medium transition-colors min-w-[80px]",
-                diceIndex === idx
-                  ? "bg-gold/15 text-gold border-gold/30"
-                  : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-              )}
+              active={diceIndex === idx}
+              className="flex flex-col items-center px-4 py-2 min-w-[80px]"
             >
               <span className="text-base font-bold">{diceLabel(opt)}</span>
               <span className="text-[10px] opacity-70">range {opt.min}–{opt.max}</span>
-            </button>
+            </OptionButton>
           ))}
         </div>
         <p className="text-[11px] text-muted-foreground pl-0.5">
@@ -144,32 +127,24 @@ export function RollerSection({
 
       {/* Quantity */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Quantity
-        </label>
+        <FieldLabel>Quantity</FieldLabel>
         <div className="flex gap-2">
           {([1, 2, 3, 5] as const).map((q) => (
-            <button
+            <OptionButton
               key={q}
               onClick={() => setQuantity(q)}
-              className={cn(
-                "w-10 h-10 rounded-md border text-sm font-medium transition-colors",
-                quantity === q
-                  ? "bg-gold/15 text-gold border-gold/30"
-                  : "bg-transparent text-muted-foreground border-border hover:text-foreground hover:bg-muted/50"
-              )}
+              active={quantity === q}
+              size="square"
             >
               {q}
-            </button>
+            </OptionButton>
           ))}
         </div>
       </div>
 
       {/* Roll input */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Your Roll Total
-        </label>
+        <FieldLabel>Your Roll Total</FieldLabel>
         <div className="flex gap-2">
           <input
             type="number"
@@ -185,7 +160,7 @@ export function RollerSection({
           <Button
             onClick={onLookUp}
             disabled={!rollValid}
-            className="bg-gold/90 hover:bg-gold text-black font-semibold"
+            variant="gold"
           >
             Look Up
           </Button>
