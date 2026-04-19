@@ -44,6 +44,8 @@ interface StatUpdate {
   value: number
 }
 
+const DEFAULT_ARMOR_SCORE = 2
+
 function toSummary(c: ServerCharacter): PlayerSummary {
   return {
     id: c.id,
@@ -53,7 +55,7 @@ function toSummary(c: ServerCharacter): PlayerSummary {
     hpMarked: c.hpMarked,
     stressTotal: c.stressTotal,
     stressMarked: c.stressMarked,
-    armorScore: c.armor?.baseScore ?? 0,
+    armorScore: c.armor?.baseScore ?? DEFAULT_ARMOR_SCORE,
     armorMarked: c.armorMarked,
     hope: c.hope,
   }
