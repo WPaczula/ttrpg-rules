@@ -91,8 +91,8 @@ export function AdversaryLibrary({
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search adversaries..."
-          className="pl-8 h-8 bg-input border-border text-sm"
+          placeholder="Search adversaries…"
+          className="pl-8 h-8 bg-input border-border-strong text-sm placeholder:text-muted-foreground/60 focus-visible:border-gold focus-visible:ring-gold/20"
         />
       </div>
 
@@ -104,10 +104,10 @@ export function AdversaryLibrary({
               key={t}
               onClick={() => setTierFilter(tierFilter === t ? null : t)}
               className={cn(
-                "text-[10px] px-2 py-0.5 rounded-full border transition-colors",
+                "dh-chip transition-colors cursor-pointer",
                 tierFilter === t
-                  ? "bg-gold/20 text-gold border-gold/40"
-                  : "bg-input border-border text-muted-foreground hover:text-foreground"
+                  ? "dh-chip-tier"
+                  : "hover:border-gold/40 hover:text-foreground"
               )}
             >
               Tier {t}
@@ -118,10 +118,10 @@ export function AdversaryLibrary({
             key={type}
             onClick={() => setTypeFilter(typeFilter === type ? null : type)}
             className={cn(
-              "text-[10px] px-2 py-0.5 rounded-full border transition-colors",
+              "dh-chip transition-colors cursor-pointer",
               typeFilter === type
-                ? "bg-gold/20 text-gold border-gold/40"
-                : "bg-input border-border text-muted-foreground hover:text-foreground"
+                ? "!border-gold/60 !text-gold bg-gold/10"
+                : "hover:border-gold/40 hover:text-foreground"
             )}
           >
             {type}
@@ -131,7 +131,7 @@ export function AdversaryLibrary({
 
       {/* List */}
       <div className="space-y-1 max-h-[300px] overflow-y-auto">
-        <div className="text-[10px] text-muted-foreground uppercase tracking-wider pb-1">
+        <div className="dh-feat-group-label pb-1">
           {filtered.length} of {library.length} adversaries
         </div>
         {filtered.map((adv) => (

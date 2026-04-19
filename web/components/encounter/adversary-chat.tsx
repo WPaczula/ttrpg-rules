@@ -125,17 +125,17 @@ export function AdversaryChat({ isActive, onAcceptEncounter, onAddAdversary }: A
 
   const header = (
     <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-purple-glow/20 flex items-center justify-center border border-purple-glow/30">
-          <Bot className="w-4 h-4 text-gold" />
-        </div>
-        <span className="font-semibold text-gold text-sm hidden sm:inline">AI Builder</span>
+      <div className="flex items-center gap-2">
+        <Bot className="w-4 h-4 text-gold shrink-0" />
+        <span className="font-display text-sm font-semibold tracking-[0.16em] text-gold uppercase hidden sm:inline">
+          AI Builder
+        </span>
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
         <div className="flex items-center gap-1.5">
-          <Users className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">PCs</span>
+          <Users className="w-3.5 h-3.5 text-gold-dim" />
+          <span className="dh-feat-group-label !mb-0">PCs</span>
           <Counter
             value={pcCount}
             onChange={setPcCount}
@@ -145,20 +145,20 @@ export function AdversaryChat({ isActive, onAcceptEncounter, onAddAdversary }: A
             size="sm"
           />
         </div>
-        <div className="w-px h-5 bg-border" />
+        <div className="w-px h-5 bg-border-strong" />
         <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tier</span>
+          <Shield className="w-3.5 h-3.5 text-gold-dim" />
+          <span className="dh-feat-group-label !mb-0">Tier</span>
           <div className="flex gap-0.5">
             {[1, 2, 3, 4].map(t => (
               <button
                 key={t}
                 onClick={() => setPcTier(t)}
                 className={cn(
-                  "w-6 h-6 rounded text-xs font-bold transition-colors",
+                  "w-6 h-6 rounded border font-display text-xs font-semibold transition-colors",
                   pcTier === t
-                    ? "bg-gold text-background"
-                    : "bg-input text-muted-foreground hover:text-foreground"
+                    ? "bg-gold text-background border-gold"
+                    : "bg-input text-muted-foreground border-border-strong hover:text-gold hover:border-gold/40"
                 )}
               >
                 {t}
@@ -204,8 +204,8 @@ export function AdversaryChat({ isActive, onAcceptEncounter, onAddAdversary }: A
               />
             )}
             {proposal && !proposal.data && (
-              <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
-                Building encounter...
+              <div className="dh-feat-card text-sm text-muted-foreground animate-pulse">
+                Building encounter…
               </div>
             )}
             {adversaryCard?.data && (
@@ -216,8 +216,8 @@ export function AdversaryChat({ isActive, onAcceptEncounter, onAddAdversary }: A
               />
             )}
             {adversaryCard && !adversaryCard.data && (
-              <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
-                Designing adversary...
+              <div className="dh-feat-card text-sm text-muted-foreground animate-pulse">
+                Designing adversary…
               </div>
             )}
           </div>

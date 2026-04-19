@@ -106,8 +106,8 @@ export function ChatInterface({ isActive, onApplyCharacter }: ChatInterfaceProps
               />
             )}
             {characterCard && !characterCard.data && (
-              <div className="rounded-lg border border-gold/20 bg-card p-4 text-sm text-muted-foreground animate-pulse">
-                Building character sheet...
+              <div className="dh-feat-card text-sm text-muted-foreground animate-pulse">
+                Building character sheet…
               </div>
             )}
           </div>
