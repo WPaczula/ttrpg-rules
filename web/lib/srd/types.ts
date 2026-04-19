@@ -57,7 +57,8 @@ export interface ApiArmor {
   name: string
   tier: number
   baseScore: number
-  baseThresholds: string
+  majorThreshold: number
+  severeThreshold: number
   evasionModifier: number | null
   feature: string | null
 }

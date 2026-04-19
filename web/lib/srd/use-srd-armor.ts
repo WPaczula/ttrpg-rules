@@ -27,7 +27,7 @@ export function useSrdArmor(playerTier: number) {
     .map((a) => ({
       value: a.name,
       label: a.name,
-      detail: `Score ${a.baseScore} · Thresholds ${a.baseThresholds}${a.feature ? ` · ${a.feature}` : ""}`,
+      detail: `Score ${a.baseScore} · Thresholds ${a.majorThreshold} / ${a.severeThreshold}${a.feature ? ` · ${a.feature}` : ""}`,
       group: `Tier ${a.tier}`,
     }))
 
