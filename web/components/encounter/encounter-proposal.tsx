@@ -42,25 +42,25 @@ export function EncounterProposal({ data, pcCount, onAccept, accepted }: Encount
 
   return (
     <div className={cn(
-      "rounded-lg border-2 p-4 space-y-3",
+      "dh-feat-card space-y-3",
       isAccepted
         ? "border-green-600/50 bg-green-950/20"
-        : "border-gold/40 bg-card"
+        : "border-gold/40"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Swords className="w-4 h-4 text-gold" />
-          <span className="font-semibold text-gold text-sm">{data.name}</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Swords className="w-4 h-4 text-gold shrink-0" />
+          <span className="font-display text-base font-semibold tracking-wide text-gold truncate">{data.name}</span>
         </div>
-        <div className={cn(
-          "text-xs font-bold px-2 py-0.5 rounded",
+        <span className={cn(
+          "dh-chip tabular-nums",
           isOverBudget
-            ? "bg-destructive/20 text-destructive"
-            : "bg-gold/20 text-gold"
+            ? "!border-destructive !text-destructive bg-destructive/10"
+            : "!border-gold/60 !text-gold bg-gold/10"
         )}>
           {totalPoints} / {budget} BP
-        </div>
+        </span>
       </div>
 
       {/* Adversary list */}
@@ -101,12 +101,12 @@ export function EncounterProposal({ data, pcCount, onAccept, accepted }: Encount
       </div>
 
       {/* Summary row */}
-      <div className="text-[10px] text-muted-foreground flex items-center gap-3">
+      <div className="dh-feat-group-label !mb-0 flex items-center gap-2">
         <span>{data.adversaries.length} adversar{data.adversaries.length === 1 ? "y" : "ies"}</span>
-        <span>-</span>
+        <span>·</span>
         <span>{totalPoints} battle points used</span>
         {isOverBudget && (
-          <span className="text-destructive font-medium">
+          <span className="text-destructive">
             ({totalPoints - budget} over budget)
           </span>
         )}
@@ -123,9 +123,9 @@ export function EncounterProposal({ data, pcCount, onAccept, accepted }: Encount
           <Button
             size="sm"
             onClick={handleAccept}
-            className="bg-gold text-background hover:bg-gold/90"
+            className="bg-gold text-background hover:bg-gold/80 font-semibold"
           >
-            <Check className="w-3.5 h-3.5 mr-1" />
+            <Check className="w-3.5 h-3.5 mr-1.5" />
             Accept Encounter
           </Button>
         </div>
