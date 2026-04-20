@@ -45,6 +45,7 @@ export function SlotTracker({
               isChecked && "is-checked",
               isSevere && "is-severe",
               variant === "stress" && "is-stress",
+              variant === "armor" && "is-armor",
               isChecked && filledClass,
               !isChecked && emptyClass
             )}
