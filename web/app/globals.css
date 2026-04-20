@@ -355,18 +355,9 @@
   background: var(--purple-glow);
   border-color: var(--purple-glow);
 }
-.dh-check-box.is-hp::before {
-  content: '♥';
-  font-size: 18px;
-  color: var(--border-strong);
-  line-height: 1;
-}
 .dh-check-box.is-hp.is-checked {
-  background: var(--card);
-  border-color: var(--border-strong);
-}
-.dh-check-box.is-hp.is-checked::before {
-  color: var(--destructive);
+  background: var(--destructive);
+  border-color: var(--destructive);
 }
 .dh-check-box.is-armor {
   width: 30px;
