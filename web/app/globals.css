@@ -347,16 +347,6 @@
   background: var(--gold);
   border-color: var(--gold);
 }
-.dh-check-box.is-checked::after {
-  content: '';
-  position: absolute;
-  width: 14px;
-  height: 7px;
-  border-left: 2px solid var(--background);
-  border-bottom: 2px solid var(--background);
-  transform: rotate(-45deg) translateY(-2px);
-}
-.dh-check-box.is-severe { border-style: dashed; }
 .dh-check-box.is-severe.is-checked {
   background: var(--destructive);
   border-color: var(--destructive);
@@ -365,8 +355,23 @@
   background: var(--purple-glow);
   border-color: var(--purple-glow);
 }
-.dh-check-box.is-stress.is-checked::after {
-  border-color: var(--background);
+.dh-check-box.is-hp.is-checked {
+  background: var(--destructive);
+  border-color: var(--destructive);
+}
+.dh-check-box.is-armor {
+  width: 30px;
+  height: 36px;
+  border: none;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 62%, 50% 100%, 0% 62%);
+  filter: drop-shadow(0 0 1px var(--border-strong));
+}
+.dh-check-box.is-armor:hover {
+  filter: drop-shadow(0 0 1.5px var(--gold));
+}
+.dh-check-box.is-armor.is-checked {
+  background: var(--muted-foreground);
+  filter: drop-shadow(0 0 1.5px var(--muted-foreground));
 }
 
 /* ── Damage threshold chevrons ─────────────────────────── */
