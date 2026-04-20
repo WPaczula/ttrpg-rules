@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { StatUpdateDto } from './dto/stat-update.dto';
+import { IArmorChange } from './interfaces/stat-update.interface';
 
 @WebSocketGateway({ cors: true })
 export class CharactersGateway {
@@ -37,5 +38,9 @@ export class CharactersGateway {
     for (const update of updates) {
       this.server.to(gameId).emit('statUpdate', update);
     }
+  }
+
+  broadcastArmorChange(gameId: string, event: IArmorChange) {
+    this.server.to(gameId).emit('armorChange', event);
   }
 }

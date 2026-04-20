@@ -12,3 +12,14 @@ export interface IStatUpdate {
   stat: keyof ITrackedStats;
   value: number;
 }
+
+export interface IArmorChange {
+  characterId: string;
+  characterName: string;
+  armor: {
+    id: string;
+    name: string;
+    baseScore: number;
+  } | null;
+  armorMarked: number;
+}

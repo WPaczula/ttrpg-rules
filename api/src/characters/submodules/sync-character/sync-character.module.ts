@@ -7,8 +7,10 @@ import { CommunityRepository } from '../../../srd/repositories/community.reposit
 import { WeaponRepository } from '../../../srd/repositories/weapon.repository';
 import { ArmorRepository } from '../../../srd/repositories/armor.repository';
 import { DomainCardRepository } from '../../../srd/repositories/domain-card.repository';
+import { CharactersGatewayModule } from '../../characters-gateway.module';
 
 @Module({
+  imports: [CharactersGatewayModule],
   providers: [
     SyncCharacterService,
     ClassRepository,

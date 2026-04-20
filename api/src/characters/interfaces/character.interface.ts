@@ -76,6 +76,7 @@ export interface ICharacterWithRelations extends ICharacter {
   armor: {
     id: string;
     name: string;
+    baseScore: number;
     majorThreshold: number;
     severeThreshold: number;
     evasionModifier: number | null;

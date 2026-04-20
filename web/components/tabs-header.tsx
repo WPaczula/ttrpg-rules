@@ -12,7 +12,7 @@ interface TabsHeaderProps {
 }
 
 const pcHrefs = ["/chat", "/sheet", "/levelup"]
-const gmHrefs = ["/rules", "/adversaries", "/loot"]
+const gmHrefs = ["/rules", "/adversaries", "/encounters", "/loot", "/players"]
 
 const desktopTriggerClass =
   "gap-1.5 px-3 py-1 text-xs font-medium rounded-md border border-transparent transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 data-[active=true]:bg-gold/10 data-[active=true]:text-gold data-[active=true]:border-gold/30"

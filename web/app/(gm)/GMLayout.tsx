@@ -2,7 +2,7 @@
 
 import { MobileTabsNav } from "@/components/mobile-tabs-nav"
 import { TabsHeader } from "@/components/tabs-header"
-import { BookOpen, Bot, Dices, Swords } from "lucide-react"
+import { BookOpen, Bot, Dices, Swords, Users } from "lucide-react"
 import React from "react"
 
 const gmTabs = [
@@ -10,6 +10,7 @@ const gmTabs = [
     { value: "adversaries", href: "/adversaries", icon: Bot, label: "Adversaries" },
     { value: "encounters", href: "/encounters", icon: Swords, label: "Encounters" },
     { value: "loot", href: "/loot", icon: Dices, label: "Loot" },
+    { value: "players", href: "/players", icon: Users, label: "Players" },
 ]
 
 export const GMLayout = ({ children, role }: { children: React.ReactNode, role: "GM" | 'DEMO' }) => {

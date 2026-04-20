@@ -17,6 +17,7 @@ const CHARACTER_INCLUDE = {
     select: {
       id: true,
       name: true,
+      baseScore: true,
       majorThreshold: true,
       severeThreshold: true,
       evasionModifier: true,
