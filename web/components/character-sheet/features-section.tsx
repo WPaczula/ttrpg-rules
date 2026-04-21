@@ -124,7 +124,6 @@ export function FeaturesSection({
             {selectedClass && (
               <TabsContent value="class">
                 <div className="space-y-2">
-                  <FeatureList label={`${selectedClass.name} — Hope Feature`} features={selectedClass.features} />
                   <FeatureList label={`${selectedClass.name} — Class Features`} features={selectedClass.features} />
                   {selectedClass.features.map((f) => {
                     const key = `${selectedClass.name}:${f.name}`
