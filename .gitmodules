@@ -1,6 +1,3 @@
-[submodule "server/daggerheart-srd"]
-	path = server/daggerheart-srd
-	url = https://github.com/seansbox/daggerheart-srd.git
 [submodule "api/daggerheart-srd"]
 	path = api/daggerheart-srd
 	url = https://github.com/seansbox/daggerheart-srd.git
