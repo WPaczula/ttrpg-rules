@@ -94,8 +94,7 @@ export function AdversaryCard({
                 total={adv.hp}
                 marked={instance.hpMarked}
                 onToggle={onUpdateHp}
-                filledClass="border-destructive bg-destructive/30 text-destructive"
-                emptyClass="border-border bg-input hover:border-destructive/50"
+                variant="hp"
                 label="HP"
               />
             </div>
@@ -107,8 +106,7 @@ export function AdversaryCard({
                 total={adv.stress}
                 marked={instance.stressMarked}
                 onToggle={onUpdateStress}
-                filledClass="border-amber-500 bg-amber-500/30 text-amber-500"
-                emptyClass="border-border bg-input hover:border-amber-500/50"
+                variant="stress"
                 label="Stress"
               />
             </div>
