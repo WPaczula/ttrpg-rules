@@ -364,10 +364,18 @@
   height: 36px;
   border: none;
   clip-path: polygon(0% 0%, 100% 0%, 100% 62%, 50% 100%, 0% 62%);
-  filter: drop-shadow(0 0 1px var(--border-strong));
+  filter:
+    drop-shadow(1px 0 0.5px var(--border-strong))
+    drop-shadow(-1px 0 0.5px var(--border-strong))
+    drop-shadow(0 1px 0.5px var(--border-strong))
+    drop-shadow(0 -1px 0.5px var(--border-strong));
 }
 .dh-check-box.is-armor:hover {
-  filter: drop-shadow(0 0 1.5px var(--gold));
+  filter:
+    drop-shadow(1px 0 0.5px var(--gold))
+    drop-shadow(-1px 0 0.5px var(--gold))
+    drop-shadow(0 1px 0.5px var(--gold))
+    drop-shadow(0 -1px 0.5px var(--gold));
 }
 .dh-check-box.is-armor.is-checked {
   background: var(--muted-foreground);
