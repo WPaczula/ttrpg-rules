@@ -46,6 +46,13 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
     submit()
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.ctrlKey) {
+      e.preventDefault()
+      submit()
+    }
+  }
+
   return (
     <div className="flex h-full bg-background">
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
@@ -68,6 +75,7 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
               rows={1}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              onKeyDown={handleKeyDown}
               enterKeyHint="enter"
               className="flex-1 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-gold focus:ring-gold/20 min-h-0 max-h-24 resize-none overflow-y-auto"
             />
@@ -83,17 +91,19 @@ export function ChatLayout({ header, children, scrollRef, placeholder, isLoading
           </form>
         </div>
 
-        {!isInputFocused && (
-          <footer className="px-4 py-2 text-center text-xs text-muted-foreground border-t border-border">
-            <p>
-              Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
-              <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
-                DPCGL
-              </a>
-              . Not affiliated with Critical Role or Darrington Press.
-            </p>
-          </footer>
-        )}
+        <footer
+          className={`px-4 py-2 text-center text-xs text-muted-foreground border-t border-border ${
+            isInputFocused ? "hidden md:block" : ""
+          }`}
+        >
+          <p>
+            Uses material from the Daggerheart SRD 1.0, © Critical Role, LLC under the{" "}
+            <a href="https://darringtonpress.com/license/" className="underline hover:text-gold">
+              DPCGL
+            </a>
+            . Not affiliated with Critical Role or Darrington Press.
+          </p>
+        </footer>
       </div>
     </div>
   )
