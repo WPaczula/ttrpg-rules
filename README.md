@@ -96,6 +96,15 @@ cp -r skills/* ~/.claude/skills/
 | POST | `/:id/experiences` | Add experience |
 | POST | `/:id/domain-cards` | Add domain card |
 
+### Encounters `/api/encounters` (GM)
+
+GM adversary library + encounters, synced per user across devices.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/store` | Get your adversary library and encounters |
+| PUT | `/store` | Replace your full library + encounters (sync) |
+
 ### SRD `/api/srd`
 
 `GET /weapons`, `/armor`, `/classes`, `/subclasses`, `/ancestries`, `/communities`, `/domains`, `/domain-cards`, `/adversaries`, `/beastforms`, `/consumables`, `/environments`, `/items` — each supports `/:id` for detail.

@@ -309,14 +309,70 @@ enum Role {
 model User {
   id         String      @id @default(uuid())
   clerkId    String      @unique @map("clerk_id")
-  role       Role        @default(PC)
-  tokenLimit Int?        @map("token_limit")
-  tokensUsed Int         @default(0) @map("tokens_used")
-  characters Character[]
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
+  role        Role            @default(PC)
+  tokenLimit  Int?            @map("token_limit")
+  tokensUsed  Int             @default(0) @map("tokens_used")
+  characters  Character[]
+  adversaries UserAdversary[]
+  encounters  Encounter[]
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+// ── GM Adversary Library & Encounters (user-owned) ──────────────────────────
+
+model UserAdversary {
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  name              String
+  type              String  // 'Solo' | 'Bruiser' | 'Leader' | 'Standard' | 'Ranged' | 'Skulk' | 'Horde' | 'Minion' | 'Support' | 'Social'
+  tier              Int
+  hp                Int
+  stress            Int
+  difficulty        Int
+  thresholds        String  // "major/severe" e.g. "8/14"
+  atk               String  // e.g. "+1"
+  attack            String  // weapon/attack name
+  range             String  // "Melee", "Close", "Far"
+  damage            String  // "1d8+1 phy"
+  description       String?
+  motivesAndTactics String? @map("motives_and_tactics")
+  experience        String?
+  features          Json    @default("[]") // [{ name, text }]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@map("user_adversaries")
+}
+
+model Encounter {
+  id       String  @id @default(uuid())
+  userId   String  @map("user_id")
+  name     String
+  pcCount  Int     @default(4) @map("pc_count")
+  musicUrl String? @map("music_url")
+  position Int     @default(0)
+
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adversaries EncounterAdversary[]
+
+  @@map("encounters")
+}
+
+model EncounterAdversary {
+  id            String @id @default(uuid())
+  encounterId   String @map("encounter_id")
+  adversaryName String @map("adversary_name")
+  hpMarked      Int    @default(0) @map("hp_marked")
+  stressMarked  Int    @default(0) @map("stress_marked")
+  position      Int    @default(0)
+
+  encounter Encounter @relation(fields: [encounterId], references: [id], onDelete: Cascade)
+
+  @@map("encounter_adversaries")
 }
 
 // ── Character Tables ────────────────────────────────────────────────────────
